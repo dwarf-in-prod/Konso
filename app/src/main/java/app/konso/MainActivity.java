@@ -48,6 +48,9 @@ public class MainActivity extends Activity {
     private static final String HOST = "127.0.0.1";
     private static final int PREFERRED_PORT = 38917; // port fixe : garde le même "origine" donc le même stockage local
     private static final String FILE_NAME = "konso.json";
+    /** Version de test (APK des branches) : port et fichier distincts, pour ne jamais toucher aux données de la vraie appli. */
+    private static final int TEST_PORT = 38918;
+    private static final String TEST_FILE_NAME = "konso-test.json";
     private static final String PREF_TREE = "tree_uri";
     private static final int REQ_FOLDER = 1;
     private static final int REQ_IMAGE = 2;
@@ -141,10 +144,19 @@ public class MainActivity extends Activity {
     // Fichiers de l'interface (assets/www) servis par un petit serveur local (127.0.0.1)
     // ------------------------------------------------------------------
 
+    /** Les APK compilés depuis une branche ont l'identifiant "app.konso.test" (voir app/build.gradle). */
+    private boolean isTestBuild() {
+        return getPackageName().endsWith(".test");
+    }
+
+    private String saveFileName() {
+        return isTestBuild() ? TEST_FILE_NAME : FILE_NAME;
+    }
+
     private int startServer() throws IOException {
         InetAddress lo = InetAddress.getByName(HOST);
         try {
-            server = new ServerSocket(PREFERRED_PORT, 20, lo);
+            server = new ServerSocket(isTestBuild() ? TEST_PORT : PREFERRED_PORT, 20, lo);
         } catch (IOException busy) {
             server = new ServerSocket(0, 20, lo);
         }
@@ -406,7 +418,7 @@ public class MainActivity extends Activity {
                     DocumentsContract.Document.COLUMN_DISPLAY_NAME}, null, null, null);
             while (c != null && c.moveToNext()) {
                 String n = c.getString(1);
-                if (FILE_NAME.equals(n)) {
+                if (saveFileName().equals(n)) {
                     return DocumentsContract.buildDocumentUriUsingTree(tree, c.getString(0));
                 }
             }
@@ -420,9 +432,9 @@ public class MainActivity extends Activity {
     /** Nom du fichier réellement utilisé dans le dossier (pour l'affichage). */
     private String currentFileName() {
         Uri tree = treeUri();
-        if (tree == null) return FILE_NAME;
+        if (tree == null) return saveFileName();
         Uri file = findJsonFile(tree);
-        if (file == null) return FILE_NAME;
+        if (file == null) return saveFileName();
         Cursor c = null;
         try {
             c = getContentResolver().query(file,
@@ -432,7 +444,7 @@ public class MainActivity extends Activity {
         } finally {
             if (c != null) c.close();
         }
-        return FILE_NAME;
+        return saveFileName();
     }
 
     private String writeJson(String text) {
@@ -444,7 +456,7 @@ public class MainActivity extends Activity {
                 Uri parent = DocumentsContract.buildDocumentUriUsingTree(tree,
                         DocumentsContract.getTreeDocumentId(tree));
                 file = DocumentsContract.createDocument(getContentResolver(), parent,
-                        "application/json", FILE_NAME);
+                        "application/json", saveFileName());
             }
             if (file == null) return "cannot create file";
             OutputStream os = getContentResolver().openOutputStream(file, "wt");

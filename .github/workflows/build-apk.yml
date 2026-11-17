@@ -1,16 +1,31 @@
 name: Compiler l'APK
 
+# - main : compile l'APK ; publie la release « latest » sur lancement manuel
+#   ou si le message du commit contient [release].
+# - autre branche : compile un APK de test « Konso Test » (appli séparée, app.konso.test)
+#   et le publie dans la pré-release « test-<branche> ».
+# - branche supprimée : sa pré-release de test est supprimée.
+
 on:
   push:
-    branches: [main, master]
+    branches: ['**']
   workflow_dispatch:
+  delete:
 
 permissions:
   contents: write
 
 jobs:
   build:
+    if: github.event_name != 'delete'
     runs-on: ubuntu-latest
+    concurrency:
+      group: apk-${{ github.ref }}
+      cancel-in-progress: true
+    env:
+      BRANCH: ${{ github.ref_name }}
+      IS_MAIN: ${{ github.ref_name == 'main' || github.ref_name == 'master' }}
+      GH_TOKEN: ${{ github.token }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v5
@@ -20,15 +35,20 @@ jobs:
       - name: Rendre gradlew exécutable
         run: chmod +x gradlew
       - name: Compiler
-        run: ./gradlew assembleDebug --no-daemon
+        run: |
+          if [ "$IS_MAIN" = "true" ]; then
+            ./gradlew assembleDebug --no-daemon
+          else
+            SLUG=$(printf '%s' "$BRANCH" | sed 's#[^A-Za-z0-9._-]#-#g')
+            echo "SLUG=$SLUG" >> "$GITHUB_ENV"
+            ./gradlew assembleDebug --no-daemon -PkonsoTest="$SLUG-${GITHUB_SHA::7}"
+          fi
       - uses: actions/upload-artifact@v4
         with:
-          name: konso-apk
+          name: ${{ env.IS_MAIN == 'true' && 'konso-apk' || 'konso-test-apk' }}
           path: app/build/outputs/apk/debug/app-debug.apk
-      - name: Publier l'APK dans les Releases (lancement manuel ou message de commit contenant [release])
-        if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[release]')
-        env:
-          GH_TOKEN: ${{ github.token }}
+      - name: Publier l'APK dans la release « latest » (main)
+        if: env.IS_MAIN == 'true' && (github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[release]'))
         run: |
           cp app/build/outputs/apk/debug/app-debug.apk konso.apk
           gh release delete latest --yes --cleanup-tag || true
@@ -36,3 +56,24 @@ jobs:
             --title "Konso – dernière version" \
             --notes "APK compilé automatiquement depuis le commit ${GITHUB_SHA::7}." \
             --target "$GITHUB_SHA"
+      - name: Publier l'APK de test dans la pré-release « test-<branche> »
+        if: env.IS_MAIN != 'true'
+        run: |
+          cp app/build/outputs/apk/debug/app-debug.apk konso-test.apk
+          gh release delete "test-$SLUG" --yes --cleanup-tag || true
+          gh release create "test-$SLUG" konso-test.apk --prerelease \
+            --title "Konso Test – $BRANCH" \
+            --notes "APK de test de la branche $BRANCH (commit ${GITHUB_SHA::7}). S'installe à côté de Konso sous le nom « Konso Test », avec son propre fichier de sauvegarde konso-test.json : les données de la vraie appli ne sont jamais touchées." \
+            --target "$GITHUB_SHA"
+
+  cleanup:
+    if: github.event_name == 'delete' && github.event.ref_type == 'branch'
+    runs-on: ubuntu-latest
+    env:
+      BRANCH: ${{ github.event.ref }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Supprimer la pré-release de test de la branche
+        run: |
+          SLUG=$(printf '%s' "$BRANCH" | sed 's#[^A-Za-z0-9._-]#-#g')
+          gh release delete "test-$SLUG" --yes --cleanup-tag --repo "$GITHUB_REPOSITORY" || true
