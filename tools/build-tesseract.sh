@@ -57,6 +57,8 @@ if [ -z "${EMSDK:-}" ]; then
   export EMSDK=$WORK/emsdk-shim
 fi
 echo "EMSDK=$EMSDK"
+# CMake 4 refuses projects declaring cmake_minimum_required < 3.5 (zlib, libpng… at these commits).
+export CMAKE_POLICY_VERSION_MINIMUM=3.5
 
 # ---------------------------------------------------------------- tesseract.js-core
 step "Sources of tesseract.js-core $CORE_TAG"
