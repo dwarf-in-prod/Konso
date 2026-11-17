@@ -102,7 +102,7 @@
     svc_title: "Entretien",
     svc_rule: "Rappel pour « {car} » : tous les ans ou tous les <b>{km}</b>, au premier des deux.",
     svc_change: "Changer le kilométrage",
-    svc_note: "Les km sont comptés avec les distances de tes pleins. Enregistrer un achat « Entretien / révision » remet le suivi à zéro.",
+    svc_note: "Les km sont comptés avec les distances de tes pleins. Le suivi repart de zéro quand tu valides l'entretien depuis le bandeau, ou quand tu enregistres un achat « Entretien / révision ».",
     svc_pick: "Rappel d'entretien",
     svc_pick_sub: "« {car} » : tous les ans ou tous les…",
     svc_saved: "Rappel d'entretien : tous les {km} ✓",
@@ -119,14 +119,15 @@
     svc_due_hint: "Quand il est fait, touche le bandeau en haut de l'écran.",
     svc_banner: "Entretien à prévoir — touche ici quand il est fait",
     svc_done_title: "Entretien fait ?",
-    svc_done_msg: "Enregistre-le dans les achats avec son prix : le suivi repartira de zéro.",
+    svc_done_msg: "Il sera enregistré à la date d'aujourd'hui et le suivi repartira de zéro.",
     svc_not_yet: "Pas encore",
     svc_done_yes: "Oui, c'est fait",
-    svc_price: "Indique le prix de l'entretien, puis enregistre l'achat.",
     ok: "OK",
     validate: "Valider",
     help_q8: "Rappels d'entretien",
-    help_a8: "Un entretien est conseillé <b>tous les ans ou tous les 10 000 km</b>, au premier des deux. Le kilométrage se change dans Réglages → Entretien, pour chaque voiture. Les km sont comptés avec les distances de tes pleins depuis le dernier achat « Entretien / révision ». Quand c'est le moment, un message s'affiche une fois, puis un bandeau ambre reste en haut de l'écran. Touche-le quand l'entretien est fait : l'appli ouvre les Achats avec la catégorie déjà choisie, il ne reste qu'à indiquer le prix."
+    help_a8: "Un entretien est conseillé <b>tous les ans ou tous les 10 000 km</b>, au premier des deux. Le kilométrage se change dans Réglages → Entretien, pour chaque voiture. Les km sont comptés avec les distances de tes pleins depuis le dernier entretien. Quand c'est le moment, un message s'affiche une fois, puis un bandeau ambre reste en haut de l'écran. Touche-le quand l'entretien est fait : il est enregistré à la date du jour et le suivi repart de zéro. Pense ensuite à ajouter son coût dans les Achats.",
+    svc_done_ok_title: "Entretien enregistré ✓",
+    svc_done_ok_msg: "Le suivi repart de zéro. N'oublie pas d'ajouter le <b>coût de l'entretien</b> dans les Achats (catégorie « Entretien / révision »)."
   };
 
   D.en = {
@@ -221,7 +222,7 @@
     svc_title: "Servicing",
     svc_rule: "Reminder for “{car}”: every year or every <b>{km}</b>, whichever comes first.",
     svc_change: "Change the distance",
-    svc_note: "Kilometres are counted from your fill-up distances. Saving a “Service / maintenance” purchase resets the tracking.",
+    svc_note: "Kilometres are counted from your fill-up distances. Tracking starts again from zero when you confirm the service from the banner, or when you save a “Service / maintenance” purchase.",
     svc_pick: "Service reminder",
     svc_pick_sub: "“{car}”: every year or every…",
     svc_saved: "Service reminder: every {km} ✓",
@@ -238,14 +239,15 @@
     svc_due_hint: "Once it's done, tap the banner at the top of the screen.",
     svc_banner: "Service due — tap here once it's done",
     svc_done_title: "Service done?",
-    svc_done_msg: "Record it in your purchases with its price: tracking will start again from zero.",
+    svc_done_msg: "It will be recorded with today's date and tracking will start again from zero.",
     svc_not_yet: "Not yet",
     svc_done_yes: "Yes, it's done",
-    svc_price: "Enter the price of the service, then save the purchase.",
     ok: "OK",
     validate: "Confirm",
     help_q8: "Service reminders",
-    help_a8: "A service is recommended <b>every year or every 10,000 km</b>, whichever comes first. You can change the distance in Settings → Servicing, for each car. Kilometres are counted from your fill-up distances since the last “Service / maintenance” purchase. When it's time, a message appears once, then an amber banner stays at the top of the screen. Tap it once the service is done: the app opens Purchases with the category already selected, so you only need to enter the price."
+    help_a8: "A service is recommended <b>every year or every 10,000 km</b>, whichever comes first. You can change the distance in Settings → Servicing, for each car. Kilometres are counted from your fill-up distances since the last service. When it's time, a message appears once, then an amber banner stays at the top of the screen. Tap it once the service is done: it is recorded with today's date and tracking starts again from zero. Then remember to add its cost in Purchases.",
+    svc_done_ok_title: "Service recorded ✓",
+    svc_done_ok_msg: "Tracking starts again from zero. Don't forget to add the <b>cost of the service</b> in Purchases (“Service / maintenance” category)."
   };
 
   D.es = {
@@ -340,7 +342,7 @@
     svc_title: "Mantenimiento",
     svc_rule: "Aviso para «{car}»: cada año o cada <b>{km}</b>, lo que llegue antes.",
     svc_change: "Cambiar el kilometraje",
-    svc_note: "Los km se cuentan con las distancias de tus repostajes. Guardar una compra «Mantenimiento / revisión» pone el seguimiento a cero.",
+    svc_note: "Los km se cuentan con las distancias de tus repostajes. El seguimiento vuelve a cero cuando confirmas el mantenimiento desde el aviso o cuando guardas una compra «Mantenimiento / revisión».",
     svc_pick: "Aviso de mantenimiento",
     svc_pick_sub: "«{car}»: cada año o cada…",
     svc_saved: "Aviso de mantenimiento: cada {km} ✓",
@@ -357,14 +359,15 @@
     svc_due_hint: "Cuando esté hecho, toca el aviso de la parte superior de la pantalla.",
     svc_banner: "Mantenimiento pendiente: toca aquí cuando esté hecho",
     svc_done_title: "¿Mantenimiento hecho?",
-    svc_done_msg: "Regístralo en las compras con su precio: el seguimiento volverá a empezar de cero.",
+    svc_done_msg: "Se registrará con la fecha de hoy y el seguimiento volverá a empezar de cero.",
     svc_not_yet: "Todavía no",
     svc_done_yes: "Sí, está hecho",
-    svc_price: "Indica el precio del mantenimiento y guarda la compra.",
     ok: "Aceptar",
     validate: "Confirmar",
     help_q8: "Avisos de mantenimiento",
-    help_a8: "Se recomienda un mantenimiento <b>cada año o cada 10 000 km</b>, lo que llegue antes. El kilometraje se cambia en Ajustes → Mantenimiento, para cada coche. Los km se cuentan con las distancias de tus repostajes desde la última compra «Mantenimiento / revisión». Cuando llega el momento, aparece un mensaje una vez y luego un aviso ámbar se queda en la parte superior de la pantalla. Tócalo cuando el mantenimiento esté hecho: la app abre Compras con la categoría ya elegida y solo queda indicar el precio."
+    help_a8: "Se recomienda un mantenimiento <b>cada año o cada 10 000 km</b>, lo que llegue antes. El kilometraje se cambia en Ajustes → Mantenimiento, para cada coche. Los km se cuentan con las distancias de tus repostajes desde el último mantenimiento. Cuando llega el momento, aparece un mensaje una vez y luego un aviso ámbar se queda en la parte superior de la pantalla. Tócalo cuando el mantenimiento esté hecho: se registra con la fecha de hoy y el seguimiento vuelve a empezar de cero. Después, recuerda añadir su coste en Compras.",
+    svc_done_ok_title: "Mantenimiento registrado ✓",
+    svc_done_ok_msg: "El seguimiento vuelve a empezar de cero. No olvides añadir el <b>coste del mantenimiento</b> en Compras (categoría «Mantenimiento / revisión»)."
   };
 
   D.de = {
@@ -459,7 +462,7 @@
     svc_title: "Wartung",
     svc_rule: "Erinnerung für „{car}“: jedes Jahr oder alle <b>{km}</b>, je nachdem, was zuerst eintritt.",
     svc_change: "Kilometerzahl ändern",
-    svc_note: "Die km werden aus den Strecken der Tankungen berechnet. Ein Kauf „Wartung / Inspektion“ setzt die Zählung zurück.",
+    svc_note: "Die km werden aus den Strecken der Tankungen berechnet. Die Zählung beginnt wieder bei null, wenn die Wartung über den Hinweis bestätigt oder ein Kauf „Wartung / Inspektion“ gespeichert wird.",
     svc_pick: "Wartungserinnerung",
     svc_pick_sub: "„{car}“: jedes Jahr oder alle …",
     svc_saved: "Wartungserinnerung: alle {km} ✓",
@@ -476,14 +479,15 @@
     svc_due_hint: "Wenn sie erledigt ist, auf den Hinweis oben auf dem Bildschirm tippen.",
     svc_banner: "Wartung fällig – hier tippen, wenn sie erledigt ist",
     svc_done_title: "Wartung erledigt?",
-    svc_done_msg: "Bitte mit Preis bei den Käufen eintragen: Die Zählung beginnt dann wieder bei null.",
+    svc_done_msg: "Sie wird mit dem heutigen Datum gespeichert und die Zählung beginnt wieder bei null.",
     svc_not_yet: "Noch nicht",
     svc_done_yes: "Ja, erledigt",
-    svc_price: "Preis der Wartung eingeben und den Kauf speichern.",
     ok: "OK",
     validate: "Bestätigen",
     help_q8: "Wartungserinnerungen",
-    help_a8: "Eine Wartung wird <b>jedes Jahr oder alle 10.000 km</b> empfohlen, je nachdem, was zuerst eintritt. Die Kilometerzahl lässt sich unter Einstellungen → Wartung für jedes Auto ändern. Die km werden aus den Strecken der Tankungen seit dem letzten Kauf „Wartung / Inspektion“ berechnet. Ist es so weit, erscheint einmal eine Meldung, danach bleibt ein bernsteinfarbener Hinweis oben auf dem Bildschirm. Wenn die Wartung erledigt ist, darauf tippen: Die App öffnet die Käufe mit bereits gewählter Kategorie, nur noch der Preis fehlt."
+    help_a8: "Eine Wartung wird <b>jedes Jahr oder alle 10.000 km</b> empfohlen, je nachdem, was zuerst eintritt. Die Kilometerzahl lässt sich unter Einstellungen → Wartung für jedes Auto ändern. Die km werden aus den Strecken der Tankungen seit der letzten Wartung berechnet. Ist es so weit, erscheint einmal eine Meldung, danach bleibt ein bernsteinfarbener Hinweis oben auf dem Bildschirm. Wenn die Wartung erledigt ist, darauf tippen: Sie wird mit dem heutigen Datum gespeichert und die Zählung beginnt wieder bei null. Danach die Kosten bei den Käufen eintragen.",
+    svc_done_ok_title: "Wartung gespeichert ✓",
+    svc_done_ok_msg: "Die Zählung beginnt wieder bei null. Bitte nicht vergessen, die <b>Kosten der Wartung</b> bei den Käufen einzutragen (Kategorie „Wartung / Inspektion“)."
   };
 
   D.it = {
@@ -578,7 +582,7 @@
     svc_title: "Manutenzione",
     svc_rule: "Promemoria per «{car}»: ogni anno o ogni <b>{km}</b>, alla prima scadenza.",
     svc_change: "Cambia il chilometraggio",
-    svc_note: "I km sono calcolati con le distanze dei tuoi rifornimenti. Registrare un acquisto «Manutenzione / tagliando» azzera il conteggio.",
+    svc_note: "I km sono calcolati con le distanze dei tuoi rifornimenti. Il conteggio riparte da zero quando confermi la manutenzione dal banner o quando registri un acquisto «Manutenzione / tagliando».",
     svc_pick: "Promemoria manutenzione",
     svc_pick_sub: "«{car}»: ogni anno o ogni…",
     svc_saved: "Promemoria manutenzione: ogni {km} ✓",
@@ -595,14 +599,15 @@
     svc_due_hint: "Quando è fatta, tocca il banner in alto sullo schermo.",
     svc_banner: "Manutenzione da fare: tocca qui quando è fatta",
     svc_done_title: "Manutenzione fatta?",
-    svc_done_msg: "Registrala negli acquisti con il suo prezzo: il conteggio ripartirà da zero.",
+    svc_done_msg: "Verrà registrata con la data di oggi e il conteggio ripartirà da zero.",
     svc_not_yet: "Non ancora",
     svc_done_yes: "Sì, è fatta",
-    svc_price: "Inserisci il prezzo della manutenzione, poi salva l'acquisto.",
     ok: "OK",
     validate: "Conferma",
     help_q8: "Promemoria di manutenzione",
-    help_a8: "Si consiglia una manutenzione <b>ogni anno o ogni 10.000 km</b>, alla prima scadenza. Il chilometraggio si cambia in Impostazioni → Manutenzione, per ogni auto. I km sono calcolati con le distanze dei tuoi rifornimenti dall'ultimo acquisto «Manutenzione / tagliando». Al momento giusto compare un messaggio una volta, poi un banner ambra resta in alto sullo schermo. Toccalo quando la manutenzione è fatta: l'app apre gli Acquisti con la categoria già scelta e resta solo da inserire il prezzo."
+    help_a8: "Si consiglia una manutenzione <b>ogni anno o ogni 10.000 km</b>, alla prima scadenza. Il chilometraggio si cambia in Impostazioni → Manutenzione, per ogni auto. I km sono calcolati con le distanze dei tuoi rifornimenti dall'ultima manutenzione. Al momento giusto compare un messaggio una volta, poi un banner ambra resta in alto sullo schermo. Toccalo quando la manutenzione è fatta: viene registrata con la data di oggi e il conteggio riparte da zero. Poi ricordati di aggiungerne il costo negli Acquisti.",
+    svc_done_ok_title: "Manutenzione registrata ✓",
+    svc_done_ok_msg: "Il conteggio riparte da zero. Non dimenticare di aggiungere il <b>costo della manutenzione</b> negli Acquisti (categoria «Manutenzione / tagliando»)."
   };
 
   D.pt = {
@@ -697,7 +702,7 @@
     svc_title: "Manutenção",
     svc_rule: "Lembrete para «{car}»: todos os anos ou a cada <b>{km}</b>, o que acontecer primeiro.",
     svc_change: "Alterar a quilometragem",
-    svc_note: "Os km são contados com as distâncias dos teus abastecimentos. Registar uma compra «Manutenção / revisão» põe a contagem a zero.",
+    svc_note: "Os km são contados com as distâncias dos teus abastecimentos. A contagem volta a zero quando confirmas a manutenção a partir da faixa ou quando registas uma compra «Manutenção / revisão».",
     svc_pick: "Lembrete de manutenção",
     svc_pick_sub: "«{car}»: todos os anos ou a cada…",
     svc_saved: "Lembrete de manutenção: a cada {km} ✓",
@@ -714,14 +719,15 @@
     svc_due_hint: "Quando estiver feita, toca na faixa no topo do ecrã.",
     svc_banner: "Manutenção a fazer: toca aqui quando estiver feita",
     svc_done_title: "Manutenção feita?",
-    svc_done_msg: "Regista-a nas compras com o seu preço: a contagem volta a zero.",
+    svc_done_msg: "Vai ser registada com a data de hoje e a contagem volta a zero.",
     svc_not_yet: "Ainda não",
     svc_done_yes: "Sim, está feita",
-    svc_price: "Indica o preço da manutenção e guarda a compra.",
     ok: "OK",
     validate: "Confirmar",
     help_q8: "Lembretes de manutenção",
-    help_a8: "Recomenda-se uma manutenção <b>todos os anos ou a cada 10 000 km</b>, o que acontecer primeiro. A quilometragem altera-se em Definições → Manutenção, para cada carro. Os km são contados com as distâncias dos teus abastecimentos desde a última compra «Manutenção / revisão». Quando chega a altura, aparece uma mensagem uma vez e depois uma faixa âmbar fica no topo do ecrã. Toca nela quando a manutenção estiver feita: a app abre as Compras com a categoria já escolhida e só falta indicar o preço."
+    help_a8: "Recomenda-se uma manutenção <b>todos os anos ou a cada 10 000 km</b>, o que acontecer primeiro. A quilometragem altera-se em Definições → Manutenção, para cada carro. Os km são contados com as distâncias dos teus abastecimentos desde a última manutenção. Quando chega a altura, aparece uma mensagem uma vez e depois uma faixa âmbar fica no topo do ecrã. Toca nela quando a manutenção estiver feita: fica registada com a data de hoje e a contagem volta a zero. Depois, lembra-te de adicionar o custo nas Compras.",
+    svc_done_ok_title: "Manutenção registada ✓",
+    svc_done_ok_msg: "A contagem volta a zero. Não te esqueças de adicionar o <b>custo da manutenção</b> nas Compras (categoria «Manutenção / revisão»)."
   };
 
   D.nl = {
@@ -816,7 +822,7 @@
     svc_title: "Onderhoud",
     svc_rule: "Herinnering voor „{car}”: elk jaar of elke <b>{km}</b>, wat het eerst komt.",
     svc_change: "Afstand wijzigen",
-    svc_note: "De km worden berekend uit de afstanden van je tankbeurten. Een aankoop „Onderhoud / beurt” opslaan zet de teller op nul.",
+    svc_note: "De km worden berekend uit de afstanden van je tankbeurten. De telling begint weer bij nul als je het onderhoud via de balk bevestigt of een aankoop „Onderhoud / beurt” opslaat.",
     svc_pick: "Onderhoudsherinnering",
     svc_pick_sub: "„{car}”: elk jaar of elke…",
     svc_saved: "Onderhoudsherinnering: elke {km} ✓",
@@ -833,14 +839,15 @@
     svc_due_hint: "Tik op de balk bovenaan het scherm zodra het gedaan is.",
     svc_banner: "Onderhoud nodig – tik hier zodra het gedaan is",
     svc_done_title: "Onderhoud gedaan?",
-    svc_done_msg: "Sla het op bij je aankopen met de prijs: de telling begint dan weer bij nul.",
+    svc_done_msg: "Het wordt opgeslagen met de datum van vandaag en de telling begint weer bij nul.",
     svc_not_yet: "Nog niet",
     svc_done_yes: "Ja, gedaan",
-    svc_price: "Vul de prijs van het onderhoud in en sla de aankoop op.",
     ok: "OK",
     validate: "Bevestigen",
     help_q8: "Onderhoudsherinneringen",
-    help_a8: "Onderhoud wordt aangeraden <b>elk jaar of elke 10.000 km</b>, wat het eerst komt. De afstand wijzig je in Instellingen → Onderhoud, per auto. De km worden berekend uit de afstanden van je tankbeurten sinds de laatste aankoop „Onderhoud / beurt”. Als het zover is, verschijnt één keer een melding en blijft daarna een amberkleurige balk bovenaan het scherm staan. Tik erop zodra het onderhoud gedaan is: de app opent Aankopen met de categorie al gekozen, je hoeft alleen nog de prijs in te vullen."
+    help_a8: "Onderhoud wordt aangeraden <b>elk jaar of elke 10.000 km</b>, wat het eerst komt. De afstand wijzig je in Instellingen → Onderhoud, per auto. De km worden berekend uit de afstanden van je tankbeurten sinds het laatste onderhoud. Als het zover is, verschijnt één keer een melding en blijft daarna een amberkleurige balk bovenaan het scherm staan. Tik erop zodra het onderhoud gedaan is: het wordt opgeslagen met de datum van vandaag en de telling begint weer bij nul. Voeg daarna de kosten toe bij Aankopen.",
+    svc_done_ok_title: "Onderhoud opgeslagen ✓",
+    svc_done_ok_msg: "De telling begint weer bij nul. Vergeet niet de <b>kosten van het onderhoud</b> toe te voegen bij Aankopen (categorie „Onderhoud / beurt”)."
   };
 
   D.pl = {
@@ -935,7 +942,7 @@
     svc_title: "Serwis",
     svc_rule: "Przypomnienie dla „{car}”: co rok lub co <b>{km}</b>, zależnie od tego, co nastąpi wcześniej.",
     svc_change: "Zmień przebieg",
-    svc_note: "Kilometry są liczone z dystansów twoich tankowań. Zapisanie zakupu „Serwis / przegląd” zeruje licznik.",
+    svc_note: "Kilometry są liczone z dystansów twoich tankowań. Licznik zeruje się, gdy potwierdzisz serwis na pasku lub zapiszesz zakup „Serwis / przegląd”.",
     svc_pick: "Przypomnienie o serwisie",
     svc_pick_sub: "„{car}”: co rok lub co…",
     svc_saved: "Przypomnienie o serwisie: co {km} ✓",
@@ -952,14 +959,15 @@
     svc_due_hint: "Gdy będzie zrobiony, dotknij paska u góry ekranu.",
     svc_banner: "Czas na serwis – dotknij tutaj, gdy będzie zrobiony",
     svc_done_title: "Serwis zrobiony?",
-    svc_done_msg: "Zapisz go w zakupach z ceną: licznik zacznie się od zera.",
+    svc_done_msg: "Zostanie zapisany z dzisiejszą datą, a licznik zacznie się od zera.",
     svc_not_yet: "Jeszcze nie",
     svc_done_yes: "Tak, zrobiony",
-    svc_price: "Podaj cenę serwisu i zapisz zakup.",
     ok: "OK",
     validate: "Zatwierdź",
     help_q8: "Przypomnienia o serwisie",
-    help_a8: "Serwis zaleca się <b>co rok lub co 10 000 km</b>, zależnie od tego, co nastąpi wcześniej. Przebieg zmienisz w Ustawienia → Serwis, osobno dla każdego auta. Kilometry są liczone z dystansów tankowań od ostatniego zakupu „Serwis / przegląd”. Gdy nadejdzie pora, raz pojawi się komunikat, a potem u góry ekranu zostanie bursztynowy pasek. Dotknij go, gdy serwis będzie zrobiony: aplikacja otworzy Zakupy z wybraną już kategorią, wystarczy podać cenę."
+    help_a8: "Serwis zaleca się <b>co rok lub co 10 000 km</b>, zależnie od tego, co nastąpi wcześniej. Przebieg zmienisz w Ustawienia → Serwis, osobno dla każdego auta. Kilometry są liczone z dystansów tankowań od ostatniego serwisu. Gdy nadejdzie pora, raz pojawi się komunikat, a potem u góry ekranu zostanie bursztynowy pasek. Dotknij go, gdy serwis będzie zrobiony: zostanie zapisany z dzisiejszą datą, a licznik zacznie się od zera. Potem dodaj jego koszt w Zakupach.",
+    svc_done_ok_title: "Serwis zapisany ✓",
+    svc_done_ok_msg: "Licznik zaczyna się od zera. Nie zapomnij dodać <b>kosztu serwisu</b> w Zakupach (kategoria „Serwis / przegląd”)."
   };
 
   D.tr = {
@@ -1054,7 +1062,7 @@
     svc_title: "Bakım",
     svc_rule: "“{car}” için hatırlatma: her yıl veya her <b>{km}</b>, hangisi önce gelirse.",
     svc_change: "Kilometreyi değiştir",
-    svc_note: "Kilometreler yakıt alımlarındaki mesafelerden hesaplanır. “Bakım / servis” alışverişi kaydetmek sayacı sıfırlar.",
+    svc_note: "Kilometreler yakıt alımlarındaki mesafelerden hesaplanır. Bakımı şeritten onayladığında veya bir “Bakım / servis” alışverişi kaydettiğinde sayım sıfırlanır.",
     svc_pick: "Bakım hatırlatması",
     svc_pick_sub: "“{car}”: her yıl veya her…",
     svc_saved: "Bakım hatırlatması: her {km} ✓",
@@ -1071,14 +1079,15 @@
     svc_due_hint: "Bakım yapılınca ekranın üstündeki şeride dokun.",
     svc_banner: "Bakım zamanı – yapılınca buraya dokun",
     svc_done_title: "Bakım yapıldı mı?",
-    svc_done_msg: "Fiyatıyla birlikte alışverişlere kaydet: sayım sıfırdan başlar.",
+    svc_done_msg: "Bugünün tarihiyle kaydedilecek ve sayım sıfırdan başlayacak.",
     svc_not_yet: "Henüz değil",
     svc_done_yes: "Evet, yapıldı",
-    svc_price: "Bakımın fiyatını gir, sonra alışverişi kaydet.",
     ok: "Tamam",
     validate: "Onayla",
     help_q8: "Bakım hatırlatmaları",
-    help_a8: "Bakım <b>her yıl veya her 10.000 km'de</b>, hangisi önce gelirse önerilir. Kilometre, her araba için Ayarlar → Bakım bölümünden değiştirilebilir. Kilometreler son “Bakım / servis” alışverişinden beri yakıt alımlarındaki mesafelerden hesaplanır. Zamanı gelince bir kez mesaj çıkar, ardından ekranın üstünde kehribar renkli bir şerit kalır. Bakım yapılınca ona dokun: uygulama kategori seçili olarak Alışverişler'i açar, sadece fiyatı girmen kalır."
+    help_a8: "Bakım <b>her yıl veya her 10.000 km'de</b>, hangisi önce gelirse önerilir. Kilometre, her araba için Ayarlar → Bakım bölümünden değiştirilebilir. Kilometreler son bakımdan beri yakıt alımlarındaki mesafelerden hesaplanır. Zamanı gelince bir kez mesaj çıkar, ardından ekranın üstünde kehribar renkli bir şerit kalır. Bakım yapılınca ona dokun: bugünün tarihiyle kaydedilir ve sayım sıfırdan başlar. Ardından maliyetini Alışverişler'e eklemeyi unutma.",
+    svc_done_ok_title: "Bakım kaydedildi ✓",
+    svc_done_ok_msg: "Sayım sıfırdan başlıyor. <b>Bakımın maliyetini</b> Alışverişler'e eklemeyi unutma (“Bakım / servis” kategorisi)."
   };
 
   D.ro = {
@@ -1173,7 +1182,7 @@
     svc_title: "Întreținere",
     svc_rule: "Memento pentru „{car}”: în fiecare an sau la fiecare <b>{km}</b>, oricare vine prima.",
     svc_change: "Schimbă kilometrajul",
-    svc_note: "Km se calculează din distanțele alimentărilor tale. Salvarea unei achiziții „Întreținere / revizie” resetează numărătoarea.",
+    svc_note: "Km se calculează din distanțele alimentărilor tale. Numărătoarea reîncepe de la zero când confirmi întreținerea din bandă sau când salvezi o achiziție „Întreținere / revizie”.",
     svc_pick: "Memento pentru întreținere",
     svc_pick_sub: "„{car}”: în fiecare an sau la fiecare…",
     svc_saved: "Memento pentru întreținere: la fiecare {km} ✓",
@@ -1190,14 +1199,15 @@
     svc_due_hint: "Când este făcută, atinge banda din partea de sus a ecranului.",
     svc_banner: "Întreținere de făcut – atinge aici când este făcută",
     svc_done_title: "Întreținere făcută?",
-    svc_done_msg: "Înregistreaz-o la achiziții cu prețul ei: numărătoarea va reîncepe de la zero.",
+    svc_done_msg: "Va fi înregistrată cu data de azi, iar numărătoarea va reîncepe de la zero.",
     svc_not_yet: "Încă nu",
     svc_done_yes: "Da, este făcută",
-    svc_price: "Completează prețul întreținerii, apoi salvează achiziția.",
     ok: "OK",
     validate: "Confirmă",
     help_q8: "Mementouri pentru întreținere",
-    help_a8: "Se recomandă o întreținere <b>în fiecare an sau la fiecare 10.000 km</b>, oricare vine prima. Kilometrajul se schimbă în Setări → Întreținere, pentru fiecare mașină. Km se calculează din distanțele alimentărilor de la ultima achiziție „Întreținere / revizie”. Când e momentul, apare o dată un mesaj, apoi o bandă de culoare chihlimbar rămâne în partea de sus a ecranului. Atinge-o când întreținerea este făcută: aplicația deschide Achiziții cu categoria deja aleasă, rămâne doar să completezi prețul."
+    help_a8: "Se recomandă o întreținere <b>în fiecare an sau la fiecare 10.000 km</b>, oricare vine prima. Kilometrajul se schimbă în Setări → Întreținere, pentru fiecare mașină. Km se calculează din distanțele alimentărilor de la ultima întreținere. Când e momentul, apare o dată un mesaj, apoi o bandă de culoare chihlimbar rămâne în partea de sus a ecranului. Atinge-o când întreținerea este făcută: este înregistrată cu data de azi, iar numărătoarea reîncepe de la zero. Apoi nu uita să adaugi costul la Achiziții.",
+    svc_done_ok_title: "Întreținere înregistrată ✓",
+    svc_done_ok_msg: "Numărătoarea reîncepe de la zero. Nu uita să adaugi <b>costul întreținerii</b> la Achiziții (categoria „Întreținere / revizie”)."
   };
 
   const api = { LANGS, D };

@@ -49,7 +49,7 @@ h2.sec{font:500 14px/1.4 var(--font);color:var(--on-surf-v);margin:24px 4px 8px;
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px 12px}
 .full{grid-column:1/-1}
 .f{position:relative}
-.f input,.f select{width:100%;height:54px;padding:0 14px;border:1px solid var(--outline);border-radius:12px;background:transparent;color:var(--on-surf);font:inherit;outline:none;appearance:none;-webkit-appearance:none}
+.f input,.f select,.f .fieldbtn{width:100%;height:54px;padding:0 14px;border:1px solid var(--outline);border-radius:12px;background:transparent;color:var(--on-surf);font:inherit;outline:none;appearance:none;-webkit-appearance:none}
 .f input:focus,.f select:focus{border:2px solid var(--primary);padding:0 13px}
 .f label{position:absolute;left:12px;top:15px;padding:0 4px;background:var(--surf);color:var(--on-surf-v);font-size:16px;line-height:22px;pointer-events:none;transition:top .12s,font-size .12s;max-width:calc(100% - 28px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .f input:focus+label,.f input:not(:placeholder-shown)+label,.f.fl label{top:-10px;font-size:12px;line-height:18px}
@@ -58,6 +58,7 @@ h2.sec{font:500 14px/1.4 var(--font);color:var(--on-surf-v);margin:24px 4px 8px;
 .f.todo label,.f.todo input:focus+label,.f.todo select:focus+label{color:var(--ok)}
 .f.need input,.f.need select{border:2px solid var(--error);padding:0 13px}
 .f.need label,.f.need input:focus+label,.f.need select:focus+label{color:var(--error)}
+.f .fieldbtn{text-align:left;cursor:pointer}
 .f.sel::after{content:"";position:absolute;right:14px;top:23px;border:5px solid transparent;border-top-color:var(--on-surf-v);pointer-events:none}
 textarea{width:100%;padding:12px;border:1px solid var(--outline);border-radius:12px;background:transparent;color:var(--on-surf);font:12px/1.4 monospace;outline:none}
 
@@ -212,7 +213,7 @@ body.kb #st{bottom:16px}
     <div class="grid" style="margin-top:6px">
       <div class="f fl"><input type="date" id="bd"><label for="bd" data-i18n="date"></label></div>
       <div class="f"><input type="number" id="be" inputmode="decimal" step="0.01" placeholder=" "><label for="be" data-i18n="amount"></label></div>
-      <div class="f fl sel full"><select id="bc"></select><label for="bc" data-i18n="category"></label></div>
+      <div class="f fl sel full"><button type="button" class="fieldbtn" id="bc"></button><label data-i18n="category"></label></div>
       <div class="f full"><input type="text" id="bn" placeholder=" "><label for="bn" data-i18n="description"></label></div>
       <div class="f"><input type="number" id="bk" inputmode="numeric" placeholder=" "><label for="bk" data-i18n="odometer"></label></div>
       <div class="f"><input type="text" id="bs" placeholder=" "><label for="bs" data-i18n="shop"></label></div>
@@ -234,7 +235,7 @@ body.kb #st{bottom:16px}
 
 <section id="save" class="hide">
   <div class="card">
-    <div class="f fl sel"><select id="langSel"></select><label for="langSel" data-i18n="set_lang"></label></div>
+    <div class="f fl sel"><button type="button" class="fieldbtn" id="langBtn"></button><label data-i18n="set_lang"></label></div>
   </div>
   <div class="card">
     <h3 data-i18n="svc_title"></h3>
@@ -296,13 +297,13 @@ body.kb #st{bottom:16px}
   </div>
 </div>
 
-<div id="kmpick" class="lang hide">
+<div id="picker" class="lang hide">
   <div class="wrap">
-    <svg class="i" viewBox="0 0 24 24" style="width:40px;height:40px;color:var(--amber)"><path d="M22.7 19l-9.1-9.1c.9-2.3.4-5-1.5-6.9-2-2-5-2.4-7.4-1.3L9 6 6 9 1.6 4.7C.4 7.1.9 10.1 2.9 12.1c1.9 1.9 4.6 2.4 6.9 1.5l9.1 9.1c.4.4 1 .4 1.4 0l2.3-2.3c.5-.4.5-1.1.1-1.4z"/></svg>
-    <h1 data-i18n="svc_pick"></h1>
-    <div class="note" style="margin:-8px 0 16px" id="kmSub"></div>
-    <div class="wheel"><div class="band"></div><div class="wl" id="km-list"></div></div>
-    <div class="btns2"><button class="btn tonal" id="km-cancel" data-i18n="cancel"></button><button class="btn" id="km-ok" data-i18n="validate"></button></div>
+    <svg class="i" viewBox="0 0 24 24" id="pkIcon" style="width:40px;height:40px"><path id="pkPath" d=""/></svg>
+    <h1 id="pkTitle"></h1>
+    <div class="note" style="margin:-8px 0 16px" id="pkSub"></div>
+    <div class="wheel"><div class="band"></div><div class="wl" id="pk-list"></div></div>
+    <div class="btns2"><button class="btn tonal" id="pk-cancel" data-i18n="cancel"></button><button class="btn" id="pk-ok" data-i18n="validate"></button></div>
   </div>
 </div>
 
@@ -339,8 +340,10 @@ const kmTxt=n=>fmt(n,0)+' km';
 function addYear(d){const [y,m,j]=d.split('-').map(Number);return new Date(Date.UTC(y+1,m-1,j)).toISOString().slice(0,10)}
 function svcInfo(c){
   const every=svcEvery(c),svc=S.buys.find(b=>b.car===c.id&&b.c===SVC_CAT),fills=S.fuel.filter(f=>f.car===c.id);
-  let ref,start=false,km;
-  if(svc){ref=svc.d;km=fills.filter(f=>f.d>ref).reduce((a,f)=>a+f.k,0)}
+  // référence : le plus récent entre l'entretien validé depuis le bandeau et le dernier achat « Entretien / révision »
+  let ref=svc?svc.d:'',start=false,km;
+  if(c.svcDone&&c.svcDone>ref)ref=c.svcDone;
+  if(ref)km=fills.filter(f=>f.d>ref).reduce((a,f)=>a+f.k,0);
   else if(fills.length){start=true;ref=fills[fills.length-1].d;km=fills.slice(0,-1).reduce((a,f)=>a+f.k,0)}
   else return null;
   const next=addYear(ref),overKm=km>=every,overDate=today()>=next;
@@ -358,7 +361,7 @@ function norm(d){
   const arr=v=>(Array.isArray(v)?v:[]).filter(x=>x&&typeof x==='object');
   const seen=new Set();let auto=Date.now();
   const uid=v=>{let id=num(v);while(!(id>0)||seen.has(id))id=++auto;seen.add(id);return id};
-  let cars=arr(d.cars).map(c=>({id:str(c.id,40),name:str(c.name,40).trim(),fuel:str(c.fuel,20),svcKm:svcEvery(c)})).filter(c=>c.id);
+  let cars=arr(d.cars).map(c=>({id:str(c.id,40),name:str(c.name,40).trim(),fuel:str(c.fuel,20),svcKm:svcEvery(c),svcDone:/^\d{4}-\d{2}-\d{2}$/.test(c.svcDone)?c.svcDone:''})).filter(c=>c.id);
   cars=cars.filter((c,i)=>cars.findIndex(x=>x.id===c.id)===i);
   if(!cars.length)cars=[{id:'c1',name:'',fuel:'SP95-E10'}];
   const ids=new Set(cars.map(c=>c.id)),car=v=>ids.has(v)?v:cars[0].id;
@@ -405,8 +408,8 @@ function applyI18n(){
   document.querySelectorAll('[data-i18n-title]').forEach(e=>{const s=tx(e.dataset.i18nTitle);e.title=s;e.setAttribute('aria-label',s)});
   document.querySelectorAll('[data-i18n-ph]').forEach(e=>e.placeholder=tx(e.dataset.i18nPh));
   const opts=(el,list,label)=>{const v=el.value;el.innerHTML=list.map((x,i)=>'<option value="'+esc(x)+'"'+(x===''?' disabled':'')+'>'+esc(label(x,i))+'</option>').join('');if(list.includes(v))el.value=v};
-  opts($('fc'),['',...FUELV],x=>x?fuelLabel(x):tx('fuel_choose'));opts($('carFuel'),FUELV,fuelLabel);opts($('bc'),CATSHOW,catLabel);
-  $('langSel').innerHTML=LANGS.map(l=>'<option value="'+l[0]+'">'+esc(l[1])+'</option>').join('');$('langSel').value=LANG;
+  opts($('fc'),['',...FUELV],x=>x?fuelLabel(x):tx('fuel_choose'));opts($('carFuel'),FUELV,fuelLabel);setCat($('bc').value||CATSHOW[0]);
+  $('langBtn').textContent=(LANGS.find(l=>l[0]===LANG)||LANGS[0])[1];
 }
 function setLang(l,store){
   const x=LANGS.find(a=>a[0]===l)||LANGS[1];LANG=x[0];LOC=x[2];
@@ -433,13 +436,32 @@ function makeWheel(list,labels,sel,loop,onPick){
   list.scrollTop=((loop?N:0)+sel)*IT;paint();
   return at;
 }
+// Choix dans une roue en plein écran, avec Annuler / Valider. C'est la façon de choisir dans une liste
+// pour cette appli (préférée aux menus déroulants natifs). title : clé de traduction (mise à jour si la langue change).
+const ICON={globe:document.querySelector('#lang svg path').getAttribute('d'),wrench:document.querySelector('#svcBar svg path').getAttribute('d')};
+function picker(o){
+  $('pkPath').setAttribute('d',ICON[o.icon]);$('pkIcon').style.color=o.color||'var(--primary)';
+  $('pkTitle').dataset.i18n=o.title;$('pkTitle').textContent=tx(o.title);$('pkSub').textContent=o.sub||'';
+  $('picker').classList.remove('hide');
+  const get=makeWheel($('pk-list'),o.labels,o.sel,o.loop,o.onPick),close=()=>$('picker').classList.add('hide');
+  $('pk-ok').onclick=()=>{const i=get();close();o.onOk(i)};
+  $('pk-cancel').onclick=()=>{close();if(o.onCancel)o.onCancel()};
+}
+// Catégorie d'achat : choisie dans la roue ; la valeur enregistrée reste dans l'attribut value du bouton #bc
+function setCat(v){$('bc').value=v;$('bc').textContent=catLabel(v)}
+$('bc').onclick=()=>picker({icon:'wrench',title:'category',labels:CATSHOW.map(catLabel),
+  sel:Math.max(0,CATSHOW.indexOf($('bc').value)),loop:false,onOk:i=>setCat(CATSHOW[i])});
 function showLangScreen(){
   $('lang').classList.remove('hide');
   // aperçu : les textes changent pendant qu'on fait défiler, rien n'est enregistré avant « Suivant »
   const get=makeWheel($('wheel-list'),LANGS.map(l=>l[1]),Math.max(0,LANGS.findIndex(l=>l[0]===LANG)),true,i=>setLang(LANGS[i][0],false));
   $('lang-next').onclick=()=>{setLang(LANGS[get()][0],true);$('lang').classList.add('hide');render()};
 }
-$('langSel').onchange=()=>setLang($('langSel').value,true);
+$('langBtn').onclick=()=>{
+  const orig=LANG;
+  picker({icon:'globe',title:'lang_pick',labels:LANGS.map(l=>l[1]),sel:Math.max(0,LANGS.findIndex(l=>l[0]===LANG)),loop:true,
+    onPick:i=>setLang(LANGS[i][0],false),onOk:i=>setLang(LANGS[i][0],true),onCancel:()=>setLang(orig,false)});
+};
 
 function init(){
   let saved=null;try{saved=localStorage.getItem(LK)}catch(e){}
@@ -675,28 +697,25 @@ function svcUI(){
   $('svcBar').classList.toggle('hide',!due);
   if(!due)return;
   const k=svcKey(c,i);
-  const busy=setupMode||!$('dlg').classList.contains('hide')||!$('lang').classList.contains('hide')||!$('kmpick').classList.contains('hide');
+  const busy=setupMode||!$('dlg').classList.contains('hide')||!$('lang').classList.contains('hide')||!$('picker').classList.contains('hide');
   if(busy||svcShown.has(k)||svcSeen(k))return;
   svcShown.add(k);
   dialog(tx('svc_due_title'),(S.cars.length>1?'<p><b>'+esc(carName(c))+'</b></p>':'')+'<p>'+svcReason(i)+'</p><p>'+esc(tx('svc_due_hint'))+'</p>',
     [{t:tx('ok'),fn:()=>svcMarkSeen(k)}]);
 }
-// Toucher le bandeau : « L'entretien est fait ? » -> Achats, catégorie Entretien choisie, il reste le prix à saisir
-function svcGoBuy(){
-  showTab('buys');
-  $('bc').value=SVC_CAT;$('bd').value=today();
-  $('be').closest('.f').classList.remove('need');$('be').closest('.f').classList.add('todo');
-  status(tx('svc_price'));$('be').focus();
+// Toucher le bandeau : « Entretien fait ? » -> enregistré à la date du jour, le suivi repart de zéro,
+// puis un message rappelle d'ajouter le coût dans les Achats.
+function svcDoneToday(){
+  const c=curCar();c.svcDone=today();persist();render();
+  dialog(tx('svc_done_ok_title'),'<p>'+tx('svc_done_ok_msg')+'</p>',[{t:tx('ok')}]);
 }
 $('svcBar').onclick=()=>dialog(tx('svc_done_title'),'<p>'+esc(tx('svc_done_msg'))+'</p>',
-  [{t:tx('svc_not_yet'),tonal:true},{t:tx('svc_done_yes'),fn:svcGoBuy}]);
+  [{t:tx('svc_not_yet'),tonal:true},{t:tx('svc_done_yes'),fn:svcDoneToday}]);
 $('svcKmBtn').onclick=()=>{
   const c=curCar();
-  $('kmSub').textContent=tx('svc_pick_sub',{car:carName(c)});
-  $('kmpick').classList.remove('hide');
-  const get=makeWheel($('km-list'),SVC_KM.map(kmTxt),Math.max(0,SVC_KM.indexOf(svcEvery(c))),false);
-  $('km-ok').onclick=()=>{c.svcKm=SVC_KM[get()];$('kmpick').classList.add('hide');persist();render();status(tx('svc_saved',{km:kmTxt(c.svcKm)}))};
-  $('km-cancel').onclick=()=>$('kmpick').classList.add('hide');
+  picker({icon:'wrench',color:'var(--amber)',title:'svc_pick',sub:tx('svc_pick_sub',{car:carName(c)}),
+    labels:SVC_KM.map(kmTxt),sel:Math.max(0,SVC_KM.indexOf(svcEvery(c))),loop:false,
+    onOk:i=>{c.svcKm=SVC_KM[i];persist();render();status(tx('svc_saved',{km:kmTxt(c.svcKm)}))}});
 };
 const monthName=i=>new Date(2000,i,1).toLocaleDateString(LOC,{month:'short'});
 const sd=s=>s.slice(8,10)+'/'+s.slice(5,7);
