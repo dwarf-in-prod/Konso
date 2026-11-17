@@ -213,7 +213,7 @@ body.kb #st{bottom:16px}
     <div class="grid" style="margin-top:6px">
       <div class="f fl"><input type="date" id="bd"><label for="bd" data-i18n="date"></label></div>
       <div class="f"><input type="number" id="be" inputmode="decimal" step="0.01" placeholder=" "><label for="be" data-i18n="amount"></label></div>
-      <div class="f fl sel full"><select id="bc"></select><label for="bc" data-i18n="category"></label></div>
+      <div class="f fl sel full"><button type="button" class="fieldbtn" id="bc"></button><label data-i18n="category"></label></div>
       <div class="f full"><input type="text" id="bn" placeholder=" "><label for="bn" data-i18n="description"></label></div>
       <div class="f"><input type="number" id="bk" inputmode="numeric" placeholder=" "><label for="bk" data-i18n="odometer"></label></div>
       <div class="f"><input type="text" id="bs" placeholder=" "><label for="bs" data-i18n="shop"></label></div>
@@ -408,7 +408,7 @@ function applyI18n(){
   document.querySelectorAll('[data-i18n-title]').forEach(e=>{const s=tx(e.dataset.i18nTitle);e.title=s;e.setAttribute('aria-label',s)});
   document.querySelectorAll('[data-i18n-ph]').forEach(e=>e.placeholder=tx(e.dataset.i18nPh));
   const opts=(el,list,label)=>{const v=el.value;el.innerHTML=list.map((x,i)=>'<option value="'+esc(x)+'"'+(x===''?' disabled':'')+'>'+esc(label(x,i))+'</option>').join('');if(list.includes(v))el.value=v};
-  opts($('fc'),['',...FUELV],x=>x?fuelLabel(x):tx('fuel_choose'));opts($('carFuel'),FUELV,fuelLabel);opts($('bc'),CATSHOW,catLabel);
+  opts($('fc'),['',...FUELV],x=>x?fuelLabel(x):tx('fuel_choose'));opts($('carFuel'),FUELV,fuelLabel);setCat($('bc').value||CATSHOW[0]);
   $('langBtn').textContent=(LANGS.find(l=>l[0]===LANG)||LANGS[0])[1];
 }
 function setLang(l,store){
@@ -447,6 +447,10 @@ function picker(o){
   $('pk-ok').onclick=()=>{const i=get();close();o.onOk(i)};
   $('pk-cancel').onclick=()=>{close();if(o.onCancel)o.onCancel()};
 }
+// Catégorie d'achat : choisie dans la roue ; la valeur enregistrée reste dans l'attribut value du bouton #bc
+function setCat(v){$('bc').value=v;$('bc').textContent=catLabel(v)}
+$('bc').onclick=()=>picker({icon:'wrench',title:'category',labels:CATSHOW.map(catLabel),
+  sel:Math.max(0,CATSHOW.indexOf($('bc').value)),loop:false,onOk:i=>setCat(CATSHOW[i])});
 function showLangScreen(){
   $('lang').classList.remove('hide');
   // aperçu : les textes changent pendant qu'on fait défiler, rien n'est enregistré avant « Suivant »
