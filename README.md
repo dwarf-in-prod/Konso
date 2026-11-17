@@ -14,6 +14,7 @@ Simple, hors ligne, sans compte et sans publicité.
 | ⛽ **Pleins** | Distance, litres, montant → L/100 km, coût aux 100 km, prix au litre. |
 | 📷 **Lecture de ticket** | Photo d'un ticket de caisse lue directement sur le téléphone (OCR Tesseract embarqué). Modèle optimisé pour les tickets français ; les valeurs lues restent à vérifier. |
 | 🔧 **Achats** | Huile, pièces, pneus, entretien… classés par catégorie. |
+| 🛠️ **Rappels d'entretien** | Tous les ans ou tous les 10 000 km (réglable de 100 à 100 000 km, par voiture). Un message s'affiche une fois, puis un bandeau reste en haut de l'écran ; un appui ouvre les Achats avec la catégorie « Entretien / révision » déjà choisie. |
 | 📊 **Bilan** | Moyennes, courbe de consommation, dépenses par mois. |
 | 🚗 **Plusieurs voitures** | Ajout, renommage, suppression, sélecteur rapide. |
 | 💾 **Sauvegarde automatique** | Un fichier `konso.json` dans le dossier de votre choix (téléphone, ou Google Drive via le sélecteur de fichiers Android). |
@@ -86,6 +87,7 @@ Composants tiers : [Tesseract.js](https://github.com/naptha/tesseract.js) et ses
 - **Fill-ups**: distance, litres, price → L/100 km, cost per 100 km, price per litre.
 - **Receipt scanning**: on-device OCR (embedded Tesseract). Tuned for French receipts; always double-check the values.
 - **Purchases**: oil, parts, tyres, servicing… sorted by category.
+- **Service reminders**: every year or every 10,000 km (adjustable from 100 to 100,000 km, per car). A message appears once, then a banner stays at the top of the screen; tapping it opens Purchases with the service category already selected.
 - **Overview**: averages, consumption chart, monthly spending.
 - **Multiple cars.**
 - **Automatic backup** to a `konso.json` file in a folder you pick (local storage, or Google Drive through the Android file picker).

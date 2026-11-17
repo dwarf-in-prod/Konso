@@ -13,14 +13,14 @@
   --secondary-c:#dbe2f9;--on-secondary-c:#141b2c;
   --surface:#f9f9ff;--surf:#edeef4;--surf-high:#e7e8ee;
   --on-surf:#191c20;--on-surf-v:#44474e;--outline:#74777f;--outline-v:#c4c6d0;
-  --error:#ba1a1a;--on-error:#fff;--ok:#386a20;--inverse:#2e3036;--on-inverse:#f0f0f7;
+  --error:#ba1a1a;--on-error:#fff;--ok:#386a20;--amber:#7c5800;--amber-c:#ffdf9e;--on-amber-c:#261a00;--inverse:#2e3036;--on-inverse:#f0f0f7;
   --s1:#2a78d6;--s2:#eb6834;--font:system-ui,Roboto,-apple-system,"Segoe UI",sans-serif}
 @media(prefers-color-scheme:dark){:root{
   --primary:#aac7ff;--on-primary:#0a305f;--primary-c:#284777;--on-primary-c:#d6e3ff;
   --secondary-c:#3e4759;--on-secondary-c:#dbe2f9;
   --surface:#111318;--surf:#1d2024;--surf-high:#282a2f;
   --on-surf:#e2e2e9;--on-surf-v:#c4c6d0;--outline:#8e9099;--outline-v:#44474e;
-  --error:#ffb4ab;--on-error:#690005;--ok:#9cd67d;--inverse:#e2e2e9;--on-inverse:#2e3036;
+  --error:#ffb4ab;--on-error:#690005;--ok:#9cd67d;--amber:#f5bf48;--amber-c:#5c4200;--on-amber-c:#ffdf9e;--inverse:#e2e2e9;--on-inverse:#2e3036;
   --s1:#3987e5;--s2:#d95926}}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html{background:var(--surface)}
@@ -129,6 +129,18 @@ body.kb .nav{display:none}
 #st.show{opacity:1}
 body.kb #st{bottom:16px}
 
+/* entretien : bandeau ambre en haut de l'écran, fenêtre de rappel */
+.svcbar{display:flex;align-items:center;gap:12px;width:100%;border:0;border-radius:16px;padding:12px 14px;margin:0 0 12px;background:var(--amber-c);color:var(--on-amber-c);font:500 14px/1.35 var(--font);text-align:left;cursor:pointer}
+.svcbar span{flex:1}
+.svcbar svg.i:first-child{color:var(--amber)}
+.scrim{position:fixed;inset:0;z-index:40;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;padding:24px}
+.dialog{width:100%;max-width:360px;background:var(--surf-high);color:var(--on-surf);border-radius:28px;padding:24px;box-shadow:0 8px 24px rgba(0,0,0,.25)}
+.dialog>svg.i{width:28px;height:28px;color:var(--amber);display:block;margin:0 auto}
+.dialog h2{font:400 22px/1.3 var(--font);text-align:center;margin:14px 0 12px}
+.dialog p{font-size:14px;line-height:1.5;color:var(--on-surf-v);margin:0 0 10px}
+.dbtns{display:flex;gap:12px;margin-top:6px}
+.dbtns .btn{margin-top:8px}
+
 /* choix de la langue : roue infinie */
 .lang{position:fixed;inset:0;z-index:50;background:var(--surface);overflow-y:auto;display:flex;flex-direction:column;justify-content:center;padding:24px 20px}
 .lang .wrap{width:100%;max-width:440px;margin:0 auto;text-align:center}
@@ -152,6 +164,7 @@ body.kb #st{bottom:16px}
 </header>
 
 <main>
+<button class="svcbar hide" id="svcBar"><svg class="i" viewBox="0 0 24 24"><path d="M22.7 19l-9.1-9.1c.9-2.3.4-5-1.5-6.9-2-2-5-2.4-7.4-1.3L9 6 6 9 1.6 4.7C.4 7.1.9 10.1 2.9 12.1c1.9 1.9 4.6 2.4 6.9 1.5l9.1 9.1c.4.4 1 .4 1.4 0l2.3-2.3c.5-.4.5-1.1.1-1.4z"/></svg><span id="svcBarTxt"></span><svg class="i" viewBox="0 0 24 24"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg></button>
 <div class="card hide" id="carForm">
   <h3 id="carFormTitle"></h3>
   <div class="grid">
@@ -224,6 +237,12 @@ body.kb #st{bottom:16px}
     <div class="f fl sel"><select id="langSel"></select><label for="langSel" data-i18n="set_lang"></label></div>
   </div>
   <div class="card">
+    <h3 data-i18n="svc_title"></h3>
+    <div class="sum" id="svcInfo"></div>
+    <div class="note" data-i18n="svc_note"></div>
+    <button class="btn tonal" id="svcKmBtn" data-i18n="svc_change"></button>
+  </div>
+  <div class="card">
     <h3 data-i18n="set_backup"></h3>
     <div id="sv-folder" class="sum"></div>
     <div id="sv-pending" class="scanres warn hide"></div>
@@ -254,6 +273,7 @@ body.kb #st{bottom:16px}
     <details><summary data-i18n="help_q5"></summary><div class="note" data-i18n-html="help_a5"></div></details>
     <details><summary data-i18n="help_q6"></summary><div class="note" data-i18n-html="help_a6"></div></details>
     <details><summary data-i18n="help_q7"></summary><div class="note" data-i18n-html="help_a7"></div></details>
+    <details><summary data-i18n="help_q8"></summary><div class="note" data-i18n-html="help_a8"></div></details>
   </div>
 </section>
 </main>
@@ -276,6 +296,18 @@ body.kb #st{bottom:16px}
   </div>
 </div>
 
+<div id="kmpick" class="lang hide">
+  <div class="wrap">
+    <svg class="i" viewBox="0 0 24 24" style="width:40px;height:40px;color:var(--amber)"><path d="M22.7 19l-9.1-9.1c.9-2.3.4-5-1.5-6.9-2-2-5-2.4-7.4-1.3L9 6 6 9 1.6 4.7C.4 7.1.9 10.1 2.9 12.1c1.9 1.9 4.6 2.4 6.9 1.5l9.1 9.1c.4.4 1 .4 1.4 0l2.3-2.3c.5-.4.5-1.1.1-1.4z"/></svg>
+    <h1 data-i18n="svc_pick"></h1>
+    <div class="note" style="margin:-8px 0 16px" id="kmSub"></div>
+    <div class="wheel"><div class="band"></div><div class="wl" id="km-list"></div></div>
+    <div class="btns2"><button class="btn tonal" id="km-cancel" data-i18n="cancel"></button><button class="btn" id="km-ok" data-i18n="validate"></button></div>
+  </div>
+</div>
+
+<div id="dlg" class="scrim hide"><div class="dialog" role="dialog" aria-modal="true" aria-labelledby="dlgT"><svg class="i" viewBox="0 0 24 24"><path d="M22.7 19l-9.1-9.1c.9-2.3.4-5-1.5-6.9-2-2-5-2.4-7.4-1.3L9 6 6 9 1.6 4.7C.4 7.1.9 10.1 2.9 12.1c1.9 1.9 4.6 2.4 6.9 1.5l9.1 9.1c.4.4 1 .4 1.4 0l2.3-2.3c.5-.4.5-1.1.1-1.4z"/></svg><h2 id="dlgT"></h2><div id="dlgM"></div><div class="dbtns" id="dlgB"></div></div></div>
+
 <script src="i18n.js"></script>
 <script src="parse.js"></script>
 <script src="vendor/tesseract.min.js"></script>
@@ -293,9 +325,27 @@ const fdate=s=>{try{return new Date(s+'T12:00:00').toLocaleDateString(LOC)}catch
 const esc=s=>String(s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 // valeurs enregistrées dans le fichier (ne changent pas avec la langue) et leur libellé affiché
 const FUELV=['SP95-E10','SP95','SP98','E85','GPL','Gazole'];
-const CATV=['Huile moteur','Huile boîte / pont','Filtres','Freinage','Suspension / train roulant','Pneus','Liquides','Électricité / éclairage','Pièces moteur','Carrosserie','Outillage','Autre'];
+const CATV=['Huile moteur','Huile boîte / pont','Filtres','Freinage','Suspension / train roulant','Pneus','Liquides','Électricité / éclairage','Pièces moteur','Carrosserie','Outillage','Autre','Entretien / révision'];
 const fuelLabel=v=>('fuel_'+v) in DICT.fr?tx('fuel_'+v):v;
 const catLabel=c=>{const i=CATV.indexOf(c);return i>=0?tx('cat'+i):c};
+// Entretien : rappel tous les ans ou tous les N km, au premier des deux (N au choix par voiture, 10 000 par défaut).
+// Les km sont la somme des distances des pleins depuis le dernier achat « Entretien / révision »
+// (sans entretien enregistré : depuis le premier plein).
+const SVC_CAT='Entretien / révision';
+const CATSHOW=[...CATV.filter(c=>c!=='Autre'&&c!==SVC_CAT),SVC_CAT,'Autre'];   // ordre d'affichage de la liste
+const SVC_KM=[];for(let v=100;v<=100000;v+=v<1000?100:v<10000?1000:v<30000?5000:10000)SVC_KM.push(v);
+const svcEvery=c=>SVC_KM.includes(+c.svcKm)?+c.svcKm:10000;
+const kmTxt=n=>fmt(n,0)+' km';
+function addYear(d){const [y,m,j]=d.split('-').map(Number);return new Date(Date.UTC(y+1,m-1,j)).toISOString().slice(0,10)}
+function svcInfo(c){
+  const every=svcEvery(c),svc=S.buys.find(b=>b.car===c.id&&b.c===SVC_CAT),fills=S.fuel.filter(f=>f.car===c.id);
+  let ref,start=false,km;
+  if(svc){ref=svc.d;km=fills.filter(f=>f.d>ref).reduce((a,f)=>a+f.k,0)}
+  else if(fills.length){start=true;ref=fills[fills.length-1].d;km=fills.slice(0,-1).reduce((a,f)=>a+f.k,0)}
+  else return null;
+  const next=addYear(ref),overKm=km>=every,overDate=today()>=next;
+  return {ref,start,km,every,next,left:Math.max(0,every-km),overKm,overDate,due:overKm||overDate};
+}
 
 let S={cars:[{id:'c1',name:'',fuel:'SP95-E10'}],cur:'c1',fuel:[],buys:[]}, LS='konso-data';
 const carName=c=>c.name||tx('car_default');   // la voiture créée par défaut n'a pas de nom : libellé traduit
@@ -308,7 +358,7 @@ function norm(d){
   const arr=v=>(Array.isArray(v)?v:[]).filter(x=>x&&typeof x==='object');
   const seen=new Set();let auto=Date.now();
   const uid=v=>{let id=num(v);while(!(id>0)||seen.has(id))id=++auto;seen.add(id);return id};
-  let cars=arr(d.cars).map(c=>({id:str(c.id,40),name:str(c.name,40).trim(),fuel:str(c.fuel,20)})).filter(c=>c.id);
+  let cars=arr(d.cars).map(c=>({id:str(c.id,40),name:str(c.name,40).trim(),fuel:str(c.fuel,20),svcKm:svcEvery(c)})).filter(c=>c.id);
   cars=cars.filter((c,i)=>cars.findIndex(x=>x.id===c.id)===i);
   if(!cars.length)cars=[{id:'c1',name:'',fuel:'SP95-E10'}];
   const ids=new Set(cars.map(c=>c.id)),car=v=>ids.has(v)?v:cars[0].id;
@@ -355,7 +405,7 @@ function applyI18n(){
   document.querySelectorAll('[data-i18n-title]').forEach(e=>{const s=tx(e.dataset.i18nTitle);e.title=s;e.setAttribute('aria-label',s)});
   document.querySelectorAll('[data-i18n-ph]').forEach(e=>e.placeholder=tx(e.dataset.i18nPh));
   const opts=(el,list,label)=>{const v=el.value;el.innerHTML=list.map((x,i)=>'<option value="'+esc(x)+'"'+(x===''?' disabled':'')+'>'+esc(label(x,i))+'</option>').join('');if(list.includes(v))el.value=v};
-  opts($('fc'),['',...FUELV],x=>x?fuelLabel(x):tx('fuel_choose'));opts($('carFuel'),FUELV,fuelLabel);opts($('bc'),CATV,(c,i)=>tx('cat'+i));
+  opts($('fc'),['',...FUELV],x=>x?fuelLabel(x):tx('fuel_choose'));opts($('carFuel'),FUELV,fuelLabel);opts($('bc'),CATSHOW,catLabel);
   $('langSel').innerHTML=LANGS.map(l=>'<option value="'+l[0]+'">'+esc(l[1])+'</option>').join('');$('langSel').value=LANG;
 }
 function setLang(l,store){
@@ -363,24 +413,31 @@ function setLang(l,store){
   if(store){try{localStorage.setItem(LK,LANG)}catch(e){}}
   applyI18n();applyCarDefaults();render();renderSave();live();
 }
-// Roue infinie (comme à la configuration d'un téléphone Android) : on fait défiler, puis on valide avec « Suivant ».
-function showLangScreen(){
-  const N=LANGS.length,IT=56,list=$('wheel-list');
-  list.innerHTML=[0,1,2].map(()=>LANGS.map((l,i)=>'<div class="it" data-i="'+i+'">'+esc(l[1])+'</div>').join('')).join('');
-  const items=[...list.children];
-  let sel=Math.max(0,LANGS.findIndex(l=>l[0]===LANG)),tm=null;
+// Roue (comme à la configuration d'un téléphone Android) : on fait défiler, puis on valide.
+// loop : roue infinie (la liste est répétée 3 fois). Renvoie une fonction qui donne l'indice choisi.
+// La roue doit être visible quand on l'appelle (sinon la position de défilement est ignorée).
+function makeWheel(list,labels,sel,loop,onPick){
+  const N=labels.length,IT=56;
+  list.innerHTML=(loop?[0,1,2]:[0]).map(()=>labels.map(l=>'<div class="it">'+esc(l)+'</div>').join('')).join('');
+  const items=[...list.children];let tm=null;
+  const at=()=>{const k=Math.round(list.scrollTop/IT);return loop?((k%N)+N)%N:Math.max(0,Math.min(N-1,k))};
   const paint=()=>{const c=list.scrollTop/IT;items.forEach((e,k)=>{const d=Math.abs(k-c);e.style.opacity=Math.max(.25,1-d*.3);e.style.transform='scale('+Math.max(.72,1-d*.1)+')';e.style.color=d<.5?'var(--on-primary-c)':''})};
   const settle=()=>{
-    let k=Math.round(list.scrollTop/IT);const real=((k%N)+N)%N;
-    if(k<N||k>=2*N){list.style.scrollSnapType='none';list.scrollTop=(N+real)*IT;list.style.scrollSnapType='';}
-    if(real!==sel){sel=real;setLang(LANGS[sel][0],false)}   // aperçu : les textes changent, rien n'est enregistré
+    const k=Math.round(list.scrollTop/IT),real=at();
+    if(loop&&(k<N||k>=2*N)){list.style.scrollSnapType='none';list.scrollTop=(N+real)*IT;list.style.scrollSnapType='';}
+    if(real!==sel){sel=real;if(onPick)onPick(sel)}
     paint();
   };
   list.onscroll=()=>{paint();clearTimeout(tm);tm=setTimeout(settle,130)};
   items.forEach((e,k)=>e.onclick=()=>list.scrollTo({top:k*IT,behavior:'smooth'}));
-  $('lang-next').onclick=()=>{setLang(LANGS[sel][0],true);$('lang').classList.add('hide')};
+  list.scrollTop=((loop?N:0)+sel)*IT;paint();
+  return at;
+}
+function showLangScreen(){
   $('lang').classList.remove('hide');
-  list.scrollTop=(N+sel)*IT;paint();
+  // aperçu : les textes changent pendant qu'on fait défiler, rien n'est enregistré avant « Suivant »
+  const get=makeWheel($('wheel-list'),LANGS.map(l=>l[1]),Math.max(0,LANGS.findIndex(l=>l[0]===LANG)),true,i=>setLang(LANGS[i][0],false));
+  $('lang-next').onclick=()=>{setLang(LANGS[get()][0],true);$('lang').classList.add('hide');render()};
 }
 $('langSel').onchange=()=>setLang($('langSel').value,true);
 
@@ -548,9 +605,11 @@ $('addF').onclick=()=>{
   S.fuel.sort((a,b)=>b.d.localeCompare(a.d)||b.id-a.id);
   ['fk','fl','fe','fs'].forEach(i=>$(i).value='');tried=false;setFuelPending(false);live();persist();render();applyCarDefaults();
 };
+$('be').addEventListener('input',()=>{if(+$('be').value>0)$('be').closest('.f').classList.remove('todo','need')});
 $('addB').onclick=()=>{
   const e=+$('be').value;
-  if(!(e>0)){status(tx('need_amount'));return}
+  if(!(e>0)){$('be').closest('.f').classList.remove('todo');$('be').closest('.f').classList.add('need');status(tx('need_amount'));return}
+  $('be').closest('.f').classList.remove('todo','need');
   S.buys.unshift({id:Date.now(),car:S.cur,d:$('bd').value||today(),e,c:$('bc').value,n:$('bn').value.trim(),k:+$('bk').value||0,s:$('bs').value.trim()});
   S.buys.sort((a,b)=>b.d.localeCompare(a.d)||b.id-a.id);
   ['be','bn','bk','bs'].forEach(i=>$(i).value='');persist();render();
@@ -583,7 +642,62 @@ function render(){
   const ent=Object.entries(by).sort((a,b)=>b[1]-a[1]),mx=ent.length?ent[0][1]:1;
   $('cats').innerHTML=ent.length?'<div class="note" style="margin:0 0 8px">'+esc(tx('s_by_cat'))+'</div>'+ent.map(([c,v])=>`<div style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;font-size:14px"><span>${esc(catLabel(c))}</span><b style="font-weight:500">${eur(v)}</b></div><div class="bar"><i style="width:${v/mx*100}%"></i></div></div>`).join(''):'';
   lineChart();barChart();
+  svcUI();
 }
+// ---- Entretien : réglage, rappel (une fois au milieu de l'écran), puis bandeau ambre en haut de l'écran
+const SK='konso-svc-seen',svcShown=new Set();
+const svcKey=(c,i)=>c.id+'|'+i.ref;
+function svcSeen(k){try{return (JSON.parse(localStorage.getItem(SK))||{})[k.split('|')[0]]===k}catch(e){return false}}
+function svcMarkSeen(k){try{const m=JSON.parse(localStorage.getItem(SK))||{};m[k.split('|')[0]]=k;localStorage.setItem(SK,JSON.stringify(m))}catch(e){}}
+function dialog(title,html,btns){
+  $('dlgT').textContent=title;$('dlgM').innerHTML=html;$('dlgB').innerHTML='';
+  btns.forEach(b=>{const e=document.createElement('button');e.className='btn'+(b.tonal?' tonal':'');e.textContent=b.t;
+    e.onclick=()=>{$('dlg').classList.add('hide');if(b.fn)b.fn()};$('dlgB').appendChild(e)});
+  $('dlg').classList.remove('hide');
+}
+function svcReason(i){
+  const v={km:'<b>'+kmTxt(i.km)+'</b>',d:'<b>'+fdate(i.ref)+'</b>'};
+  return tx(i.overKm?(i.start?'svc_due_km_start':'svc_due_km'):(i.start?'svc_due_date_start':'svc_due_date'),v);
+}
+function renderSvc(c,i){
+  let h=tx('svc_rule',{car:esc(carName(c)),km:kmTxt(svcEvery(c))});
+  if(!i)h+='<br>'+tx('svc_nodata');
+  else{
+    h+='<br>'+tx(i.start?'svc_start':'svc_last',{d:fdate(i.ref),km:kmTxt(i.km)});
+    h+='<br>'+(i.due?'<b>'+tx('svc_now')+'</b>':tx('svc_next',{km:kmTxt(i.left),d:fdate(i.next)}));
+  }
+  $('svcInfo').innerHTML=h;
+}
+function svcUI(){
+  const c=curCar(),i=svcInfo(c),due=!!(i&&i.due);
+  renderSvc(c,i);
+  $('svcBarTxt').textContent=tx('svc_banner');
+  $('svcBar').classList.toggle('hide',!due);
+  if(!due)return;
+  const k=svcKey(c,i);
+  const busy=setupMode||!$('dlg').classList.contains('hide')||!$('lang').classList.contains('hide')||!$('kmpick').classList.contains('hide');
+  if(busy||svcShown.has(k)||svcSeen(k))return;
+  svcShown.add(k);
+  dialog(tx('svc_due_title'),(S.cars.length>1?'<p><b>'+esc(carName(c))+'</b></p>':'')+'<p>'+svcReason(i)+'</p><p>'+esc(tx('svc_due_hint'))+'</p>',
+    [{t:tx('ok'),fn:()=>svcMarkSeen(k)}]);
+}
+// Toucher le bandeau : « L'entretien est fait ? » -> Achats, catégorie Entretien choisie, il reste le prix à saisir
+function svcGoBuy(){
+  showTab('buys');
+  $('bc').value=SVC_CAT;$('bd').value=today();
+  $('be').closest('.f').classList.remove('need');$('be').closest('.f').classList.add('todo');
+  status(tx('svc_price'));$('be').focus();
+}
+$('svcBar').onclick=()=>dialog(tx('svc_done_title'),'<p>'+esc(tx('svc_done_msg'))+'</p>',
+  [{t:tx('svc_not_yet'),tonal:true},{t:tx('svc_done_yes'),fn:svcGoBuy}]);
+$('svcKmBtn').onclick=()=>{
+  const c=curCar();
+  $('kmSub').textContent=tx('svc_pick_sub',{car:carName(c)});
+  $('kmpick').classList.remove('hide');
+  const get=makeWheel($('km-list'),SVC_KM.map(kmTxt),Math.max(0,SVC_KM.indexOf(svcEvery(c))),false);
+  $('km-ok').onclick=()=>{c.svcKm=SVC_KM[get()];$('kmpick').classList.add('hide');persist();render();status(tx('svc_saved',{km:kmTxt(c.svcKm)}))};
+  $('km-cancel').onclick=()=>$('kmpick').classList.add('hide');
+};
 const monthName=i=>new Date(2000,i,1).toLocaleDateString(LOC,{month:'short'});
 const sd=s=>s.slice(8,10)+'/'+s.slice(5,7);
 function niceTicks(lo,hi,n){
