@@ -51,9 +51,10 @@ Written by an AI does not mean unchecked: all the source code is open, so anyone
 - 🔧 **Purchases**: oil, parts, tyres, servicing… sorted by category.
 - 🛠️ **Service reminders**: every year or every 10,000 km, whichever comes first (adjustable from 100 to 100,000 km, per car). A message appears once, then an amber banner stays at the top of the screen; tap it once the service is done and tracking starts again from zero.
 - 📊 **Overview**: averages, consumption chart, monthly spending.
+- 📏 **Units and currency**: kilometres or miles (L/100 km, UK mpg, or US mpg with US gallons) and €, £, $, CHF, zł, lei or ₺. Chosen with three wheels at first launch (language, units, currency) and changeable in Settings. Data is always stored in km and litres, so switching units loses nothing.
 - 🚗 **Several cars**, each with its own history and reminders.
 - 💾 **Automatic backup** to `konso.json`, updated after every change.
-- 🎡 **Wheel pickers** for language, categories and service distance.
+- 🎡 **Wheel pickers** for language, units, currency, categories and service distance.
 - 🌍 **10 languages**: English, French, Spanish, German, Italian, Portuguese, Dutch, Polish, Turkish, Romanian.
 - ❓ **Built-in help** ("How it works" in Settings) and a Material Design 3 interface with light and dark themes.
 
@@ -149,9 +150,10 @@ Comment elle est faite :
 - 🔧 **Achats** : huile, pièces, pneus, entretien… classés par catégorie.
 - 🛠️ **Rappels d'entretien** : tous les ans ou tous les 10 000 km, au premier des deux (réglable de 100 à 100 000 km, par voiture). Un message s'affiche une fois, puis un bandeau ambre reste en haut de l'écran ; un appui valide l'entretien et le suivi repart de zéro.
 - 📊 **Bilan** : moyennes, courbe de consommation, dépenses par mois.
+- 📏 **Unités et monnaie** : kilomètres ou miles (L/100 km, mpg britannique, ou mpg américain avec gallons US) et €, £, $, CHF, zł, lei ou ₺. Choisis avec trois roues au premier lancement (langue, unités, monnaie), modifiables dans les Réglages. Les données sont toujours enregistrées en km et en litres : changer d'unité ne perd rien.
 - 🚗 **Plusieurs voitures**, chacune avec son historique et ses rappels.
 - 💾 **Sauvegarde automatique** dans `konso.json`, mise à jour à chaque modification.
-- 🎡 **Choix par roue** pour la langue, les catégories et le kilométrage d'entretien.
+- 🎡 **Choix par roue** pour la langue, les unités, la monnaie, les catégories et le kilométrage d'entretien.
 - 🌍 **10 langues** : français, anglais, espagnol, allemand, italien, portugais, néerlandais, polonais, turc, roumain.
 - ❓ **Aide intégrée** (« Comment ça marche ? » dans les Réglages) et interface Material Design 3, en thème clair ou sombre.
 
