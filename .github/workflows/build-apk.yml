@@ -1,0 +1,38 @@
+name: Compiler l'APK
+
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Rendre gradlew exécutable
+        run: chmod +x gradlew
+      - name: Compiler
+        run: ./gradlew assembleDebug --no-daemon
+      - uses: actions/upload-artifact@v4
+        with:
+          name: konso-apk
+          path: app/build/outputs/apk/debug/app-debug.apk
+      - name: Publier l'APK dans les Releases (lancement manuel ou message de commit contenant [release])
+        if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[release]')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cp app/build/outputs/apk/debug/app-debug.apk konso.apk
+          gh release delete latest --yes --cleanup-tag || true
+          gh release create latest konso.apk \
+            --title "Konso – dernière version" \
+            --notes "APK compilé automatiquement depuis le commit ${GITHUB_SHA::7}." \
+            --target "$GITHUB_SHA"

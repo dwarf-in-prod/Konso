@@ -1,0 +1,527 @@
+package app.konso;
+
+import android.app.Activity;
+import android.content.ContentValues;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.UriPermission;
+import android.database.Cursor;
+import android.net.Uri;
+import android.os.Bundle;
+import android.provider.DocumentsContract;
+import android.provider.MediaStore;
+import android.webkit.JavascriptInterface;
+import android.webkit.ValueCallback;
+import android.webkit.WebChromeClient;
+import android.webkit.WebResourceRequest;
+import android.webkit.WebResourceResponse;
+import android.webkit.WebSettings;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
+
+import org.json.JSONObject;
+
+import java.io.ByteArrayInputStream;
+import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.net.InetAddress;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
+/**
+ * Appli autonome : une WebView qui affiche l'interface embarquée dans assets/www,
+ * plus un petit pont natif ("Android") pour écrire / lire le fichier de sauvegarde (konso.json)
+ * dans un dossier choisi par l'utilisateur (Storage Access Framework).
+ */
+public class MainActivity extends Activity {
+
+    private static final String HOST = "127.0.0.1";
+    private static final int PREFERRED_PORT = 38917; // port fixe : garde le même "origine" donc le même stockage local
+    private static final String FILE_NAME = "konso.json";
+    private static final String PREF_TREE = "tree_uri";
+    private static final int REQ_FOLDER = 1;
+    private static final int REQ_IMAGE = 2;
+
+    private WebView web;
+    private SharedPreferences prefs;
+    private ServerSocket server;
+    private final ExecutorService pool = Executors.newFixedThreadPool(4);
+
+    private ValueCallback<Uri[]> chooserCallback;
+    private Uri cameraUri;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        prefs = getSharedPreferences("konso", MODE_PRIVATE);
+
+        int port;
+        try {
+            port = startServer();
+        } catch (IOException e) {
+            port = -1;
+        }
+
+        web = new WebView(this);
+        setContentView(web);
+
+        WebSettings s = web.getSettings();
+        s.setJavaScriptEnabled(true);
+        s.setDomStorageEnabled(true);
+        s.setAllowFileAccess(false);
+        s.setAllowContentAccess(true);
+
+        web.addJavascriptInterface(new Bridge(), "Android");
+
+        web.setWebViewClient(new WebViewClient() {
+            @Override
+            public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
+                // Tout ce qui n'est pas l'appli elle-même (serveur local) est bloqué : aucun accès internet.
+                if (HOST.equals(request.getUrl().getHost())) {
+                    return null;
+                }
+                return emptyResponse(403, "Forbidden");
+            }
+
+            @Override
+            public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
+                return !HOST.equals(request.getUrl().getHost());
+            }
+        });
+
+        web.setWebChromeClient(new WebChromeClient() {
+            @Override
+            public boolean onShowFileChooser(WebView view, ValueCallback<Uri[]> callback,
+                                             FileChooserParams params) {
+                if (chooserCallback != null) {
+                    chooserCallback.onReceiveValue(null);
+                }
+                chooserCallback = callback;
+                return launchImageChooser();
+            }
+        });
+
+        if (port < 0) {
+            web.loadData("<html><body><p>Local server could not start. Please restart the app.</p></body></html>",
+                    "text/html", "utf-8");
+        } else if (savedInstanceState != null) {
+            web.restoreState(savedInstanceState);
+        } else {
+            web.loadUrl("http://" + HOST + ":" + port + "/index.html");
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        try {
+            if (server != null) server.close();
+        } catch (IOException ignored) {
+        }
+        pool.shutdownNow();
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        web.saveState(outState);
+    }
+
+    // ------------------------------------------------------------------
+    // Fichiers de l'interface (assets/www) servis par un petit serveur local (127.0.0.1)
+    // ------------------------------------------------------------------
+
+    private int startServer() throws IOException {
+        InetAddress lo = InetAddress.getByName(HOST);
+        try {
+            server = new ServerSocket(PREFERRED_PORT, 20, lo);
+        } catch (IOException busy) {
+            server = new ServerSocket(0, 20, lo);
+        }
+        final ServerSocket ss = server;
+        Thread t = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (!ss.isClosed()) {
+                    try {
+                        final Socket client = ss.accept();
+                        pool.execute(new Runnable() {
+                            @Override
+                            public void run() {
+                                handle(client);
+                            }
+                        });
+                    } catch (Exception e) {
+                        break;
+                    }
+                }
+            }
+        }, "assets-server");
+        t.setDaemon(true);
+        t.start();
+        return ss.getLocalPort();
+    }
+
+    private void handle(Socket client) {
+        try {
+            client.setSoTimeout(10000);
+            BufferedReader r = new BufferedReader(
+                    new InputStreamReader(client.getInputStream(), StandardCharsets.ISO_8859_1));
+            String line = r.readLine();
+            if (line == null) return;
+            String h;
+            while ((h = r.readLine()) != null && !h.isEmpty()) {
+                // en-têtes ignorés
+            }
+            String[] parts = line.split(" ");
+            String method = parts[0];
+            String target = parts.length > 1 ? parts[1] : "/";
+            int q = target.indexOf('?');
+            if (q >= 0) target = target.substring(0, q);
+            int f = target.indexOf('#');
+            if (f >= 0) target = target.substring(0, f);
+            OutputStream out = client.getOutputStream();
+            boolean head = method.equals("HEAD");
+            if (!head && !method.equals("GET")) {
+                respond(out, 405, "Method Not Allowed", "text/plain", new byte[0], false);
+                return;
+            }
+            if (target.isEmpty() || target.equals("/")) target = "/index.html";
+            // Les fichiers .gz sont stockés sous le nom « .gz.bin » : l'outil de compilation Android
+            // retire sinon l'extension .gz des assets et décompresse le fichier.
+            String assetName = "www" + target + (target.endsWith(".gz") ? ".bin" : "");
+            byte[] body = target.contains("..") ? null : readAsset(assetName);
+            if (body == null) {
+                respond(out, 404, "Not Found", "text/plain", new byte[0], head);
+            } else {
+                respond(out, 200, "OK", mimeFor(target), body, head);
+            }
+        } catch (Exception ignored) {
+        } finally {
+            try {
+                client.close();
+            } catch (IOException ignored) {
+            }
+        }
+    }
+
+    private byte[] readAsset(String name) {
+        try {
+            InputStream in = getAssets().open(name);
+            try {
+                ByteArrayOutputStream out = new ByteArrayOutputStream();
+                byte[] buf = new byte[16384];
+                int n;
+                while ((n = in.read(buf)) > 0) out.write(buf, 0, n);
+                return out.toByteArray();
+            } finally {
+                in.close();
+            }
+        } catch (IOException e) {
+            return null;
+        }
+    }
+
+    private static void respond(OutputStream out, int code, String reason, String mime, byte[] body,
+                                boolean head) throws IOException {
+        boolean text = mime.startsWith("text/") || mime.equals("application/json");
+        String hdr = "HTTP/1.1 " + code + " " + reason + "\r\n"
+                + "Content-Type: " + mime + (text ? "; charset=utf-8" : "") + "\r\n"
+                + "Content-Length: " + body.length + "\r\n"
+                + "Cache-Control: no-cache\r\n"
+                + "Connection: close\r\n\r\n";
+        out.write(hdr.getBytes(StandardCharsets.ISO_8859_1));
+        if (!head) out.write(body);
+        out.flush();
+    }
+
+    private static WebResourceResponse emptyResponse(int code, String reason) {
+        return new WebResourceResponse("text/plain", "utf-8", code, reason,
+                new HashMap<String, String>(), new ByteArrayInputStream(new byte[0]));
+    }
+
+    private static String mimeFor(String path) {
+        String p = path.toLowerCase();
+        if (p.endsWith(".html")) return "text/html";
+        if (p.endsWith(".js")) return "text/javascript";
+        if (p.endsWith(".css")) return "text/css";
+        if (p.endsWith(".json")) return "application/json";
+        if (p.endsWith(".png")) return "image/png";
+        if (p.endsWith(".wasm")) return "application/wasm";
+        if (p.endsWith(".gz")) return "application/gzip";
+        return "application/octet-stream";
+    }
+
+    // ------------------------------------------------------------------
+    // Photo du ticket : appareil photo ou galerie
+    // ------------------------------------------------------------------
+
+    private boolean launchImageChooser() {
+        Intent pick = new Intent(Intent.ACTION_GET_CONTENT);
+        pick.addCategory(Intent.CATEGORY_OPENABLE);
+        pick.setType("image/*");
+        Intent chooser = Intent.createChooser(pick, null);
+
+        cameraUri = null;
+        try {
+            ContentValues v = new ContentValues();
+            v.put(MediaStore.Images.Media.DISPLAY_NAME, "ticket_" + System.currentTimeMillis() + ".jpg");
+            v.put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg");
+            cameraUri = getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, v);
+            if (cameraUri != null) {
+                Intent cam = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                cam.putExtra(MediaStore.EXTRA_OUTPUT, cameraUri);
+                cam.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                chooser.putExtra(Intent.EXTRA_INITIAL_INTENTS, new Intent[]{cam});
+            }
+        } catch (Exception e) {
+            cameraUri = null; // appareil photo indisponible : galerie seulement
+        }
+
+        try {
+            startActivityForResult(chooser, REQ_IMAGE);
+            return true;
+        } catch (Exception e) {
+            if (chooserCallback != null) {
+                chooserCallback.onReceiveValue(null);
+                chooserCallback = null;
+            }
+            deleteCameraEntry();
+            return false;
+        }
+    }
+
+    private void deleteCameraEntry() {
+        if (cameraUri != null) {
+            try {
+                getContentResolver().delete(cameraUri, null, null);
+            } catch (Exception ignored) {
+            }
+            cameraUri = null;
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == REQ_IMAGE) {
+            if (chooserCallback == null) return;
+            Uri[] result = null;
+            if (resultCode == RESULT_OK) {
+                if (data != null && data.getData() != null) {
+                    result = new Uri[]{data.getData()};
+                    deleteCameraEntry(); // image choisie dans la galerie : l'entrée appareil photo est inutile
+                } else if (cameraUri != null) {
+                    result = new Uri[]{cameraUri};
+                    cameraUri = null;
+                }
+            }
+            if (result == null) {
+                deleteCameraEntry();
+            }
+            chooserCallback.onReceiveValue(result);
+            chooserCallback = null;
+            return;
+        }
+
+        if (requestCode == REQ_FOLDER) {
+            if (resultCode == RESULT_OK && data != null && data.getData() != null) {
+                Uri tree = data.getData();
+                try {
+                    getContentResolver().takePersistableUriPermission(tree,
+                            Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+                    prefs.edit().putString(PREF_TREE, tree.toString()).apply();
+                } catch (Exception e) {
+                    // permission non persistée : le dossier ne sera pas utilisable
+                    prefs.edit().remove(PREF_TREE).apply();
+                }
+            }
+            final String name = JSONObject.quote(folderDisplayName());
+            web.post(new Runnable() {
+                @Override
+                public void run() {
+                    web.evaluateJavascript("window.onFolderPicked && window.onFolderPicked(" + name + ")", null);
+                }
+            });
+        }
+    }
+
+    // ------------------------------------------------------------------
+    // Dossier choisi (Storage Access Framework) + fichier JSON
+    // ------------------------------------------------------------------
+
+    /** Retourne le dossier choisi, seulement si l'autorisation d'écriture est toujours valide. */
+    private Uri treeUri() {
+        String s = prefs.getString(PREF_TREE, null);
+        if (s == null) return null;
+        Uri tree = Uri.parse(s);
+        List<UriPermission> perms = getContentResolver().getPersistedUriPermissions();
+        for (UriPermission p : perms) {
+            if (p.getUri().equals(tree) && p.isReadPermission() && p.isWritePermission()) {
+                return tree;
+            }
+        }
+        return null;
+    }
+
+    private String folderDisplayName() {
+        Uri tree = treeUri();
+        if (tree == null) return "";
+        Uri doc = DocumentsContract.buildDocumentUriUsingTree(tree, DocumentsContract.getTreeDocumentId(tree));
+        Cursor c = null;
+        try {
+            c = getContentResolver().query(doc,
+                    new String[]{DocumentsContract.Document.COLUMN_DISPLAY_NAME}, null, null, null);
+            if (c != null && c.moveToFirst()) {
+                String n = c.getString(0);
+                if (n != null && !n.isEmpty()) return n;
+            }
+        } catch (Exception ignored) {
+        } finally {
+            if (c != null) c.close();
+        }
+        String last = tree.getLastPathSegment();
+        return last == null ? "?" : last;
+    }
+
+    /** Cherche le fichier de sauvegarde directement dans le dossier choisi. */
+    private Uri findJsonFile(Uri tree) {
+        Uri children = DocumentsContract.buildChildDocumentsUriUsingTree(tree,
+                DocumentsContract.getTreeDocumentId(tree));
+        Cursor c = null;
+        try {
+            c = getContentResolver().query(children, new String[]{
+                    DocumentsContract.Document.COLUMN_DOCUMENT_ID,
+                    DocumentsContract.Document.COLUMN_DISPLAY_NAME}, null, null, null);
+            while (c != null && c.moveToNext()) {
+                String n = c.getString(1);
+                if (FILE_NAME.equals(n)) {
+                    return DocumentsContract.buildDocumentUriUsingTree(tree, c.getString(0));
+                }
+            }
+        } catch (Exception ignored) {
+        } finally {
+            if (c != null) c.close();
+        }
+        return null;
+    }
+
+    /** Nom du fichier réellement utilisé dans le dossier (pour l'affichage). */
+    private String currentFileName() {
+        Uri tree = treeUri();
+        if (tree == null) return FILE_NAME;
+        Uri file = findJsonFile(tree);
+        if (file == null) return FILE_NAME;
+        Cursor c = null;
+        try {
+            c = getContentResolver().query(file,
+                    new String[]{DocumentsContract.Document.COLUMN_DISPLAY_NAME}, null, null, null);
+            if (c != null && c.moveToFirst() && c.getString(0) != null) return c.getString(0);
+        } catch (Exception ignored) {
+        } finally {
+            if (c != null) c.close();
+        }
+        return FILE_NAME;
+    }
+
+    private String writeJson(String text) {
+        Uri tree = treeUri();
+        if (tree == null) return "no folder access";
+        try {
+            Uri file = findJsonFile(tree);
+            if (file == null) {
+                Uri parent = DocumentsContract.buildDocumentUriUsingTree(tree,
+                        DocumentsContract.getTreeDocumentId(tree));
+                file = DocumentsContract.createDocument(getContentResolver(), parent,
+                        "application/json", FILE_NAME);
+            }
+            if (file == null) return "cannot create file";
+            OutputStream os = getContentResolver().openOutputStream(file, "wt");
+            if (os == null) return "cannot open file";
+            try {
+                os.write(text.getBytes(StandardCharsets.UTF_8));
+                os.flush();
+            } finally {
+                os.close();
+            }
+            return "ok";
+        } catch (Exception e) {
+            return e.getClass().getSimpleName() + (e.getMessage() == null ? "" : ": " + e.getMessage());
+        }
+    }
+
+    private String readJson() {
+        Uri tree = treeUri();
+        if (tree == null) return "";
+        try {
+            Uri file = findJsonFile(tree);
+            if (file == null) return "";
+            InputStream in = getContentResolver().openInputStream(file);
+            if (in == null) return "";
+            try {
+                ByteArrayOutputStream out = new ByteArrayOutputStream();
+                byte[] buf = new byte[8192];
+                int n;
+                while ((n = in.read(buf)) > 0) out.write(buf, 0, n);
+                return new String(out.toByteArray(), StandardCharsets.UTF_8);
+            } finally {
+                in.close();
+            }
+        } catch (Exception e) {
+            return "";
+        }
+    }
+
+    /** Méthodes appelables depuis la page : window.Android.xxx(...) */
+    public class Bridge {
+        @JavascriptInterface
+        public String folderName() {
+            return folderDisplayName();
+        }
+
+        @JavascriptInterface
+        public void pickFolder() {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Intent i = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
+                    i.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION
+                            | Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                            | Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION
+                            | Intent.FLAG_GRANT_PREFIX_URI_PERMISSION);
+                    try {
+                        startActivityForResult(i, REQ_FOLDER);
+                    } catch (Exception e) {
+                        web.evaluateJavascript("window.onFolderPicked && window.onFolderPicked('')", null);
+                    }
+                }
+            });
+        }
+
+        @JavascriptInterface
+        public String writeFile(String text) {
+            return writeJson(text == null ? "" : text);
+        }
+
+        @JavascriptInterface
+        public String fileName() {
+            return currentFileName();
+        }
+
+        @JavascriptInterface
+        public String readFile() {
+            return readJson();
+        }
+    }
+}
