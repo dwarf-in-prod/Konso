@@ -142,7 +142,9 @@
     step3: "Étape 3 sur 3",
     back: "Retour",
     help_q9: "Unités et monnaie",
-    help_a9: "Les unités (km ou miles, litres ou gallons) et la monnaie se changent dans Réglages. Les données sont toujours enregistrées en km et en litres : changer d'unité ne change que l'affichage, sans rien perdre. Changer de monnaie ne change que le symbole : les montants ne sont pas convertis."
+    help_a9: "Les unités (km ou miles, litres ou gallons) et la monnaie se changent dans Réglages. Les données sont toujours enregistrées en km et en litres : changer d'unité ne change que l'affichage, sans rien perdre. Changer de monnaie ne change que le symbole : les montants ne sont pas convertis.",
+    help_q10: "Graphiques du bilan",
+    help_a10: "Touche une barre ou un point pour afficher le détail : il reste affiché jusqu'au prochain appui, n'importe où sur l'écran. Si tu maintiens le doigt, le détail suit ton doigt et disparaît quand tu le relâches."
   };
 
   D.en = {
@@ -277,7 +279,9 @@
     step3: "Step 3 of 3",
     back: "Back",
     help_q9: "Units and currency",
-    help_a9: "Units (km or miles, litres or gallons) and the currency can be changed in Settings. Data is always stored in km and litres, so switching units only changes what is displayed, with nothing lost. Changing the currency only changes the symbol: amounts are not converted."
+    help_a9: "Units (km or miles, litres or gallons) and the currency can be changed in Settings. Data is always stored in km and litres, so switching units only changes what is displayed, with nothing lost. Changing the currency only changes the symbol: amounts are not converted.",
+    help_q10: "Stats charts",
+    help_a10: "Tap a bar or a point to show its details: they stay on screen until your next tap, anywhere on the screen. If you hold your finger down, the details follow your finger and disappear when you let go."
   };
 
   D.es = {
@@ -412,7 +416,9 @@
     step3: "Paso 3 de 3",
     back: "Atrás",
     help_q9: "Unidades y moneda",
-    help_a9: "Las unidades (km o millas, litros o galones) y la moneda se cambian en Ajustes. Los datos se guardan siempre en km y litros: cambiar de unidad solo cambia lo que se muestra, sin perder nada. Cambiar de moneda solo cambia el símbolo: los importes no se convierten."
+    help_a9: "Las unidades (km o millas, litros o galones) y la moneda se cambian en Ajustes. Los datos se guardan siempre en km y litros: cambiar de unidad solo cambia lo que se muestra, sin perder nada. Cambiar de moneda solo cambia el símbolo: los importes no se convierten.",
+    help_q10: "Gráficos del resumen",
+    help_a10: "Toca una barra o un punto para ver el detalle: se queda en pantalla hasta el siguiente toque, en cualquier parte de la pantalla. Si mantienes el dedo, el detalle sigue al dedo y desaparece al soltarlo."
   };
 
   D.de = {
@@ -547,7 +553,9 @@
     step3: "Schritt 3 von 3",
     back: "Zurück",
     help_q9: "Einheiten und Währung",
-    help_a9: "Einheiten (km oder Meilen, Liter oder Gallonen) und Währung lassen sich in den Einstellungen ändern. Die Daten werden immer in km und Litern gespeichert: Ein Wechsel der Einheit ändert nur die Anzeige, ohne Verlust. Ein Wechsel der Währung ändert nur das Symbol: Beträge werden nicht umgerechnet."
+    help_a9: "Einheiten (km oder Meilen, Liter oder Gallonen) und Währung lassen sich in den Einstellungen ändern. Die Daten werden immer in km und Litern gespeichert: Ein Wechsel der Einheit ändert nur die Anzeige, ohne Verlust. Ein Wechsel der Währung ändert nur das Symbol: Beträge werden nicht umgerechnet.",
+    help_q10: "Diagramme der Auswertung",
+    help_a10: "Auf einen Balken oder Punkt tippen, um die Details zu sehen: Sie bleiben sichtbar bis zum nächsten Tippen, egal wo auf dem Bildschirm. Wird der Finger gedrückt gehalten, folgen die Details dem Finger und verschwinden beim Loslassen."
   };
 
   D.it = {
@@ -682,7 +690,9 @@
     step3: "Passo 3 di 3",
     back: "Indietro",
     help_q9: "Unità e valuta",
-    help_a9: "Le unità (km o miglia, litri o galloni) e la valuta si cambiano in Impostazioni. I dati sono sempre salvati in km e litri: cambiare unità modifica solo la visualizzazione, senza perdere nulla. Cambiare valuta modifica solo il simbolo: gli importi non vengono convertiti."
+    help_a9: "Le unità (km o miglia, litri o galloni) e la valuta si cambiano in Impostazioni. I dati sono sempre salvati in km e litri: cambiare unità modifica solo la visualizzazione, senza perdere nulla. Cambiare valuta modifica solo il simbolo: gli importi non vengono convertiti.",
+    help_q10: "Grafici del riepilogo",
+    help_a10: "Tocca una barra o un punto per vedere il dettaglio: resta visibile fino al tocco successivo, in qualsiasi punto dello schermo. Se tieni premuto il dito, il dettaglio segue il dito e scompare quando lo sollevi."
   };
 
   D.pt = {
@@ -817,7 +827,9 @@
     step3: "Passo 3 de 3",
     back: "Voltar",
     help_q9: "Unidades e moeda",
-    help_a9: "As unidades (km ou milhas, litros ou galões) e a moeda alteram-se em Definições. Os dados são sempre guardados em km e litros: mudar de unidade só muda o que é mostrado, sem perder nada. Mudar de moeda só muda o símbolo: os montantes não são convertidos."
+    help_a9: "As unidades (km ou milhas, litros ou galões) e a moeda alteram-se em Definições. Os dados são sempre guardados em km e litros: mudar de unidade só muda o que é mostrado, sem perder nada. Mudar de moeda só muda o símbolo: os montantes não são convertidos.",
+    help_q10: "Gráficos do resumo",
+    help_a10: "Toca numa barra ou num ponto para ver o detalhe: fica visível até ao toque seguinte, em qualquer parte do ecrã. Se mantiveres o dedo, o detalhe segue o dedo e desaparece quando o levantas."
   };
 
   D.nl = {
@@ -952,7 +964,9 @@
     step3: "Stap 3 van 3",
     back: "Terug",
     help_q9: "Eenheden en valuta",
-    help_a9: "De eenheden (km of mijlen, liters of gallons) en de valuta wijzig je in Instellingen. Gegevens worden altijd in km en liters opgeslagen: een andere eenheid verandert alleen de weergave, er gaat niets verloren. Een andere valuta verandert alleen het symbool: bedragen worden niet omgerekend."
+    help_a9: "De eenheden (km of mijlen, liters of gallons) en de valuta wijzig je in Instellingen. Gegevens worden altijd in km en liters opgeslagen: een andere eenheid verandert alleen de weergave, er gaat niets verloren. Een andere valuta verandert alleen het symbool: bedragen worden niet omgerekend.",
+    help_q10: "Grafieken van het overzicht",
+    help_a10: "Tik op een balk of punt om de details te zien: ze blijven staan tot je opnieuw tikt, waar dan ook op het scherm. Houd je je vinger erop, dan volgen de details je vinger en verdwijnen ze als je loslaat."
   };
 
   D.pl = {
@@ -1087,7 +1101,9 @@
     step3: "Krok 3 z 3",
     back: "Wstecz",
     help_q9: "Jednostki i waluta",
-    help_a9: "Jednostki (km lub mile, litry lub galony) i walutę zmienisz w Ustawieniach. Dane są zawsze zapisywane w km i litrach: zmiana jednostek zmienia tylko wyświetlanie, nic nie ginie. Zmiana waluty zmienia tylko symbol: kwoty nie są przeliczane."
+    help_a9: "Jednostki (km lub mile, litry lub galony) i walutę zmienisz w Ustawieniach. Dane są zawsze zapisywane w km i litrach: zmiana jednostek zmienia tylko wyświetlanie, nic nie ginie. Zmiana waluty zmienia tylko symbol: kwoty nie są przeliczane.",
+    help_q10: "Wykresy podsumowania",
+    help_a10: "Dotknij słupka lub punktu, aby zobaczyć szczegóły: zostają na ekranie do następnego dotknięcia w dowolnym miejscu. Jeśli przytrzymasz palec, szczegóły podążają za palcem i znikają po jego puszczeniu."
   };
 
   D.tr = {
@@ -1222,7 +1238,9 @@
     step3: "Adım 3 / 3",
     back: "Geri",
     help_q9: "Birimler ve para birimi",
-    help_a9: "Birimler (km veya mil, litre veya galon) ve para birimi Ayarlar'dan değiştirilir. Veriler her zaman km ve litre olarak kaydedilir: birim değiştirmek yalnızca görüntüyü değiştirir, hiçbir şey kaybolmaz. Para birimini değiştirmek yalnızca simgeyi değiştirir: tutarlar dönüştürülmez."
+    help_a9: "Birimler (km veya mil, litre veya galon) ve para birimi Ayarlar'dan değiştirilir. Veriler her zaman km ve litre olarak kaydedilir: birim değiştirmek yalnızca görüntüyü değiştirir, hiçbir şey kaybolmaz. Para birimini değiştirmek yalnızca simgeyi değiştirir: tutarlar dönüştürülmez.",
+    help_q10: "Özet grafikleri",
+    help_a10: "Ayrıntıları görmek için bir çubuğa veya noktaya dokun: ekranın herhangi bir yerine yeniden dokunana kadar görünür kalır. Parmağını basılı tutarsan ayrıntılar parmağını izler ve bıraktığında kaybolur."
   };
 
   D.ro = {
@@ -1357,7 +1375,9 @@
     step3: "Pasul 3 din 3",
     back: "Înapoi",
     help_q9: "Unități și monedă",
-    help_a9: "Unitățile (km sau mile, litri sau galoane) și moneda se schimbă în Setări. Datele sunt salvate mereu în km și litri: schimbarea unității schimbă doar afișarea, fără să se piardă nimic. Schimbarea monedei schimbă doar simbolul: sumele nu sunt convertite."
+    help_a9: "Unitățile (km sau mile, litri sau galoane) și moneda se schimbă în Setări. Datele sunt salvate mereu în km și litri: schimbarea unității schimbă doar afișarea, fără să se piardă nimic. Schimbarea monedei schimbă doar simbolul: sumele nu sunt convertite.",
+    help_q10: "Graficele rezumatului",
+    help_a10: "Atinge o bară sau un punct pentru a vedea detaliile: rămân afișate până la următoarea atingere, oriunde pe ecran. Dacă ții degetul apăsat, detaliile urmăresc degetul și dispar când îl ridici."
   };
 
   const api = { LANGS, D };

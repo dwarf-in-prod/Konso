@@ -83,6 +83,7 @@ textarea{width:100%;padding:12px;border:1px solid var(--outline);border-radius:1
 .row .t{font-weight:500}
 .row .m{font-size:13px;color:var(--on-surf-v);overflow-wrap:anywhere}
 .row .r{text-align:right;white-space:nowrap}
+.row .hl{display:inline-block;margin:3px 0 2px;padding:1px 8px;border-radius:8px;background:var(--primary-c);color:var(--on-primary-c);font-size:13px;font-weight:600}
 .del{border:0;background:transparent;color:var(--on-surf-v);width:40px;height:40px;border-radius:20px;display:grid;place-items:center;padding:0;flex:none}
 .del svg{width:22px;height:22px}
 .del.armed{width:auto;padding:0 14px;background:var(--error);color:var(--on-error);font:500 13px var(--font)}
@@ -103,7 +104,7 @@ textarea{width:100%;padding:12px;border:1px solid var(--outline);border-radius:1
 .chart svg{width:100%;height:auto;display:block;touch-action:pan-y}
 .chart text{fill:var(--on-surf-v);font-size:11px}
 .chart .grid{stroke:var(--outline-v);stroke-width:1}
-.tip{position:absolute;top:0;pointer-events:none;background:var(--inverse);color:var(--on-inverse);font-size:12px;padding:6px 10px;border-radius:8px;white-space:nowrap;transform:translateX(-50%);display:none;z-index:2;line-height:1.4}
+.tip{position:absolute;top:0;pointer-events:none;background:var(--inverse);color:var(--on-inverse);font-size:12px;padding:6px 10px;border-radius:8px;white-space:nowrap;transform:translate(-50%,-5vh);display:none;z-index:2;line-height:1.4}
 .sum{font-size:14px;margin-top:10px;color:var(--on-surf-v)}
 .sum b{color:var(--on-surf)}
 
@@ -280,6 +281,7 @@ body.kb #st{bottom:16px}
     <details><summary data-i18n="help_q7"></summary><div class="note" data-i18n-html="help_a7"></div></details>
     <details><summary data-i18n="help_q8"></summary><div class="note" data-i18n-html="help_a8"></div></details>
     <details><summary data-i18n="help_q9"></summary><div class="note" data-i18n-html="help_a9"></div></details>
+    <details><summary data-i18n="help_q10"></summary><div class="note" data-i18n-html="help_a10"></div></details>
   </div>
 </section>
 </main>
@@ -361,6 +363,7 @@ const moneyLabel=code=>curSym(code)+' — '+curName(code);
 // date locale (toISOString donnerait la date UTC : la veille juste après minuit)
 const today=()=>{const d=new Date(),p=n=>String(n).padStart(2,'0');return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())};
 const fdate=s=>{try{return new Date(s+'T12:00:00').toLocaleDateString(LOC)}catch(e){return s}};
+const fdateS=s=>{try{return new Date(s+'T12:00:00').toLocaleDateString(LOC,{day:'2-digit',month:'2-digit',year:'2-digit'})}catch(e){return s}};   // jj/mm/aa
 const esc=s=>String(s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 // valeurs enregistrées dans le fichier (ne changent pas avec la langue) et leur libellé affiché
 const FUELV=['SP95-E10','SP95','SP98','E85','GPL','Gazole'];
@@ -719,7 +722,7 @@ const TRASH='<svg class="i" viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1
 function render(){
   renderCars();
   const fl=$('fl-list');
-  fl.innerHTML=FU().length?FU().map(f=>`<div class="row"><div class="l"><div class="t">${fdate(f.d)} · ${fmt(dist(f.k),0)} ${DU()}</div><div class="m">${fmt(vol(f.l))} ${VU()} · ${money(f.e/vol(f.l),3)}/${VU()} · ${esc(fuelLabel(f.c))}${f.s?' · '+esc(f.s):''}</div></div><div class="r"><div class="t">${fmtCons(cons(f.k,f.l))} ${UNIT==='km'?'L/100':'mpg'}</div><div class="m">${money(f.e)}</div></div><button class="del" data-k="fuel" data-i="${esc(f.id)}" aria-label="${esc(tx('del'))}">${TRASH}</button></div>`).join(''):'<div class="empty">'+esc(tx('empty_fuel'))+'</div>';
+  fl.innerHTML=FU().length?FU().map(f=>`<div class="row"><div class="l"><div class="t">${fdateS(f.d)} · ${fmt(dist(f.k),0)} ${DU()}</div><div class="m">${fmt(vol(f.l))} ${VU()} · ${money(f.e/vol(f.l),3)}/${VU()} · ${esc(fuelLabel(f.c))}${f.s?' · '+esc(f.s):''}</div></div><div class="r"><div class="t">${fmtCons(cons(f.k,f.l))} ${UNIT==='km'?'L/100':'mpg'}</div><div class="hl">${money(f.e/dist(f.k)*100)}/100 ${DU()}</div><div class="m">${money(f.e)}</div></div><button class="del" data-k="fuel" data-i="${esc(f.id)}" aria-label="${esc(tx('del'))}">${TRASH}</button></div>`).join(''):'<div class="empty">'+esc(tx('empty_fuel'))+'</div>';
   const bl=$('bl-list');
   bl.innerHTML=BU().length?BU().map(b=>`<div class="row"><div class="l"><div class="t">${esc(b.n)||esc(catLabel(b.c))}</div><div class="m">${fdate(b.d)} · ${esc(catLabel(b.c))}${b.k?' · '+fmt(dist(b.k),0)+' '+DU():''}${b.s?' · '+esc(b.s):''}</div></div><div class="r"><div class="t">${money(b.e)}</div></div><button class="del" data-k="buys" data-i="${esc(b.id)}" aria-label="${esc(tx('del'))}">${TRASH}</button></div>`).join(''):'<div class="empty">'+esc(tx('empty_buys'))+'</div>';
   document.querySelectorAll('.del').forEach(b=>b.onclick=()=>delClick(b.dataset.k,+b.dataset.i,b));
@@ -797,11 +800,30 @@ function niceTicks(lo,hi,n){
   return t;
 }
 // Détail d'un graphique : souris = au survol ; doigt = un appui OU un maintien l'affiche, et il reste jusqu'à un appui ailleurs.
+// Bulles d'information des graphiques, au doigt :
+// - appui court : la bulle reste affichée ; l'appui suivant, n'importe où sur l'écran (bulle comprise), la cache ;
+// - appui maintenu (HOLD_MS) : la bulle suit le doigt et disparaît quand on le relâche (ou quand on fait défiler).
+// À la souris : la bulle suit le pointeur et disparaît quand il quitte le graphique.
+const HOLD_MS=400;
+let tipOpen=null,tipSwallow=null;   // bulle restée affichée ; appui qui vient de la fermer (ne doit rien rouvrir)
+document.addEventListener('pointerdown',e=>{if(tipOpen){const h=tipOpen;tipOpen=null;tipSwallow=e.pointerId;h()}},true);
+document.addEventListener('pointerup',()=>{tipSwallow=null});
+document.addEventListener('pointercancel',()=>{tipSwallow=null});
 function wireTip(svg,show,hide){
-  const touch=e=>e.pointerType==='touch'||e.pointerType==='pen';
-  svg.addEventListener('pointerdown',show);
-  svg.addEventListener('pointermove',e=>{if(!touch(e)||e.buttons)show(e)});
-  svg.addEventListener('pointerleave',e=>{if(!touch(e))hide()});
+  const tip=svg.parentNode.querySelector('.tip'),touch=e=>e.pointerType==='touch'||e.pointerType==='pen';
+  let down=null;   // appui en cours sur ce graphique : {id, t}
+  svg.addEventListener('pointerdown',e=>{
+    if(tipSwallow===e.pointerId)return;
+    down={id:e.pointerId,t:e.timeStamp};show(e);
+  });
+  svg.addEventListener('pointermove',e=>{if(down?down.id===e.pointerId:!touch(e)&&!e.buttons)show(e)});
+  const end=e=>{
+    if(!down||down.id!==e.pointerId)return;
+    const held=e.type==='pointercancel'||e.timeStamp-down.t>=HOLD_MS;down=null;
+    if(held||tip.style.display!=='block')hide();else tipOpen=hide;
+  };
+  svg.addEventListener('pointerup',end);svg.addEventListener('pointercancel',end);
+  svg.addEventListener('pointerleave',e=>{if(!touch(e)&&!down&&tipOpen!==hide)hide()});
   svg.addEventListener('contextmenu',e=>e.preventDefault());
 }
 document.addEventListener('pointerdown',e=>{
