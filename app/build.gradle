@@ -2,6 +2,10 @@ plugins {
     id 'com.android.application'
 }
 
+// APK de test (branches) : ./gradlew assembleDebug -PkonsoTest=<nom-de-branche>
+// Donne une appli séparée "Konso Test" (app.konso.test), installable à côté de la vraie.
+def konsoTest = project.findProperty('konsoTest')
+
 android {
     namespace 'app.konso'
     compileSdk 34
@@ -12,6 +16,7 @@ android {
         targetSdk 34
         versionCode 11
         versionName '2.0'
+        manifestPlaceholders = [appLabel: 'Konso']
     }
 
     signingConfigs {
@@ -26,6 +31,13 @@ android {
     }
 
     buildTypes {
+        debug {
+            if (konsoTest) {
+                applicationIdSuffix '.test'
+                versionNameSuffix "-test-${konsoTest}"
+                manifestPlaceholders = [appLabel: 'Konso Test']
+            }
+        }
         release {
             minifyEnabled false
             signingConfig signingConfigs.debug
