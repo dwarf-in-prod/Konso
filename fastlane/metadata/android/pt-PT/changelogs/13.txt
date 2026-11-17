@@ -1,0 +1,1 @@
+Seletores em roda para o idioma e a categoria de compra. Uma revisão pode ser confirmada diretamente no aviso de lembrete, com uma indicação para adicionar o seu custo nas Compras.

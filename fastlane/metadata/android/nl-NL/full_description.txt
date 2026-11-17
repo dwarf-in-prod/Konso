@@ -1,0 +1,15 @@
+Konso houdt het brandstofverbruik en de kosten van je auto's bij. De app werkt offline, zonder account, zonder advertenties en zonder tracking.
+
+Functies:
+* Tankbeurten: afstand, liters en bedrag geven L/100 km, kosten per 100 km en literprijs.
+* Bonnetjes scannen: maak een foto van het tankbonnetje en het formulier vult zichzelf in. De tekstherkenning (Tesseract) draait op de telefoon: foto's verlaten het toestel nooit. Afgestemd op Franse bonnetjes; controleer de waarden altijd.
+* Aankopen: olie, onderdelen, banden, onderhoud… gesorteerd per categorie.
+* Onderhoudsherinneringen: elk jaar of elke 10.000 km, wat het eerst komt (per auto instelbaar).
+* Overzicht: gemiddelden, verbruiksgrafiek, uitgaven per maand.
+* Meerdere auto's, elk met een eigen geschiedenis en eigen herinneringen.
+* Automatische back-up in een eenvoudig bestand konso.json, in de map van je keuze.
+* 10 talen, licht en donker thema, ingebouwde hulp.
+
+Privacy: de enige netwerkmachtiging dient om de eigen bestanden van de app via 127.0.0.1 te tonen. Elk verzoek naar een andere server wordt geblokkeerd.
+
+Konso is gemaakt met AI (Claude Code); elke versie wordt door een mens op een echte telefoon getest. De broncode is open, onder de GPL-3.0-licentie.

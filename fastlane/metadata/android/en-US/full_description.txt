@@ -1,0 +1,15 @@
+Konso tracks the fuel consumption and the running costs of your cars. It works offline, with no account, no ads and no tracking.
+
+Features:
+* Fill-ups: distance, litres and amount give L/100 km, cost per 100 km and price per litre.
+* Receipt scanning: take a photo of a fuel receipt and the form fills itself. Text recognition (Tesseract) runs on the phone: photos never leave the device. Tuned for French receipts; always check the values.
+* Purchases: oil, parts, tyres, servicing… sorted by category.
+* Service reminders: every year or every 10,000 km, whichever comes first (adjustable per car).
+* Overview: averages, consumption chart, monthly spending.
+* Several cars, each with its own history and reminders.
+* Automatic backup to a plain konso.json file, in the folder of your choice.
+* 10 languages, light and dark themes, built-in help.
+
+Privacy: the only network permission is used to serve the app's own files on 127.0.0.1. Every request to any other host is blocked.
+
+Konso was built with AI (Claude Code); every version is tested on a real phone by a human. Its source code is open, under the GPL-3.0 licence.

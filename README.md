@@ -71,7 +71,8 @@ Requires Android 10 or later.
   ```sh
   ./gradlew assembleDebug
   ```
-- **GitHub Actions**: every push to `main` builds the APK (artifact `konso-apk`). Running the workflow manually, or a commit on `main` whose message contains `[release]`, publishes the APK in the `latest` release.
+- **GitHub Actions**: every push to `main` builds the APK (artifact `konso-apk`). Running the workflow manually, or a commit on `main` whose message contains `[release]`, publishes the APK in the `latest` release, and once per version in a `v<versionName>` release (`konso-<version>.apk`), whose tag is used by F-Droid-style app stores.
+- **OCR engine from source**: `tools/build-tesseract.sh` rebuilds the Tesseract files of `vendor/` from the source code of [tesseract.js-core](https://github.com/naptha/tesseract.js-core) and [tesseract.js](https://github.com/naptha/tesseract.js) (Emscripten 4.0.15, Node.js). The *Tesseract from source* workflow runs it and checks the result with `tools/ocr-test.js`.
 
 ## Development
 
@@ -99,7 +100,11 @@ app/src/main/
 │   └── vendor/         Tesseract.js and the French language model
 └── java/app/konso/
     └── MainActivity.java   WebView, local server, camera, backup file
-tools/screenshots.js        Regenerates the README screenshots
+tools/
+├── screenshots.js          Regenerates the screenshots (README and store listing)
+├── build-tesseract.sh      Rebuilds the OCR engine from source
+└── ocr-test.js             Checks that an OCR engine build reads text
+fastlane/metadata/android/  Store listing (F-Droid, IzzyOnDroid), 10 languages
 ```
 
 ## Licence
@@ -161,7 +166,8 @@ Android 10 ou plus récent.
 
 - **Android Studio** : ouvrir le dossier, puis *Build → Build APK(s)*.
 - **Ligne de commande** (JDK 17 + SDK Android) : `./gradlew assembleDebug`
-- **GitHub Actions** : chaque push sur `main` compile l'APK (artefact `konso-apk`). Un lancement manuel du workflow, ou un commit sur `main` dont le message contient `[release]`, publie l'APK dans la release `latest`.
+- **GitHub Actions** : chaque push sur `main` compile l'APK (artefact `konso-apk`). Un lancement manuel du workflow, ou un commit sur `main` dont le message contient `[release]`, publie l'APK dans la release `latest`, et une fois par version dans une release `v<versionName>` (`konso-<version>.apk`) dont le tag sert aux magasins d'applis de type F-Droid.
+- **Moteur OCR depuis les sources** : `tools/build-tesseract.sh` recompile les fichiers Tesseract de `vendor/` depuis le code source de [tesseract.js-core](https://github.com/naptha/tesseract.js-core) et [tesseract.js](https://github.com/naptha/tesseract.js) (Emscripten 4.0.15, Node.js). Le workflow *Tesseract depuis les sources* le lance et vérifie le résultat avec `tools/ocr-test.js`.
 
 ## Développement
 

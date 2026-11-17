@@ -1,7 +1,8 @@
 name: Compiler l'APK
 
-# - main : compile l'APK ; publie la release « latest » sur lancement manuel
-#   ou si le message du commit contient [release].
+# - main : compile l'APK ; sur lancement manuel ou si le message du commit contient [release],
+#   publie la release versionnée « v<versionName> » (une seule fois par version, son tag sert
+#   à F-Droid / IzzyOnDroid) et recrée la release « latest ».
 # - autre branche : compile un APK de test « Konso Test » (appli séparée, app.konso.test)
 #   et le publie dans la pré-release « test-<branche> ».
 # - branche supprimée : sa pré-release de test est supprimée.
@@ -50,6 +51,21 @@ jobs:
       - name: Publier l'APK dans la release « latest » (main)
         if: env.IS_MAIN == 'true' && (github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[release]'))
         run: |
+          # 1. Release versionnée v<versionName> (konso-<versionName>.apk), créée une seule fois par version :
+          #    son tag sert à F-Droid et IzzyOnDroid pour détecter les nouvelles versions.
+          #    Notes : fastlane/metadata/android/en-US/changelogs/<versionCode>.txt s'il existe.
+          VERSION=$(sed -n "s/^ *versionName '\(.*\)'.*/\1/p" app/build.gradle)
+          CODE=$(sed -n "s/^ *versionCode \([0-9]*\).*/\1/p" app/build.gradle)
+          if gh release view "v$VERSION" >/dev/null 2>&1; then
+            echo "::warning::La release v$VERSION existe déjà : augmente versionCode et versionName pour publier une nouvelle version."
+          else
+            cp app/build/outputs/apk/debug/app-debug.apk "konso-$VERSION.apk"
+            NOTES="fastlane/metadata/android/en-US/changelogs/$CODE.txt"
+            [ -f "$NOTES" ] || { echo "Konso $VERSION (versionCode $CODE)." > notes.txt; NOTES=notes.txt; }
+            gh release create "v$VERSION" "konso-$VERSION.apk" \
+              --title "Konso $VERSION" --notes-file "$NOTES" --target "$GITHUB_SHA" --latest=false
+          fi
+          # 2. Release « latest » (konso.apk), recréée à chaque fois : c'est elle que pointe le README.
           cp app/build/outputs/apk/debug/app-debug.apk konso.apk
           gh release delete latest --yes --cleanup-tag || true
           gh release create latest konso.apk \

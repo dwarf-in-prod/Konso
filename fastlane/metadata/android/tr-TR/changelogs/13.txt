@@ -1,0 +1,1 @@
+Dil ve alışveriş kategorisi için çark seçiciler. Bakım artık doğrudan hatırlatma şeridinden onaylanabiliyor; masrafını Alışverişler'e eklemen için bir hatırlatma gösteriliyor.

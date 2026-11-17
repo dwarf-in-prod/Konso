@@ -1,5 +1,7 @@
 // Regenerates the README screenshots (docs/screenshots/*.png) from the web app, in English,
-// with made-up demo data. Usage, from the repository root:
+// with made-up demo data. Also copies them to the F-Droid / IzzyOnDroid listing
+// (fastlane/metadata/android/en-US/images/phoneScreenshots/) and renders its 512 px icon
+// from the launcher icon (res/drawable/ic_fg.xml on the res/values/colors.xml background). Usage, from the repository root:
 //   npm install --no-save playwright && npx playwright install chromium   (once)
 //   node tools/screenshots.js
 // The Android bridge is stubbed (a backup folder named "Konso") and the OCR engine is replaced
@@ -9,6 +11,7 @@ const http = require('http'), fs = require('fs'), path = require('path');
 
 const ROOT = path.join(__dirname, '..', 'app', 'src', 'main', 'assets', 'www');
 const OUT = path.join(__dirname, '..', 'docs', 'screenshots');
+const STORE = path.join(__dirname, '..', 'fastlane', 'metadata', 'android', 'en-US', 'images');
 const TYPES = { '.html': 'text/html', '.js': 'text/javascript', '.wasm': 'application/wasm' };
 
 const pad = n => String(n).padStart(2, '0');
@@ -93,6 +96,19 @@ function demo(serviceDaysAgo, svcKm) {
   page = await open(demo(200, 5000));
   await shot(page, '4-service-reminder.png');
   await page.context().close();
+
+  // Store listing: same screenshots, and the icon (the adaptive icon's layers, full square).
+  const shots = path.join(STORE, 'phoneScreenshots');
+  fs.mkdirSync(shots, { recursive: true });
+  for (const f of fs.readdirSync(OUT).filter(f => f.endsWith('.png'))) fs.copyFileSync(path.join(OUT, f), path.join(shots, f));
+  const res = path.join(__dirname, '..', 'app', 'src', 'main', 'res');
+  const bg = fs.readFileSync(path.join(res, 'values', 'colors.xml'), 'utf8').match(/name="ic_bg">([^<]+)</)[1];
+  const fg = fs.readFileSync(path.join(res, 'drawable', 'ic_fg.xml'), 'utf8');
+  const fill = fg.match(/fillColor="([^"]+)"/)[1], d = fg.match(/pathData="([^"]+)"/)[1];
+  page = await (await browser.newContext({ viewport: { width: 512, height: 512 } })).newPage();
+  await page.setContent(`<body style="margin:0"><svg width="512" height="512" viewBox="0 0 108 108"><rect width="108" height="108" fill="${bg}"/><path fill="${fill}" d="${d}"/></svg>`);
+  await page.screenshot({ path: path.join(STORE, 'icon.png') });
+  console.log('fastlane/metadata/android/en-US/images/ (icon and screenshots)');
 
   await browser.close();
   srv.close();

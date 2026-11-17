@@ -1,0 +1,1 @@
+Wheel pickers for the language and the purchase category. A service can be confirmed directly from the reminder banner, with a reminder to add its cost in Purchases.

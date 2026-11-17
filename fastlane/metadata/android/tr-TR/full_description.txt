@@ -1,0 +1,15 @@
+Konso, araçlarının yakıt tüketimini ve masraflarını kaydeder. Çevrimdışı çalışır; hesap, reklam ve izleme yoktur.
+
+Özellikler:
+* Yakıt alımları: mesafe, litre ve tutardan L/100 km, 100 km başına maliyet ve litre fiyatı hesaplanır.
+* Fiş okuma: yakıt fişinin fotoğrafını çek, form kendiliğinden dolsun. Metin tanıma (Tesseract) telefonda çalışır: fotoğraflar cihazdan asla çıkmaz. Fransız fişlerine göre ayarlanmıştır; değerleri her zaman kontrol et.
+* Alışverişler: yağ, parça, lastik, bakım… kategoriye göre sıralı.
+* Bakım hatırlatıcıları: her yıl ya da her 10.000 km'de, hangisi önce gelirse (her araç için ayarlanabilir).
+* Özet: ortalamalar, tüketim grafiği, aylık harcamalar.
+* Birden fazla araç, her birinin kendi geçmişi ve hatırlatıcıları.
+* Seçtiğin klasörde, basit bir konso.json dosyasına otomatik yedekleme.
+* 10 dil, açık ve koyu tema, yerleşik yardım.
+
+Gizlilik: tek ağ izni, uygulamanın kendi dosyalarını 127.0.0.1 üzerinden sunmak için kullanılır. Başka bir sunucuya yapılan her istek engellenir.
+
+Konso yapay zekâ (Claude Code) ile geliştirildi; her sürüm bir insan tarafından gerçek bir telefonda test edilir. Kaynak kodu GPL-3.0 lisansıyla açıktır.

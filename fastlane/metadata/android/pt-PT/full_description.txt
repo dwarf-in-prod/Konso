@@ -1,0 +1,15 @@
+O Konso regista o consumo de combustível e as despesas dos teus carros. Funciona offline, sem conta, sem anúncios e sem rastreio.
+
+Funcionalidades:
+* Abastecimentos: distância, litros e valor dão os L/100 km, o custo por 100 km e o preço por litro.
+* Leitura de talões: tira uma fotografia ao talão e o formulário preenche-se sozinho. O reconhecimento de texto (Tesseract) corre no telemóvel: as fotografias nunca saem do aparelho. Pensado para talões franceses; confirma sempre os valores.
+* Compras: óleo, peças, pneus, revisões… organizados por categoria.
+* Lembretes de manutenção: todos os anos ou a cada 10 000 km, o que acontecer primeiro (ajustável para cada carro).
+* Resumo: médias, gráfico de consumo, despesas por mês.
+* Vários carros, cada um com o seu histórico e os seus lembretes.
+* Cópia de segurança automática num simples ficheiro konso.json, na pasta à tua escolha.
+* 10 idiomas, tema claro ou escuro, ajuda integrada.
+
+Privacidade: a única permissão de rede serve para mostrar os ficheiros da própria app em 127.0.0.1. Qualquer pedido para outro servidor é bloqueado.
+
+O Konso foi criado com IA (Claude Code); cada versão é testada por uma pessoa num telemóvel real. O código-fonte é aberto, sob a licença GPL-3.0.
