@@ -1,0 +1,1 @@
+Choix par roue pour la langue et la catégorie d'achat. Un entretien se valide directement depuis le bandeau de rappel, avec un message pour penser à ajouter son coût dans les Achats.

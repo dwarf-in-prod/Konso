@@ -1,0 +1,15 @@
+Konso urmărește consumul de carburant și cheltuielile mașinilor tale. Funcționează offline, fără cont, fără reclame și fără urmărire.
+
+Funcții:
+* Alimentări: distanța, litrii și suma dau L/100 km, costul la 100 km și prețul pe litru.
+* Citirea bonurilor: fă o poză bonului și formularul se completează singur. Recunoașterea textului (Tesseract) rulează pe telefon: pozele nu părăsesc niciodată dispozitivul. Gândită pentru bonuri franceze; verifică mereu valorile.
+* Cumpărături: ulei, piese, anvelope, revizii… sortate pe categorii.
+* Mementouri de întreținere: în fiecare an sau la fiecare 10.000 km, care vine primul (reglabil pentru fiecare mașină).
+* Rezumat: medii, grafic de consum, cheltuieli lunare.
+* Mai multe mașini, fiecare cu istoricul și mementourile ei.
+* Copie de siguranță automată într-un simplu fișier konso.json, în dosarul ales de tine.
+* 10 limbi, temă luminoasă sau întunecată, ajutor integrat.
+
+Confidențialitate: singura permisiune de rețea servește la afișarea fișierelor proprii ale aplicației pe 127.0.0.1. Orice cerere către alt server este blocată.
+
+Konso a fost creată cu IA (Claude Code); fiecare versiune este testată de un om pe un telefon real. Codul sursă este deschis, sub licența GPL-3.0.

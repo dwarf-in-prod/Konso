@@ -1,0 +1,15 @@
+Konso erfasst den Spritverbrauch und die Kosten deiner Autos. Die App funktioniert offline, ohne Konto, ohne Werbung und ohne Tracking.
+
+Funktionen:
+* Tankvorgänge: Strecke, Liter und Betrag ergeben L/100 km, Kosten pro 100 km und Literpreis.
+* Belege scannen: Fotografiere den Tankbeleg und das Formular füllt sich von selbst. Die Texterkennung (Tesseract) läuft auf dem Handy: Fotos verlassen nie das Gerät. Auf französische Belege abgestimmt; prüfe die Werte immer.
+* Einkäufe: Öl, Teile, Reifen, Wartung… nach Kategorie sortiert.
+* Wartungserinnerungen: jedes Jahr oder alle 10.000 km, je nachdem, was zuerst eintritt (pro Auto einstellbar).
+* Übersicht: Durchschnittswerte, Verbrauchskurve, monatliche Ausgaben.
+* Mehrere Autos, jedes mit eigenem Verlauf und eigenen Erinnerungen.
+* Automatische Sicherung in einer einfachen Datei konso.json, im Ordner deiner Wahl.
+* 10 Sprachen, helles und dunkles Design, eingebaute Hilfe.
+
+Datenschutz: Die einzige Netzwerkberechtigung dient dazu, die eigenen Dateien der App über 127.0.0.1 bereitzustellen. Jede Anfrage an einen anderen Server wird blockiert.
+
+Konso wurde mit KI (Claude Code) entwickelt; jede Version wird von einem Menschen auf einem echten Handy getestet. Der Quellcode ist offen, unter der Lizenz GPL-3.0.

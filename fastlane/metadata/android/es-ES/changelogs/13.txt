@@ -1,0 +1,1 @@
+Selectores de rueda para el idioma y la categoría de compra. Un mantenimiento se confirma directamente desde el aviso, con un recordatorio para añadir su coste en Compras.

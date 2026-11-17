@@ -1,0 +1,62 @@
+name: Tesseract depuis les sources
+
+# Recompile le moteur OCR embarqué (vendor/) depuis ses sources avec tools/build-tesseract.sh,
+# puis vérifie avec tools/ocr-test.js que les fichiers recompilés lisent bien du texte.
+# Sert à prouver que l'appli peut être compilée sans code précompilé (exigence de F-Droid).
+# Les fichiers recompilés sont joints au lancement (artefact « tesseract-rebuilt ») ;
+# ceux du dépôt ne sont pas modifiés.
+
+on:
+  push:
+    paths:
+      - 'tools/build-tesseract.sh'
+      - 'tools/ocr-test.js'
+      - 'app/src/main/assets/www/vendor/**'
+      - '.github/workflows/tesseract-from-source.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  rebuild:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Outils de compilation
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y autoconf automake libtool pkg-config cmake make
+      - name: Emscripten 4.0.15
+        run: |
+          git clone --depth 1 https://github.com/emscripten-core/emsdk.git "$RUNNER_TEMP/emsdk"
+          "$RUNNER_TEMP/emsdk/emsdk" install 4.0.15
+          "$RUNNER_TEMP/emsdk/emsdk" activate 4.0.15
+      - name: Recompiler Tesseract
+        run: |
+          source "$RUNNER_TEMP/emsdk/emsdk_env.sh"
+          tools/build-tesseract.sh --work "$RUNNER_TEMP/tesseract" --out build/rebuilt
+      - name: Comparer avec les fichiers du dépôt
+        run: |
+          for f in tesseract-core-simd-lstm.wasm.js tesseract.min.js worker.min.js; do
+            if cmp -s "build/rebuilt/$f" "app/src/main/assets/www/vendor/$f"; then
+              echo "$f : identique au fichier du dépôt"
+            else
+              echo "$f : différent du fichier du dépôt ($(stat -c %s "build/rebuilt/$f") octets contre $(stat -c %s "app/src/main/assets/www/vendor/$f"))"
+            fi
+          done
+      - name: Tester l'OCR avec les fichiers recompilés
+        run: |
+          npm install --no-save --no-audit --no-fund playwright
+          npx playwright install --with-deps chromium
+          node tools/ocr-test.js build/rebuilt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: tesseract-rebuilt
+          path: build/rebuilt/
+          if-no-files-found: ignore
