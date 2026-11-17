@@ -41,7 +41,7 @@ mkdir -p "$WORK"
 step() { echo; echo "=== $* ==="; }
 
 step "Checking tools"
-for cmd in git cmake make autoconf automake libtool pkg-config node npm emcc; do
+for cmd in git cmake make autoconf automake libtoolize pkg-config node npm emcc; do
   command -v "$cmd" >/dev/null || { echo "Missing tool: $cmd" >&2; exit 1; }
 done
 EM_FOUND=$(emcc --version | head -1 | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1)
