@@ -235,7 +235,11 @@ body.kb #st{bottom:16px}
 
 <section id="save" class="hide">
   <div class="card">
-    <div class="f fl sel"><button type="button" class="fieldbtn" id="langBtn"></button><label data-i18n="set_lang"></label></div>
+    <div class="grid">
+      <div class="f fl sel full"><button type="button" class="fieldbtn" id="langBtn"></button><label data-i18n="set_lang"></label></div>
+      <div class="f fl sel full"><button type="button" class="fieldbtn" id="unitBtn"></button><label data-i18n="set_units"></label></div>
+      <div class="f fl sel full"><button type="button" class="fieldbtn" id="moneyBtn"></button><label data-i18n="set_money"></label></div>
+    </div>
   </div>
   <div class="card">
     <h3 data-i18n="svc_title"></h3>
@@ -275,6 +279,7 @@ body.kb #st{bottom:16px}
     <details><summary data-i18n="help_q6"></summary><div class="note" data-i18n-html="help_a6"></div></details>
     <details><summary data-i18n="help_q7"></summary><div class="note" data-i18n-html="help_a7"></div></details>
     <details><summary data-i18n="help_q8"></summary><div class="note" data-i18n-html="help_a8"></div></details>
+    <details><summary data-i18n="help_q9"></summary><div class="note" data-i18n-html="help_a9"></div></details>
   </div>
 </section>
 </main>
@@ -292,6 +297,7 @@ body.kb #st{bottom:16px}
   <div class="wrap">
     <svg class="i" viewBox="0 0 24 24" style="width:40px;height:40px;color:var(--primary)"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zm6.93 6h-2.95a15.65 15.65 0 00-1.38-3.56A8.03 8.03 0 0118.92 8zM12 4.04c.83 1.2 1.48 2.53 1.91 3.96h-3.82c.43-1.43 1.08-2.76 1.91-3.96zM4.26 14C4.1 13.36 4 12.69 4 12s.1-1.36.26-2h3.38c-.08.66-.14 1.32-.14 2s.06 1.34.14 2H4.26zm.82 2h2.95c.32 1.25.78 2.45 1.38 3.56A7.99 7.99 0 015.08 16zm2.95-8H5.08a7.99 7.99 0 014.33-3.56A15.65 15.65 0 008.03 8zM12 19.96c-.83-1.2-1.48-2.53-1.91-3.96h3.82c-.43 1.43-1.08 2.76-1.91 3.96zM14.34 14H9.66c-.09-.66-.16-1.32-.16-2s.07-1.35.16-2h4.68c.09.65.16 1.32.16 2s-.07 1.34-.16 2zm.25 5.56c.6-1.11 1.06-2.31 1.38-3.56h2.95a8.03 8.03 0 01-4.33 3.56zM16.36 14c.08-.66.14-1.32.14-2s-.06-1.34-.14-2h3.38c.16.64.26 1.31.26 2s-.1 1.36-.26 2h-3.38z"/></svg>
     <h1 data-i18n="lang_pick"></h1>
+    <div class="note" style="margin:-8px 0 16px" data-i18n="step1"></div>
     <div class="wheel"><div class="band"></div><div class="wl" id="wheel-list"></div></div>
     <button class="btn" id="lang-next" data-i18n="next"></button>
   </div>
@@ -317,9 +323,41 @@ const $=id=>document.getElementById(id);
 const {LANGS,D:DICT}=I18N;
 const LK='konso-lang';
 let LANG='fr',LOC='fr-FR';
-const tx=(k,v)=>{let s=(DICT[LANG]&&DICT[LANG][k])||DICT.fr[k]||k;if(v)for(const x in v)s=s.split('{'+x+'}').join(v[x]);return s};
+// {du} {vu} {cu} {cs} dans un texte : unité de distance, de volume, de consommation, symbole de la monnaie
+const tx=(k,v)=>{let s=(DICT[LANG]&&DICT[LANG][k])||DICT.fr[k]||k;if(v)for(const x in v)s=s.split('{'+x+'}').join(v[x]);
+  return s.replace(/\{(du|vu|cu|cs)\}/g,(m,x)=>x==='du'?DU():x==='vu'?VU():x==='cu'?CU():curSym())};
 const fmt=(n,d=2)=>isFinite(n)?n.toLocaleString(LOC,{minimumFractionDigits:d,maximumFractionDigits:d}):'–';
-const eur=n=>fmt(n)+' €';
+// ---- Unités et monnaie : préférences de l'appareil, comme la langue.
+// Les données sont toujours enregistrées en km et en litres : seuls l'affichage et la saisie sont convertis,
+// donc changer d'unité ne perd rien. La monnaie ne change que le symbole (les montants ne sont pas convertis).
+const UK='konso-units',MK='konso-money';
+const UNITS=['km','uk','us'];     // km + litres (L/100 km) ; miles + litres (mpg impérial) ; miles + gallons US (mpg US)
+const UNIT_LABEL={km:'km · L/100 km',uk:'miles · mpg (UK)',us:'miles · mpg (US)'};
+const MONEY=['EUR','GBP','USD','CHF','PLN','RON','TRY'];   // monnaies des pays des 10 langues
+const MONEY_BY_LANG={en:'GBP',pl:'PLN',ro:'RON',tr:'TRY'}; // proposée au premier lancement (sinon EUR)
+const MI=1.609344,USGAL=3.785411784,IMPGAL=4.54609;
+let UNIT='km',MONEYC='EUR';
+const dist=k=>UNIT==='km'?k:k/MI, distIn=v=>UNIT==='km'?v:v*MI;     // km <-> unité affichée
+const vol=l=>UNIT==='us'?l/USGAL:l, volIn=v=>UNIT==='us'?v*USGAL:v; // litres <-> unité affichée
+const DU=()=>UNIT==='km'?'km':'mi', VU=()=>UNIT==='us'?'gal':'L', CU=()=>UNIT==='km'?'L/100 km':'mpg';
+// consommation à partir de km et de litres : L/100 km, ou miles par gallon (impérial au Royaume-Uni, US sinon)
+const cons=(k,l)=>UNIT==='km'?l/k*100:(k/MI)/(l/(UNIT==='us'?USGAL:IMPGAL));
+const fmtCons=v=>fmt(v,UNIT==='km'?2:1);
+const round3=x=>Math.round(x*1000)/1000;
+// symbole fixe par monnaie (le symbole court du système varie selon la langue : pour le leu « L », « lei » ou « lej »),
+// placé avant ou après le montant selon la langue
+const SYM={EUR:'€',GBP:'£',USD:'$',CHF:'CHF',PLN:'zł',RON:'lei',TRY:'₺'};
+function money(n,d=2,code=MONEYC){
+  if(!isFinite(n))return '–';
+  try{return new Intl.NumberFormat(LOC,{style:'currency',currency:code,currencyDisplay:'narrowSymbol',minimumFractionDigits:d,maximumFractionDigits:d})
+    .formatToParts(n).map(x=>x.type==='currency'?SYM[code]:x.value).join('')}
+  catch(e){return fmt(n,d)+' '+SYM[code]}
+}
+const curSym=(code=MONEYC)=>SYM[code]||code;
+function curName(code){
+  try{const n=new Intl.DisplayNames([LOC],{type:'currency'}).of(code);return n.charAt(0).toLocaleUpperCase(LOC)+n.slice(1)}catch(e){return code}
+}
+const moneyLabel=code=>curSym(code)+' — '+curName(code);
 // date locale (toISOString donnerait la date UTC : la veille juste après minuit)
 const today=()=>{const d=new Date(),p=n=>String(n).padStart(2,'0');return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())};
 const fdate=s=>{try{return new Date(s+'T12:00:00').toLocaleDateString(LOC)}catch(e){return s}};
@@ -335,8 +373,10 @@ const catLabel=c=>{const i=CATV.indexOf(c);return i>=0?tx('cat'+i):c};
 const SVC_CAT='Entretien / révision';
 const CATSHOW=[...CATV.filter(c=>c!=='Autre'&&c!==SVC_CAT),SVC_CAT,'Autre'];   // ordre d'affichage de la liste
 const SVC_KM=[];for(let v=100;v<=100000;v+=v<1000?100:v<10000?1000:v<30000?5000:10000)SVC_KM.push(v);
-const svcEvery=c=>SVC_KM.includes(+c.svcKm)?+c.svcKm:10000;
-const kmTxt=n=>fmt(n,0)+' km';
+// intervalle enregistré en km (comme toutes les distances) ; la roue propose les mêmes valeurs dans l'unité choisie
+const svcEvery=c=>{const v=+c.svcKm;return v>=100&&v<=170000?v:10000};
+const kmTxt=n=>fmt(dist(n),0)+' '+DU();
+const nearest=(list,v)=>list.reduce((b,x,i)=>Math.abs(x-v)<Math.abs(list[b]-v)?i:b,0);
 function addYear(d){const [y,m,j]=d.split('-').map(Number);return new Date(Date.UTC(y+1,m-1,j)).toISOString().slice(0,10)}
 function svcInfo(c){
   const every=svcEvery(c),svc=S.buys.find(b=>b.car===c.id&&b.c===SVC_CAT),fills=S.fuel.filter(f=>f.car===c.id);
@@ -410,6 +450,8 @@ function applyI18n(){
   const opts=(el,list,label)=>{const v=el.value;el.innerHTML=list.map((x,i)=>'<option value="'+esc(x)+'"'+(x===''?' disabled':'')+'>'+esc(label(x,i))+'</option>').join('');if(list.includes(v))el.value=v};
   opts($('fc'),['',...FUELV],x=>x?fuelLabel(x):tx('fuel_choose'));opts($('carFuel'),FUELV,fuelLabel);setCat($('bc').value||CATSHOW[0]);
   $('langBtn').textContent=(LANGS.find(l=>l[0]===LANG)||LANGS[0])[1];
+  $('unitBtn').textContent=UNIT_LABEL[UNIT];$('moneyBtn').textContent=moneyLabel(MONEYC);
+  $('fl').nextElementSibling.textContent=tx(UNIT==='us'?'gallons':'litres');
 }
 function setLang(l,store){
   const x=LANGS.find(a=>a[0]===l)||LANGS[1];LANG=x[0];LOC=x[2];
@@ -438,12 +480,18 @@ function makeWheel(list,labels,sel,loop,onPick){
 }
 // Choix dans une roue en plein écran, avec Annuler / Valider. C'est la façon de choisir dans une liste
 // pour cette appli (préférée aux menus déroulants natifs). title : clé de traduction (mise à jour si la langue change).
-const ICON={globe:document.querySelector('#lang svg path').getAttribute('d'),wrench:document.querySelector('#svcBar svg path').getAttribute('d')};
+const ICON={globe:document.querySelector('#lang svg path').getAttribute('d'),wrench:document.querySelector('#svcBar svg path').getAttribute('d'),
+  ruler:'M21 6H3c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm0 10H3V8h2v4h2V8h2v4h2V8h2v4h2V8h2v4h2V8h2v8z',
+  money:'M19 14V6c0-1.1-.9-2-2-2H3c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zm-9-1c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm13-6v11c0 1.1-.9 2-2 2H4v-2h17V7h2z'};
+// o.sub : texte ou fonction (indice affiché) -> texte ; o.step : clé « Étape n sur 3 » ; o.ok / o.cancel : clés des boutons
 function picker(o){
   $('pkPath').setAttribute('d',ICON[o.icon]);$('pkIcon').style.color=o.color||'var(--primary)';
-  $('pkTitle').dataset.i18n=o.title;$('pkTitle').textContent=tx(o.title);$('pkSub').textContent=o.sub||'';
+  $('pkTitle').dataset.i18n=o.title;$('pkTitle').textContent=tx(o.title);
+  const sub=i=>{const t=typeof o.sub==='function'?o.sub(i):(o.sub||'');$('pkSub').textContent=o.step?tx(o.step)+(t?' · '+t:''):t};
+  sub(o.sel);
+  for(const [id,k] of [['pk-ok',o.ok||'validate'],['pk-cancel',o.cancel||'cancel']]){$(id).dataset.i18n=k;$(id).textContent=tx(k)}
   $('picker').classList.remove('hide');
-  const get=makeWheel($('pk-list'),o.labels,o.sel,o.loop,o.onPick),close=()=>$('picker').classList.add('hide');
+  const get=makeWheel($('pk-list'),o.labels,o.sel,o.loop,i=>{sub(i);if(o.onPick)o.onPick(i)}),close=()=>$('picker').classList.add('hide');
   $('pk-ok').onclick=()=>{const i=get();close();o.onOk(i)};
   $('pk-cancel').onclick=()=>{close();if(o.onCancel)o.onCancel()};
 }
@@ -455,8 +503,30 @@ function showLangScreen(){
   $('lang').classList.remove('hide');
   // aperçu : les textes changent pendant qu'on fait défiler, rien n'est enregistré avant « Suivant »
   const get=makeWheel($('wheel-list'),LANGS.map(l=>l[1]),Math.max(0,LANGS.findIndex(l=>l[0]===LANG)),true,i=>setLang(LANGS[i][0],false));
-  $('lang-next').onclick=()=>{setLang(LANGS[get()][0],true);$('lang').classList.add('hide');render()};
+  $('lang-next').onclick=()=>{setLang(LANGS[get()][0],true);$('lang').classList.add('hide');onboardUnits()};
 }
+// Premier lancement : après la langue, deux autres roues (unités, puis monnaie), avec Retour / Suivant.
+// Sans choix déjà fait, la proposition suit la langue (miles pour l'anglais, monnaie du pays de la langue).
+let obUnit=null,obMoney=null;
+function onboardUnits(){
+  const u=obUnit||(LANG==='en'?'uk':'km');
+  picker({icon:'ruler',title:'units_pick',step:'step2',labels:UNITS.map(x=>UNIT_LABEL[x]),sel:UNITS.indexOf(u),loop:false,
+    sub:i=>tx('u_'+UNITS[i]),ok:'next',cancel:'back',onCancel:showLangScreen,
+    onOk:i=>{obUnit=UNITS[i];setUnit(obUnit,true);onboardMoney()}});
+}
+function onboardMoney(){
+  const m=obMoney||MONEY_BY_LANG[LANG]||'EUR';
+  picker({icon:'money',title:'money_pick',step:'step3',labels:MONEY.map(moneyLabel),sel:MONEY.indexOf(m),loop:false,
+    sub:()=>tx('money_note'),ok:'next',cancel:'back',onCancel:onboardUnits,
+    onOk:i=>{obMoney=MONEY[i];setMoney(obMoney,true);render()}});
+}
+function refreshAll(){applyI18n();render();renderSave();live()}
+function setUnit(u,store){UNIT=UNITS.includes(u)?u:'km';if(store){try{localStorage.setItem(UK,UNIT)}catch(e){}}refreshAll()}
+function setMoney(m,store){MONEYC=MONEY.includes(m)?m:'EUR';if(store){try{localStorage.setItem(MK,MONEYC)}catch(e){}}refreshAll()}
+$('unitBtn').onclick=()=>picker({icon:'ruler',title:'units_pick',labels:UNITS.map(x=>UNIT_LABEL[x]),sel:UNITS.indexOf(UNIT),loop:false,
+  sub:i=>tx('u_'+UNITS[i]),onOk:i=>setUnit(UNITS[i],true)});
+$('moneyBtn').onclick=()=>picker({icon:'money',title:'money_pick',labels:MONEY.map(moneyLabel),sel:MONEY.indexOf(MONEYC),loop:false,
+  sub:()=>tx('money_note'),onOk:i=>setMoney(MONEY[i],true)});
 $('langBtn').onclick=()=>{
   const orig=LANG;
   picker({icon:'globe',title:'lang_pick',labels:LANGS.map(l=>l[1]),sel:Math.max(0,LANGS.findIndex(l=>l[0]===LANG)),loop:true,
@@ -465,6 +535,7 @@ $('langBtn').onclick=()=>{
 
 function init(){
   let saved=null;try{saved=localStorage.getItem(LK)}catch(e){}
+  try{const u=localStorage.getItem(UK),m=localStorage.getItem(MK);if(UNITS.includes(u))UNIT=u;if(MONEY.includes(m))MONEYC=m}catch(e){}
   const known=LANGS.some(l=>l[0]===saved);
   setLang(known?saved:guessLang(),false);
   if(!known)showLangScreen();
@@ -588,7 +659,7 @@ function initScan(){
     try{
       const {best:r,bestText}=await Promise.race([work(),stalled]);
       if(r.date)$('fd').value=r.date;
-      if(r.litres)$('fl').value=r.litres;
+      if(r.litres)$('fl').value=Math.round(vol(r.litres)*100)/100;   // tickets en litres
       if(r.montant)$('fe').value=r.montant;
       if(r.station)$('fs').value=r.station.slice(0,80);
       const fuelOk=!!r.carburant&&FUELV.includes(r.carburant);
@@ -601,7 +672,7 @@ function initScan(){
       if(miss.length)warns.push(tx('ocr_notread',{x:miss.join(', ')}));
       if(!r.station)warns.push(tx('ocr_station_miss'));
       box.className='scanres'+(warns.length?' warn':'');
-      box.innerHTML='<b>'+esc(tx('ocr_title'))+'</b><br>'+esc(r.station||tx('ocr_station_q'))+' · '+(r.date?fdate(r.date):esc(tx('ocr_date_q')))+'<br>'+(r.litres?fmt(r.litres)+' L':'? L')+' · '+(r.prix?fmt(r.prix,3)+' €/L':'? €/L')+' · '+(r.montant?eur(r.montant):'? €')+' · '+(fuelOk?esc(fuelLabel(r.carburant)):'? '+esc(tx('fuel')))+warns.map(w=>'<div class="w">'+esc(w)+'</div>').join('')+'<div class="note">'+esc(tx('ocr_verify'))+'</div><details><summary class="note">'+esc(tx('ocr_text'))+'</summary><pre style="white-space:pre-wrap;font-size:11px">'+esc(bestText)+'</pre></details>';
+      box.innerHTML='<b>'+esc(tx('ocr_title'))+'</b><br>'+esc(r.station||tx('ocr_station_q'))+' · '+(r.date?fdate(r.date):esc(tx('ocr_date_q')))+'<br>'+(r.litres?fmt(r.litres)+' L':'? L')+' · '+(r.prix?fmt(r.prix,3)+' €/L':'? €/L')+' · '+(r.montant?money(r.montant):'? €')+' · '+(fuelOk?esc(fuelLabel(r.carburant)):'? '+esc(tx('fuel')))+warns.map(w=>'<div class="w">'+esc(w)+'</div>').join('')+'<div class="note">'+esc(tx('ocr_verify'))+'</div><details><summary class="note">'+esc(tx('ocr_text'))+'</summary><pre style="white-space:pre-wrap;font-size:11px">'+esc(bestText)+'</pre></details>';
       $('fk').focus();
     }catch(err){
       await resetWorker();
@@ -614,7 +685,7 @@ function initScan(){
 // Live calc
 function live(){
   const k=+$('fk').value,l=+$('fl').value,e=+$('fe').value;
-  $('l1').textContent=k>0&&l>0?fmt(l/k*100):'–';
+  $('l1').textContent=k>0&&l>0?fmtCons(cons(distIn(k),volIn(l))):'–';
   $('l2').textContent=k>0&&e>0?fmt(e/k*100):'–';
   $('l3').textContent=l>0&&e>0?fmt(e/l,3):'–';
 }
@@ -623,7 +694,7 @@ function live(){
 $('addF').onclick=()=>{
   const k=+$('fk').value,l=+$('fl').value,e=+$('fe').value;
   if(!(k>0&&l>0&&e>0&&FUELV.includes($('fc').value))){tried=true;marks();status(tx(k>0&&l>0&&e>0?'need_fuel':'need_fill'));return}
-  S.fuel.unshift({id:Date.now(),car:S.cur,d:$('fd').value||today(),k,l,e,c:$('fc').value,s:$('fs').value.trim()});
+  S.fuel.unshift({id:Date.now(),car:S.cur,d:$('fd').value||today(),k:round3(distIn(k)),l:round3(volIn(l)),e,c:$('fc').value,s:$('fs').value.trim()});
   S.fuel.sort((a,b)=>b.d.localeCompare(a.d)||b.id-a.id);
   ['fk','fl','fe','fs'].forEach(i=>$(i).value='');tried=false;setFuelPending(false);live();persist();render();applyCarDefaults();
 };
@@ -632,7 +703,7 @@ $('addB').onclick=()=>{
   const e=+$('be').value;
   if(!(e>0)){$('be').closest('.f').classList.remove('todo');$('be').closest('.f').classList.add('need');status(tx('need_amount'));return}
   $('be').closest('.f').classList.remove('todo','need');
-  S.buys.unshift({id:Date.now(),car:S.cur,d:$('bd').value||today(),e,c:$('bc').value,n:$('bn').value.trim(),k:+$('bk').value||0,s:$('bs').value.trim()});
+  S.buys.unshift({id:Date.now(),car:S.cur,d:$('bd').value||today(),e,c:$('bc').value,n:$('bn').value.trim(),k:Math.round(distIn(+$('bk').value||0)),s:$('bs').value.trim()});
   S.buys.sort((a,b)=>b.d.localeCompare(a.d)||b.id-a.id);
   ['be','bn','bk','bs'].forEach(i=>$(i).value='');persist();render();
 };
@@ -648,21 +719,21 @@ const TRASH='<svg class="i" viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1
 function render(){
   renderCars();
   const fl=$('fl-list');
-  fl.innerHTML=FU().length?FU().map(f=>`<div class="row"><div class="l"><div class="t">${fdate(f.d)} · ${fmt(f.k,0)} km</div><div class="m">${fmt(f.l)} L · ${fmt(f.e/f.l,3)} €/L · ${esc(fuelLabel(f.c))}${f.s?' · '+esc(f.s):''}</div></div><div class="r"><div class="t">${fmt(f.l/f.k*100)} L/100</div><div class="m">${eur(f.e)}</div></div><button class="del" data-k="fuel" data-i="${esc(f.id)}" aria-label="${esc(tx('del'))}">${TRASH}</button></div>`).join(''):'<div class="empty">'+esc(tx('empty_fuel'))+'</div>';
+  fl.innerHTML=FU().length?FU().map(f=>`<div class="row"><div class="l"><div class="t">${fdate(f.d)} · ${fmt(dist(f.k),0)} ${DU()}</div><div class="m">${fmt(vol(f.l))} ${VU()} · ${money(f.e/vol(f.l),3)}/${VU()} · ${esc(fuelLabel(f.c))}${f.s?' · '+esc(f.s):''}</div></div><div class="r"><div class="t">${fmtCons(cons(f.k,f.l))} ${UNIT==='km'?'L/100':'mpg'}</div><div class="m">${money(f.e)}</div></div><button class="del" data-k="fuel" data-i="${esc(f.id)}" aria-label="${esc(tx('del'))}">${TRASH}</button></div>`).join(''):'<div class="empty">'+esc(tx('empty_fuel'))+'</div>';
   const bl=$('bl-list');
-  bl.innerHTML=BU().length?BU().map(b=>`<div class="row"><div class="l"><div class="t">${esc(b.n)||esc(catLabel(b.c))}</div><div class="m">${fdate(b.d)} · ${esc(catLabel(b.c))}${b.k?' · '+fmt(b.k,0)+' km':''}${b.s?' · '+esc(b.s):''}</div></div><div class="r"><div class="t">${eur(b.e)}</div></div><button class="del" data-k="buys" data-i="${esc(b.id)}" aria-label="${esc(tx('del'))}">${TRASH}</button></div>`).join(''):'<div class="empty">'+esc(tx('empty_buys'))+'</div>';
+  bl.innerHTML=BU().length?BU().map(b=>`<div class="row"><div class="l"><div class="t">${esc(b.n)||esc(catLabel(b.c))}</div><div class="m">${fdate(b.d)} · ${esc(catLabel(b.c))}${b.k?' · '+fmt(dist(b.k),0)+' '+DU():''}${b.s?' · '+esc(b.s):''}</div></div><div class="r"><div class="t">${money(b.e)}</div></div><button class="del" data-k="buys" data-i="${esc(b.id)}" aria-label="${esc(tx('del'))}">${TRASH}</button></div>`).join(''):'<div class="empty">'+esc(tx('empty_buys'))+'</div>';
   document.querySelectorAll('.del').forEach(b=>b.onclick=()=>delClick(b.dataset.k,+b.dataset.i,b));
   // bilan
   const F=FU(),B=BU();
   const km=F.reduce((a,x)=>a+x.k,0),L=F.reduce((a,x)=>a+x.l,0),E=F.reduce((a,x)=>a+x.e,0);
   const st=(v,l)=>`<div class="stat"><b>${v}</b><span>${esc(l)}</span></div>`;
-  $('sf').innerHTML=F.length?st(fmt(L/km*100)+'<small style="font-size:14px"> L/100 km</small>',tx('s_avg'))+st(eur(E/km*100),tx('s_cost100'))+st(fmt(E/L,3)+' €',tx('s_price'))+st(fmt(km,0)+' km',tx('s_km')):'<div class="empty" style="grid-column:1/-1">'+esc(tx('s_empty'))+'</div>';
+  $('sf').innerHTML=F.length?st(fmtCons(cons(km,L))+'<small style="font-size:14px"> '+CU()+'</small>',tx('s_avg'))+st(money(E/dist(km)*100),tx('s_cost100'))+st(money(E/vol(L),3),tx('s_price'))+st(fmt(dist(km),0)+' '+DU(),tx('s_km')):'<div class="empty" style="grid-column:1/-1">'+esc(tx('s_empty'))+'</div>';
   $('sfn').textContent='';
   const BT=B.reduce((a,x)=>a+x.e,0);
-  $('sx').innerHTML=(F.length||B.length)?`<div class="kv"><span>${esc(tx('fuel'))}</span><span>${eur(E)}</span></div><div class="kv"><span>${esc(tx('buys'))}</span><span>${eur(BT)}</span></div><div class="kv tot"><span>${esc(tx('s_total'))}</span><span>${eur(E+BT)}</span></div>`:'<div class="empty">'+esc(tx('s_nospend'))+'</div>';
+  $('sx').innerHTML=(F.length||B.length)?`<div class="kv"><span>${esc(tx('fuel'))}</span><span>${money(E)}</span></div><div class="kv"><span>${esc(tx('buys'))}</span><span>${money(BT)}</span></div><div class="kv tot"><span>${esc(tx('s_total'))}</span><span>${money(E+BT)}</span></div>`:'<div class="empty">'+esc(tx('s_nospend'))+'</div>';
   const by={};B.forEach(b=>by[b.c]=(by[b.c]||0)+b.e);
   const ent=Object.entries(by).sort((a,b)=>b[1]-a[1]),mx=ent.length?ent[0][1]:1;
-  $('cats').innerHTML=ent.length?'<div class="note" style="margin:0 0 8px">'+esc(tx('s_by_cat'))+'</div>'+ent.map(([c,v])=>`<div style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;font-size:14px"><span>${esc(catLabel(c))}</span><b style="font-weight:500">${eur(v)}</b></div><div class="bar"><i style="width:${v/mx*100}%"></i></div></div>`).join(''):'';
+  $('cats').innerHTML=ent.length?'<div class="note" style="margin:0 0 8px">'+esc(tx('s_by_cat'))+'</div>'+ent.map(([c,v])=>`<div style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;font-size:14px"><span>${esc(catLabel(c))}</span><b style="font-weight:500">${money(v)}</b></div><div class="bar"><i style="width:${v/mx*100}%"></i></div></div>`).join(''):'';
   lineChart();barChart();
   svcUI();
 }
@@ -714,8 +785,8 @@ $('svcBar').onclick=()=>dialog(tx('svc_done_title'),'<p>'+esc(tx('svc_done_msg')
 $('svcKmBtn').onclick=()=>{
   const c=curCar();
   picker({icon:'wrench',color:'var(--amber)',title:'svc_pick',sub:tx('svc_pick_sub',{car:carName(c)}),
-    labels:SVC_KM.map(kmTxt),sel:Math.max(0,SVC_KM.indexOf(svcEvery(c))),loop:false,
-    onOk:i=>{c.svcKm=SVC_KM[i];persist();render();status(tx('svc_saved',{km:kmTxt(c.svcKm)}))}});
+    labels:SVC_KM.map(v=>fmt(v,0)+' '+DU()),sel:nearest(SVC_KM,dist(svcEvery(c))),loop:false,
+    onOk:i=>{c.svcKm=round3(distIn(SVC_KM[i]));persist();render();status(tx('svc_saved',{km:kmTxt(c.svcKm)}))}});
 };
 const monthName=i=>new Date(2000,i,1).toLocaleDateString(LOC,{month:'short'});
 const sd=s=>s.slice(8,10)+'/'+s.slice(5,7);
@@ -742,9 +813,9 @@ function tipShow(box,html,x,W,rect){
   const px=Math.max(60,Math.min(rect.width-60,x/W*rect.width));t.style.left=px+'px';
 }
 function lineChart(){
-  const box=$('c1'),data=[...FU()].sort((a,b)=>a.d.localeCompare(b.d)||a.id-b.id).map(f=>({d:f.d,v:f.l/f.k*100,e:f.e/f.k*100,k:f.k,l:f.l}));
+  const box=$('c1'),data=[...FU()].sort((a,b)=>a.d.localeCompare(b.d)||a.id-b.id).map(f=>({d:f.d,v:cons(f.k,f.l),e:f.e/dist(f.k)*100,k:f.k,l:f.l}));
   if(data.length<2){box.innerHTML='<div class="empty">'+esc(tx('s_need2'))+'</div>';$('c1s').textContent='';return}
-  const km=data.reduce((a,x)=>a+x.k,0),avg=data.reduce((a,x)=>a+x.l,0)/km*100;
+  const avg=cons(data.reduce((a,x)=>a+x.k,0),data.reduce((a,x)=>a+x.l,0));
   const W=600,H=220,m={l:38,r:12,t:14,b:26},iw=W-m.l-m.r,ih=H-m.t-m.b;
   const vs=data.map(x=>x.v),lo=Math.min(...vs,avg),hi=Math.max(...vs,avg),pad=(hi-lo||1)*0.15;
   const tk=niceTicks(lo-pad,hi+pad,4),y0=tk[0],y1=tk[tk.length-1];
@@ -766,10 +837,10 @@ function lineChart(){
     let i=Math.round((px-m.l)/iw*(data.length-1));i=Math.max(0,Math.min(data.length-1,i));
     const d=data[i];vl.setAttribute('x1',X(i));vl.setAttribute('x2',X(i));vl.style.display='';
     hc.setAttribute('cx',X(i));hc.setAttribute('cy',Y(d.v));hc.style.display='';
-    tipShow(box,`<b>${fdate(d.d)}</b><br>${fmt(d.v)} L/100 km<br>${fmt(d.e)} €/100 km<br>${fmt(d.k,0)} km · ${fmt(d.l)} L`,X(i),W,r)};
+    tipShow(box,`<b>${fdate(d.d)}</b><br>${fmtCons(d.v)} ${CU()}<br>${money(d.e)} / 100 ${DU()}<br>${fmt(dist(d.k),0)} ${DU()} · ${fmt(vol(d.l))} ${VU()}`,X(i),W,r)};
   wireTip(svg,move,()=>{vl.style.display='none';hc.style.display='none';box.querySelector('.tip').style.display='none'});
   const last=data[lastI].v,diff=last-avg;
-  $('c1s').innerHTML=tx('last_fill',{v:fmt(last),d:(diff>=0?'+':'−')+fmt(Math.abs(diff)),a:fmt(avg)});
+  $('c1s').innerHTML=tx('last_fill',{v:fmtCons(last),d:(diff>=0?'+':'−')+fmtCons(Math.abs(diff)),a:fmtCons(avg)});
 }
 function barChart(){
   const box=$('c2'),by={};
@@ -793,7 +864,7 @@ function barChart(){
   s+=`</svg><div class="tip"></div>`;box.innerHTML=s;
   const svg=box.querySelector('svg');
   const show=e=>{const el=document.elementFromPoint(e.clientX,e.clientY),h=el&&el.closest?el.closest('.hit'):null;if(!h)return;const i=+h.dataset.i,d=by[keys[i]],r=svg.getBoundingClientRect(),[yy,mm]=keys[i].split('-');
-    tipShow(box,`<b>${esc(monthName(+mm-1))} ${yy}</b><br>${esc(tx('fuel'))} : ${eur(d.f)}<br>${esc(tx('buys'))} : ${eur(d.b)}<br>${esc(tx('s_total'))} : ${eur(d.f+d.b)}`,m.l+band*(i+.5),W,r)};
+    tipShow(box,`<b>${esc(monthName(+mm-1))} ${yy}</b><br>${esc(tx('fuel'))} : ${money(d.f)}<br>${esc(tx('buys'))} : ${money(d.b)}<br>${esc(tx('s_total'))} : ${money(d.f+d.b)}`,m.l+band*(i+.5),W,r)};
   wireTip(svg,show,()=>{box.querySelector('.tip').style.display='none'});
 }
 let carEditing=null,carDelArmed=false;
