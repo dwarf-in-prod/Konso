@@ -13,14 +13,14 @@
   --secondary-c:#dbe2f9;--on-secondary-c:#141b2c;
   --surface:#f9f9ff;--surf:#edeef4;--surf-high:#e7e8ee;
   --on-surf:#191c20;--on-surf-v:#44474e;--outline:#74777f;--outline-v:#c4c6d0;
-  --error:#ba1a1a;--on-error:#fff;--inverse:#2e3036;--on-inverse:#f0f0f7;
+  --error:#ba1a1a;--on-error:#fff;--ok:#386a20;--inverse:#2e3036;--on-inverse:#f0f0f7;
   --s1:#2a78d6;--s2:#eb6834;--font:system-ui,Roboto,-apple-system,"Segoe UI",sans-serif}
 @media(prefers-color-scheme:dark){:root{
   --primary:#aac7ff;--on-primary:#0a305f;--primary-c:#284777;--on-primary-c:#d6e3ff;
   --secondary-c:#3e4759;--on-secondary-c:#dbe2f9;
   --surface:#111318;--surf:#1d2024;--surf-high:#282a2f;
   --on-surf:#e2e2e9;--on-surf-v:#c4c6d0;--outline:#8e9099;--outline-v:#44474e;
-  --error:#ffb4ab;--on-error:#690005;--inverse:#e2e2e9;--on-inverse:#2e3036;
+  --error:#ffb4ab;--on-error:#690005;--ok:#9cd67d;--inverse:#e2e2e9;--on-inverse:#2e3036;
   --s1:#3987e5;--s2:#d95926}}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html{background:var(--surface)}
@@ -54,6 +54,10 @@ h2.sec{font:500 14px/1.4 var(--font);color:var(--on-surf-v);margin:24px 4px 8px;
 .f label{position:absolute;left:12px;top:15px;padding:0 4px;background:var(--surf);color:var(--on-surf-v);font-size:16px;line-height:22px;pointer-events:none;transition:top .12s,font-size .12s;max-width:calc(100% - 28px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .f input:focus+label,.f input:not(:placeholder-shown)+label,.f.fl label{top:-10px;font-size:12px;line-height:18px}
 .f input:focus+label,.f select:focus+label{color:var(--primary)}
+.f.todo input,.f.todo select{border:2px solid var(--ok);padding:0 13px}
+.f.todo label,.f.todo input:focus+label,.f.todo select:focus+label{color:var(--ok)}
+.f.need input,.f.need select{border:2px solid var(--error);padding:0 13px}
+.f.need label,.f.need input:focus+label,.f.need select:focus+label{color:var(--error)}
 .f.sel::after{content:"";position:absolute;right:14px;top:23px;border:5px solid transparent;border-top-color:var(--on-surf-v);pointer-events:none}
 textarea{width:100%;padding:12px;border:1px solid var(--outline);border-radius:12px;background:transparent;color:var(--on-surf);font:12px/1.4 monospace;outline:none}
 
@@ -241,6 +245,16 @@ body.kb #st{bottom:16px}
       <div class="note" data-i18n="manual_note"></div>
     </details>
   </div>
+  <div class="card">
+    <h3 data-i18n="help_title"></h3>
+    <details><summary data-i18n="help_q1"></summary><div class="note" data-i18n-html="help_a1"></div></details>
+    <details><summary data-i18n="help_q2"></summary><div class="note" data-i18n-html="help_a2"></div></details>
+    <details><summary data-i18n="help_q3"></summary><div class="note" data-i18n-html="help_a3"></div></details>
+    <details><summary data-i18n="help_q4"></summary><div class="note" data-i18n-html="help_a4"></div></details>
+    <details><summary data-i18n="help_q5"></summary><div class="note" data-i18n-html="help_a5"></div></details>
+    <details><summary data-i18n="help_q6"></summary><div class="note" data-i18n-html="help_a6"></div></details>
+    <details><summary data-i18n="help_q7"></summary><div class="note" data-i18n-html="help_a7"></div></details>
+  </div>
 </section>
 </main>
 
@@ -340,8 +354,8 @@ function applyI18n(){
   document.querySelectorAll('[data-i18n-html]').forEach(e=>e.innerHTML=tx(e.dataset.i18nHtml));
   document.querySelectorAll('[data-i18n-title]').forEach(e=>{const s=tx(e.dataset.i18nTitle);e.title=s;e.setAttribute('aria-label',s)});
   document.querySelectorAll('[data-i18n-ph]').forEach(e=>e.placeholder=tx(e.dataset.i18nPh));
-  const opts=(el,list,label)=>{const v=el.value;el.innerHTML=list.map((x,i)=>'<option value="'+esc(x)+'">'+esc(label(x,i))+'</option>').join('');if(list.includes(v))el.value=v};
-  opts($('fc'),FUELV,fuelLabel);opts($('carFuel'),FUELV,fuelLabel);opts($('bc'),CATV,(c,i)=>tx('cat'+i));
+  const opts=(el,list,label)=>{const v=el.value;el.innerHTML=list.map((x,i)=>'<option value="'+esc(x)+'"'+(x===''?' disabled':'')+'>'+esc(label(x,i))+'</option>').join('');if(list.includes(v))el.value=v};
+  opts($('fc'),['',...FUELV],x=>x?fuelLabel(x):tx('fuel_choose'));opts($('carFuel'),FUELV,fuelLabel);opts($('bc'),CATV,(c,i)=>tx('cat'+i));
   $('langSel').innerHTML=LANGS.map(l=>'<option value="'+l[0]+'">'+esc(l[1])+'</option>').join('');$('langSel').value=LANG;
 }
 function setLang(l,store){
@@ -498,14 +512,17 @@ function initScan(){
       if(r.litres)$('fl').value=r.litres;
       if(r.montant)$('fe').value=r.montant;
       if(r.station)$('fs').value=r.station.slice(0,80);
-      if(r.carburant&&FUELV.includes(r.carburant))$('fc').value=r.carburant;
+      const fuelOk=!!r.carburant&&FUELV.includes(r.carburant);
+      tried=false;
+      if(fuelOk){$('fc').value=r.carburant;setFuelPending(false)}else setFuelPending(true);
       live();
       const warns=r.notes.map(c=>tx('note_'+c));
+      if(!fuelOk)warns.unshift(tx('ocr_fuel_miss'));
       const miss=[];if(!r.litres)miss.push(tx('ocr_l'));if(!r.montant)miss.push(tx('ocr_m'));
       if(miss.length)warns.push(tx('ocr_notread',{x:miss.join(', ')}));
       if(!r.station)warns.push(tx('ocr_station_miss'));
       box.className='scanres'+(warns.length?' warn':'');
-      box.innerHTML='<b>'+esc(tx('ocr_title'))+'</b><br>'+esc(r.station||tx('ocr_station_q'))+' · '+(r.date?fdate(r.date):esc(tx('ocr_date_q')))+'<br>'+(r.litres?fmt(r.litres)+' L':'? L')+' · '+(r.prix?fmt(r.prix,3)+' €/L':'? €/L')+' · '+(r.montant?eur(r.montant):'? €')+(r.carburant?' · '+esc(fuelLabel(r.carburant)):'')+warns.map(w=>'<div class="w">'+esc(w)+'</div>').join('')+'<div class="note">'+esc(tx('ocr_verify'))+'</div><details><summary class="note">'+esc(tx('ocr_text'))+'</summary><pre style="white-space:pre-wrap;font-size:11px">'+esc(bestText)+'</pre></details>';
+      box.innerHTML='<b>'+esc(tx('ocr_title'))+'</b><br>'+esc(r.station||tx('ocr_station_q'))+' · '+(r.date?fdate(r.date):esc(tx('ocr_date_q')))+'<br>'+(r.litres?fmt(r.litres)+' L':'? L')+' · '+(r.prix?fmt(r.prix,3)+' €/L':'? €/L')+' · '+(r.montant?eur(r.montant):'? €')+' · '+(fuelOk?esc(fuelLabel(r.carburant)):'? '+esc(tx('fuel')))+warns.map(w=>'<div class="w">'+esc(w)+'</div>').join('')+'<div class="note">'+esc(tx('ocr_verify'))+'</div><details><summary class="note">'+esc(tx('ocr_text'))+'</summary><pre style="white-space:pre-wrap;font-size:11px">'+esc(bestText)+'</pre></details>';
       $('fk').focus();
     }catch(err){
       await resetWorker();
@@ -526,10 +543,10 @@ function live(){
 
 $('addF').onclick=()=>{
   const k=+$('fk').value,l=+$('fl').value,e=+$('fe').value;
-  if(!(k>0&&l>0&&e>0)){status(tx('need_fill'));return}
+  if(!(k>0&&l>0&&e>0&&FUELV.includes($('fc').value))){tried=true;marks();status(tx(k>0&&l>0&&e>0?'need_fuel':'need_fill'));return}
   S.fuel.unshift({id:Date.now(),car:S.cur,d:$('fd').value||today(),k,l,e,c:$('fc').value,s:$('fs').value.trim()});
   S.fuel.sort((a,b)=>b.d.localeCompare(a.d)||b.id-a.id);
-  ['fk','fl','fe','fs'].forEach(i=>$(i).value='');live();persist();render();
+  ['fk','fl','fe','fs'].forEach(i=>$(i).value='');tried=false;setFuelPending(false);live();persist();render();applyCarDefaults();
 };
 $('addB').onclick=()=>{
   const e=+$('be').value;
@@ -662,7 +679,22 @@ function openCarForm(edit){
   $('carNote').textContent=edit?(S.cars.length>1?tx('car_note_del'):tx('car_note_keep')):'';
   $('carForm').classList.remove('hide');$('carName').focus();
 }
-function applyCarDefaults(){const c=curCar();if(c&&c.fuel)$('fc').value=c.fuel}
+// Carburant présélectionné : celui du dernier plein de la voiture, sinon son carburant habituel.
+// Après un ticket dont le carburant n'a pas été reconnu, on ne présélectionne rien : le choix est obligatoire.
+let fuelPending=false;
+function setFuelPending(on){fuelPending=on;if(on)$('fc').value='';marks()}
+// Repères du formulaire de plein : vert = à remplir (la distance ; le carburant après un ticket illisible),
+// rouge = manquant après un essai d'enregistrement.
+let tried=false;
+function marks(){
+  const set=(id,ok,todo)=>{const f=$(id).closest('.f');f.classList.toggle('need',!ok&&tried);f.classList.toggle('todo',!ok&&!tried&&todo)};
+  set('fk',+$('fk').value>0,true);set('fl',+$('fl').value>0,false);set('fe',+$('fe').value>0,false);
+  set('fc',FUELV.includes($('fc').value),true);
+}
+['fk','fl','fe'].forEach(i=>$(i).addEventListener('input',marks));
+function defaultFuel(){const last=FU().find(f=>FUELV.includes(f.c)),c=curCar();return last?last.c:(c&&FUELV.includes(c.fuel)?c.fuel:'SP95-E10')}
+function applyCarDefaults(){if(!fuelPending)$('fc').value=defaultFuel()}
+$('fc').addEventListener('change',()=>{if(FUELV.includes($('fc').value))setFuelPending(false)});
 $('car').onchange=()=>{S.cur=$('car').value;persist();render();applyCarDefaults()};
 $('carAdd').onclick=()=>openCarForm(false);
 $('carEdit').onclick=()=>openCarForm(true);
@@ -692,7 +724,7 @@ document.querySelectorAll('.nav button').forEach(b=>b.onclick=()=>showTab(b.data
 document.addEventListener('focusin',e=>{if(/^(INPUT|TEXTAREA)$/.test(e.target.tagName)&&e.target.type!=='date')document.body.classList.add('kb')});
 document.addEventListener('focusout',()=>setTimeout(()=>{const a=document.activeElement;if(!a||!/^(INPUT|TEXTAREA)$/.test(a.tagName))document.body.classList.remove('kb')},150));
 $('fd').value=today();$('bd').value=today();
-init();initScan();applyCarDefaults();
+init();initScan();applyCarDefaults();marks();
 </script>
 </body>
 </html>

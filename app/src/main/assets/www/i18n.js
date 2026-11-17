@@ -79,7 +79,25 @@
     note_litres_calc: "Litres calculés à partir du montant et du prix au litre.",
     note_montant_calc: "Montant calculé à partir des litres et du prix au litre.",
     note_prix_calc: "Prix au litre calculé.",
-    note_unverified: "Valeurs lues sans recoupement fiable : vérifie-les."
+    note_unverified: "Valeurs lues sans recoupement fiable : vérifie-les.",
+    fuel_choose: "À choisir…",
+    ocr_fuel_miss: "Carburant non reconnu : choisis-le dans la liste.",
+    need_fuel: "Choisis le carburant",
+    help_title: "Comment ça marche ?",
+    help_q1: "Saisir un plein",
+    help_a1: "Fais le plein à ras à chaque fois, puis indique la <b>distance parcourue depuis le plein précédent</b>, les litres et le montant. Astuce : remets le compteur journalier à zéro à chaque plein. La consommation, le coût aux 100 km et le prix au litre se calculent tout seuls. Le champ <b>Distance</b> est entouré en vert : c'est celui à remplir en premier. Un champ oublié passe en rouge quand tu enregistres.",
+    help_q2: "Carburant présélectionné",
+    help_a2: "Le carburant proposé est celui de ton <b>dernier plein</b> avec cette voiture : pas besoin de le choisir à chaque fois. Pour une voiture sans plein, c'est son <b>carburant habituel</b> (modifiable avec le crayon, en haut).",
+    help_q3: "Scanner un ticket",
+    help_a3: "Prends le ticket en photo, à plat et bien éclairé. La lecture se fait <b>sur le téléphone</b>, sans internet, et elle est prévue pour les tickets français. Les valeurs trouvées remplissent le formulaire : <b>vérifie-les toujours</b>. Le texte reconnu est visible sous « Texte lu ».",
+    help_q4: "Carburant non reconnu",
+    help_a4: "Si le scanner ne trouve pas le carburant sur le ticket, il ne devine pas : le champ passe sur « À choisir… » et il faut le sélectionner avant d'enregistrer le plein.",
+    help_q5: "Plusieurs voitures",
+    help_a5: "En haut, le menu change de voiture, le <b>+</b> en ajoute une et le crayon permet de la renommer ou de la supprimer. Chaque voiture a ses propres pleins, achats et statistiques.",
+    help_q6: "Sauvegarde et vie privée",
+    help_a6: "Les données restent dans l'appli et, si tu choisis un dossier, dans le fichier <b>konso.json</b>, mis à jour à chaque modification. Rien n'est envoyé sur internet : pas de compte, pas de publicité, pas de statistiques d'usage.",
+    help_q7: "Supprimer un enregistrement",
+    help_a7: "Appuie sur la corbeille, puis sur « Confirmer ? » dans les 3 secondes."
   };
 
   D.en = {
@@ -151,7 +169,25 @@
     note_litres_calc: "Litres calculated from the amount and the price per litre.",
     note_montant_calc: "Amount calculated from the litres and the price per litre.",
     note_prix_calc: "Price per litre calculated.",
-    note_unverified: "Values read without a reliable cross-check: please verify them."
+    note_unverified: "Values read without a reliable cross-check: please verify them.",
+    fuel_choose: "Choose…",
+    ocr_fuel_miss: "Fuel type not recognised: pick it from the list.",
+    need_fuel: "Choose the fuel type",
+    help_title: "How it works",
+    help_q1: "Adding a fill-up",
+    help_a1: "Fill the tank to the brim each time, then enter the <b>distance driven since the previous fill-up</b>, the litres and the amount. Tip: reset the trip meter at each fill-up. Consumption, cost per 100 km and price per litre are calculated automatically. The <b>Distance</b> field is outlined in green: it's the one to fill in first. A missing field turns red when you save.",
+    help_q2: "Preselected fuel",
+    help_a2: "The fuel offered is the one from your <b>last fill-up</b> with this car, so you don't have to pick it every time. For a car with no fill-up yet, it's the car's <b>usual fuel</b> (change it with the pencil at the top).",
+    help_q3: "Scanning a receipt",
+    help_a3: "Take a photo of the receipt, flat and well lit. It is read <b>on your phone</b>, without internet, and works best with French receipts. The values found fill in the form: <b>always check them</b>. The recognised text is shown under “Text read”.",
+    help_q4: "Fuel not recognised",
+    help_a4: "If the scanner can't find the fuel type on the receipt, it doesn't guess: the field switches to “Choose…” and you must select it before saving the fill-up.",
+    help_q5: "Several cars",
+    help_a5: "At the top, the menu switches car, <b>+</b> adds one and the pencil lets you rename or delete it. Each car has its own fill-ups, purchases and statistics.",
+    help_q6: "Backup and privacy",
+    help_a6: "Your data stays in the app and, if you choose a folder, in the <b>konso.json</b> file, updated after every change. Nothing is sent over the internet: no account, no ads, no usage statistics.",
+    help_q7: "Deleting an entry",
+    help_a7: "Tap the bin, then tap “Confirm?” within 3 seconds."
   };
 
   D.es = {
@@ -223,7 +259,25 @@
     note_litres_calc: "Litros calculados a partir del importe y del precio por litro.",
     note_montant_calc: "Importe calculado a partir de los litros y del precio por litro.",
     note_prix_calc: "Precio por litro calculado.",
-    note_unverified: "Valores leídos sin una verificación fiable: compruébalos."
+    note_unverified: "Valores leídos sin una verificación fiable: compruébalos.",
+    fuel_choose: "Elegir…",
+    ocr_fuel_miss: "Combustible no reconocido: elígelo en la lista.",
+    need_fuel: "Elige el combustible",
+    help_title: "¿Cómo funciona?",
+    help_q1: "Registrar un repostaje",
+    help_a1: "Llena el depósito hasta arriba cada vez e indica la <b>distancia recorrida desde el repostaje anterior</b>, los litros y el importe. Consejo: pon a cero el cuentakilómetros parcial en cada repostaje. El consumo, el coste por 100 km y el precio por litro se calculan solos. El campo <b>Distancia</b> aparece rodeado en verde: es el primero que hay que rellenar. Un campo olvidado se vuelve rojo al guardar.",
+    help_q2: "Combustible preseleccionado",
+    help_a2: "El combustible propuesto es el de tu <b>último repostaje</b> con este coche: no hace falta elegirlo cada vez. Para un coche sin repostajes, es su <b>combustible habitual</b> (se cambia con el lápiz, arriba).",
+    help_q3: "Escanear un ticket",
+    help_a3: "Haz una foto del ticket, plano y bien iluminado. La lectura se hace <b>en el teléfono</b>, sin internet, y está pensada para tickets franceses. Los valores encontrados rellenan el formulario: <b>compruébalos siempre</b>. El texto reconocido aparece en «Texto leído».",
+    help_q4: "Combustible no reconocido",
+    help_a4: "Si el escáner no encuentra el combustible en el ticket, no lo adivina: el campo pasa a «Elegir…» y hay que seleccionarlo antes de guardar el repostaje.",
+    help_q5: "Varios coches",
+    help_a5: "Arriba, el menú cambia de coche, el <b>+</b> añade uno y el lápiz permite renombrarlo o eliminarlo. Cada coche tiene sus propios repostajes, compras y estadísticas.",
+    help_q6: "Copia de seguridad y privacidad",
+    help_a6: "Los datos se quedan en la app y, si eliges una carpeta, en el archivo <b>konso.json</b>, actualizado con cada cambio. No se envía nada a internet: sin cuenta, sin publicidad, sin estadísticas de uso.",
+    help_q7: "Eliminar un registro",
+    help_a7: "Toca la papelera y luego «¿Confirmar?» en menos de 3 segundos."
   };
 
   D.de = {
@@ -295,7 +349,25 @@
     note_litres_calc: "Liter aus Betrag und Literpreis berechnet.",
     note_montant_calc: "Betrag aus Litern und Literpreis berechnet.",
     note_prix_calc: "Literpreis berechnet.",
-    note_unverified: "Werte ohne verlässliche Gegenprüfung gelesen: bitte prüfen."
+    note_unverified: "Werte ohne verlässliche Gegenprüfung gelesen: bitte prüfen.",
+    fuel_choose: "Bitte wählen…",
+    ocr_fuel_miss: "Kraftstoffart nicht erkannt: bitte in der Liste auswählen.",
+    need_fuel: "Kraftstoffart auswählen",
+    help_title: "So funktioniert's",
+    help_q1: "Tankung erfassen",
+    help_a1: "Immer bis zum Rand volltanken und die <b>seit der letzten Tankung gefahrene Strecke</b>, die Liter und den Betrag eingeben. Tipp: den Tageskilometerzähler bei jeder Tankung zurücksetzen. Verbrauch, Kosten pro 100 km und Literpreis werden automatisch berechnet. Das Feld <b>Strecke</b> ist grün umrandet: Es wird zuerst ausgefüllt. Ein vergessenes Feld wird beim Speichern rot.",
+    help_q2: "Vorausgewählte Kraftstoffart",
+    help_a2: "Vorgeschlagen wird die Kraftstoffart der <b>letzten Tankung</b> dieses Autos – sie muss also nicht jedes Mal gewählt werden. Bei einem Auto ohne Tankung ist es seine <b>übliche Kraftstoffart</b> (oben mit dem Stift änderbar).",
+    help_q3: "Beleg scannen",
+    help_a3: "Den Beleg flach und gut beleuchtet fotografieren. Gelesen wird <b>auf dem Handy</b>, ohne Internet; ausgelegt ist das für französische Belege. Die gefundenen Werte füllen das Formular aus: <b>immer prüfen</b>. Der erkannte Text steht unter „Gelesener Text“.",
+    help_q4: "Kraftstoffart nicht erkannt",
+    help_a4: "Findet der Scanner die Kraftstoffart nicht auf dem Beleg, rät er nicht: Das Feld springt auf „Bitte wählen…“ und muss vor dem Speichern der Tankung ausgefüllt werden.",
+    help_q5: "Mehrere Autos",
+    help_a5: "Oben wechselt das Menü das Auto, <b>+</b> fügt eines hinzu und mit dem Stift lässt es sich umbenennen oder löschen. Jedes Auto hat eigene Tankungen, Käufe und Statistiken.",
+    help_q6: "Sicherung und Datenschutz",
+    help_a6: "Die Daten bleiben in der App und, wenn ein Ordner gewählt ist, in der Datei <b>konso.json</b>, die bei jeder Änderung aktualisiert wird. Nichts wird ins Internet gesendet: kein Konto, keine Werbung, keine Nutzungsstatistiken.",
+    help_q7: "Eintrag löschen",
+    help_a7: "Auf den Papierkorb tippen, dann innerhalb von 3 Sekunden auf „Bestätigen?“."
   };
 
   D.it = {
@@ -367,7 +439,25 @@
     note_litres_calc: "Litri calcolati dall'importo e dal prezzo al litro.",
     note_montant_calc: "Importo calcolato dai litri e dal prezzo al litro.",
     note_prix_calc: "Prezzo al litro calcolato.",
-    note_unverified: "Valori letti senza un controllo incrociato affidabile: verificali."
+    note_unverified: "Valori letti senza un controllo incrociato affidabile: verificali.",
+    fuel_choose: "Da scegliere…",
+    ocr_fuel_miss: "Carburante non riconosciuto: sceglilo dall'elenco.",
+    need_fuel: "Scegli il carburante",
+    help_title: "Come funziona?",
+    help_q1: "Registrare un rifornimento",
+    help_a1: "Fai sempre il pieno fino all'orlo, poi indica la <b>distanza percorsa dal rifornimento precedente</b>, i litri e l'importo. Consiglio: azzera il contachilometri parziale a ogni pieno. Consumo, costo ogni 100 km e prezzo al litro si calcolano da soli. Il campo <b>Distanza</b> è evidenziato in verde: è il primo da compilare. Un campo dimenticato diventa rosso quando salvi.",
+    help_q2: "Carburante preselezionato",
+    help_a2: "Il carburante proposto è quello del tuo <b>ultimo rifornimento</b> con questa auto: non serve sceglierlo ogni volta. Per un'auto senza rifornimenti è il suo <b>carburante abituale</b> (modificabile con la matita, in alto).",
+    help_q3: "Scansionare uno scontrino",
+    help_a3: "Fotografa lo scontrino, piatto e ben illuminato. La lettura avviene <b>sul telefono</b>, senza internet, ed è pensata per gli scontrini francesi. I valori trovati compilano il modulo: <b>controllali sempre</b>. Il testo riconosciuto è visibile in «Testo letto».",
+    help_q4: "Carburante non riconosciuto",
+    help_a4: "Se lo scanner non trova il carburante sullo scontrino, non tira a indovinare: il campo passa a «Da scegliere…» e va selezionato prima di salvare il rifornimento.",
+    help_q5: "Più auto",
+    help_a5: "In alto, il menu cambia auto, il <b>+</b> ne aggiunge una e la matita permette di rinominarla o eliminarla. Ogni auto ha i propri rifornimenti, acquisti e statistiche.",
+    help_q6: "Backup e privacy",
+    help_a6: "I dati restano nell'app e, se scegli una cartella, nel file <b>konso.json</b>, aggiornato a ogni modifica. Nulla viene inviato su internet: nessun account, nessuna pubblicità, nessuna statistica d'uso.",
+    help_q7: "Eliminare una registrazione",
+    help_a7: "Tocca il cestino, poi «Confermare?» entro 3 secondi."
   };
 
   D.pt = {
@@ -439,7 +529,25 @@
     note_litres_calc: "Litros calculados a partir do montante e do preço por litro.",
     note_montant_calc: "Montante calculado a partir dos litros e do preço por litro.",
     note_prix_calc: "Preço por litro calculado.",
-    note_unverified: "Valores lidos sem uma verificação fiável: confirma-os."
+    note_unverified: "Valores lidos sem uma verificação fiável: confirma-os.",
+    fuel_choose: "Escolher…",
+    ocr_fuel_miss: "Combustível não reconhecido: escolhe-o na lista.",
+    need_fuel: "Escolhe o combustível",
+    help_title: "Como funciona?",
+    help_q1: "Registar um abastecimento",
+    help_a1: "Enche sempre o depósito até acima e indica a <b>distância percorrida desde o abastecimento anterior</b>, os litros e o montante. Dica: põe o conta-quilómetros parcial a zero em cada abastecimento. O consumo, o custo aos 100 km e o preço por litro são calculados automaticamente. O campo <b>Distância</b> aparece contornado a verde: é o primeiro a preencher. Um campo esquecido fica vermelho quando guardas.",
+    help_q2: "Combustível pré-selecionado",
+    help_a2: "O combustível proposto é o do teu <b>último abastecimento</b> com este carro: não é preciso escolhê-lo de cada vez. Para um carro sem abastecimentos, é o seu <b>combustível habitual</b> (altera-se com o lápis, em cima).",
+    help_q3: "Digitalizar um talão",
+    help_a3: "Fotografa o talão, plano e bem iluminado. A leitura é feita <b>no telemóvel</b>, sem internet, e está pensada para talões franceses. Os valores encontrados preenchem o formulário: <b>verifica-os sempre</b>. O texto reconhecido aparece em «Texto lido».",
+    help_q4: "Combustível não reconhecido",
+    help_a4: "Se o leitor não encontrar o combustível no talão, não adivinha: o campo passa para «Escolher…» e é preciso selecioná-lo antes de guardar o abastecimento.",
+    help_q5: "Vários carros",
+    help_a5: "Em cima, o menu muda de carro, o <b>+</b> adiciona um e o lápis permite mudar-lhe o nome ou eliminá-lo. Cada carro tem os seus próprios abastecimentos, compras e estatísticas.",
+    help_q6: "Cópia de segurança e privacidade",
+    help_a6: "Os dados ficam na app e, se escolheres uma pasta, no ficheiro <b>konso.json</b>, atualizado a cada alteração. Nada é enviado para a internet: sem conta, sem publicidade, sem estatísticas de utilização.",
+    help_q7: "Eliminar um registo",
+    help_a7: "Toca no caixote do lixo e depois em «Confirmar?» dentro de 3 segundos."
   };
 
   D.nl = {
@@ -511,7 +619,25 @@
     note_litres_calc: "Liters berekend uit het bedrag en de literprijs.",
     note_montant_calc: "Bedrag berekend uit de liters en de literprijs.",
     note_prix_calc: "Literprijs berekend.",
-    note_unverified: "Waarden gelezen zonder betrouwbare controle: controleer ze."
+    note_unverified: "Waarden gelezen zonder betrouwbare controle: controleer ze.",
+    fuel_choose: "Kiezen…",
+    ocr_fuel_miss: "Brandstof niet herkend: kies hem in de lijst.",
+    need_fuel: "Kies de brandstof",
+    help_title: "Hoe werkt het?",
+    help_q1: "Een tankbeurt invoeren",
+    help_a1: "Tank telkens helemaal vol en vul de <b>afstand sinds de vorige tankbeurt</b>, de liters en het bedrag in. Tip: zet de dagteller bij elke tankbeurt op nul. Verbruik, kosten per 100 km en literprijs worden automatisch berekend. Het veld <b>Afstand</b> is groen omlijnd: dat vul je als eerste in. Een vergeten veld wordt rood als je opslaat.",
+    help_q2: "Vooraf gekozen brandstof",
+    help_a2: "De voorgestelde brandstof is die van je <b>laatste tankbeurt</b> met deze auto: je hoeft hem dus niet elke keer te kiezen. Voor een auto zonder tankbeurten is het de <b>gebruikelijke brandstof</b> (te wijzigen met het potlood bovenaan).",
+    help_q3: "Een bonnetje scannen",
+    help_a3: "Maak een foto van het bonnetje, plat en goed belicht. Het lezen gebeurt <b>op de telefoon</b>, zonder internet, en is bedoeld voor Franse bonnetjes. De gevonden waarden vullen het formulier in: <b>controleer ze altijd</b>. De herkende tekst staat onder „Gelezen tekst”.",
+    help_q4: "Brandstof niet herkend",
+    help_a4: "Vindt de scanner de brandstof niet op het bonnetje, dan gokt hij niet: het veld springt op „Kiezen…” en je moet het invullen voordat je de tankbeurt opslaat.",
+    help_q5: "Meerdere auto's",
+    help_a5: "Bovenaan wissel je met het menu van auto, voeg je er een toe met <b>+</b> en kun je hem met het potlood hernoemen of verwijderen. Elke auto heeft zijn eigen tankbeurten, aankopen en statistieken.",
+    help_q6: "Back-up en privacy",
+    help_a6: "Je gegevens blijven in de app en, als je een map kiest, in het bestand <b>konso.json</b>, dat bij elke wijziging wordt bijgewerkt. Er wordt niets naar internet verstuurd: geen account, geen reclame, geen gebruiksstatistieken.",
+    help_q7: "Een registratie verwijderen",
+    help_a7: "Tik op de prullenbak en daarna binnen 3 seconden op „Bevestigen?”."
   };
 
   D.pl = {
@@ -583,7 +709,25 @@
     note_litres_calc: "Litry obliczone z kwoty i ceny za litr.",
     note_montant_calc: "Kwota obliczona z litrów i ceny za litr.",
     note_prix_calc: "Cena za litr obliczona.",
-    note_unverified: "Wartości odczytane bez wiarygodnej weryfikacji: sprawdź je."
+    note_unverified: "Wartości odczytane bez wiarygodnej weryfikacji: sprawdź je.",
+    fuel_choose: "Wybierz…",
+    ocr_fuel_miss: "Nie rozpoznano paliwa: wybierz je z listy.",
+    need_fuel: "Wybierz paliwo",
+    help_title: "Jak to działa?",
+    help_q1: "Dodawanie tankowania",
+    help_a1: "Za każdym razem tankuj do pełna i wpisz <b>dystans przejechany od poprzedniego tankowania</b>, litry i kwotę. Wskazówka: zeruj licznik dzienny przy każdym tankowaniu. Spalanie, koszt na 100 km i cena za litr liczą się same. Pole <b>Dystans</b> jest obramowane na zielono: wypełnij je najpierw. Pominięte pole zmienia kolor na czerwony przy zapisie.",
+    help_q2: "Domyślnie wybrane paliwo",
+    help_a2: "Proponowane jest paliwo z <b>ostatniego tankowania</b> tego auta, więc nie trzeba go wybierać za każdym razem. Dla auta bez tankowań to jego <b>zwykłe paliwo</b> (można je zmienić ołówkiem u góry).",
+    help_q3: "Skanowanie paragonu",
+    help_a3: "Zrób zdjęcie paragonu, płasko i przy dobrym świetle. Odczyt odbywa się <b>na telefonie</b>, bez internetu, i jest przystosowany do francuskich paragonów. Znalezione wartości wypełniają formularz: <b>zawsze je sprawdzaj</b>. Rozpoznany tekst widać w „Odczytany tekst”.",
+    help_q4: "Nie rozpoznano paliwa",
+    help_a4: "Jeśli skaner nie znajdzie rodzaju paliwa na paragonie, nie zgaduje: pole zmienia się na „Wybierz…” i trzeba je wybrać przed zapisaniem tankowania.",
+    help_q5: "Kilka aut",
+    help_a5: "U góry menu zmienia auto, <b>+</b> dodaje nowe, a ołówek pozwala zmienić jego nazwę lub je usunąć. Każde auto ma własne tankowania, zakupy i statystyki.",
+    help_q6: "Kopia zapasowa i prywatność",
+    help_a6: "Dane zostają w aplikacji oraz, jeśli wybierzesz folder, w pliku <b>konso.json</b>, aktualizowanym przy każdej zmianie. Nic nie jest wysyłane do internetu: bez konta, bez reklam, bez statystyk użycia.",
+    help_q7: "Usuwanie wpisu",
+    help_a7: "Dotknij kosza, a potem w ciągu 3 sekund „Potwierdzić?”."
   };
 
   D.tr = {
@@ -655,7 +799,25 @@
     note_litres_calc: "Litre, tutar ve litre fiyatından hesaplandı.",
     note_montant_calc: "Tutar, litre ve litre fiyatından hesaplandı.",
     note_prix_calc: "Litre fiyatı hesaplandı.",
-    note_unverified: "Değerler güvenilir bir çapraz kontrol olmadan okundu: kontrol et."
+    note_unverified: "Değerler güvenilir bir çapraz kontrol olmadan okundu: kontrol et.",
+    fuel_choose: "Seç…",
+    ocr_fuel_miss: "Yakıt türü tanınmadı: listeden seç.",
+    need_fuel: "Yakıt türünü seç",
+    help_title: "Nasıl çalışır?",
+    help_q1: "Yakıt alımı ekleme",
+    help_a1: "Her seferinde depoyu tam doldur, sonra <b>önceki yakıt alımından beri gidilen mesafeyi</b>, litreyi ve tutarı gir. İpucu: her yakıt alımında günlük kilometre sayacını sıfırla. Tüketim, 100 km maliyeti ve litre fiyatı otomatik hesaplanır. <b>Mesafe</b> alanı yeşil çerçevelidir: ilk doldurulacak alan odur. Unutulan bir alan kaydederken kırmızıya döner.",
+    help_q2: "Önceden seçili yakıt",
+    help_a2: "Önerilen yakıt, bu arabayla yaptığın <b>son yakıt alımındaki</b> yakıttır; her seferinde seçmen gerekmez. Henüz yakıt alımı olmayan bir arabada, arabanın <b>genelde kullanılan yakıtı</b> seçilir (üstteki kalemle değiştirilebilir).",
+    help_q3: "Fiş tarama",
+    help_a3: "Fişin fotoğrafını düz ve iyi ışıkta çek. Okuma <b>telefonda</b>, internetsiz yapılır ve Fransız fişleri için tasarlanmıştır. Bulunan değerler formu doldurur: <b>her zaman kontrol et</b>. Tanınan metin “Okunan metin” altında görünür.",
+    help_q4: "Yakıt türü tanınmadı",
+    help_a4: "Tarayıcı fişte yakıt türünü bulamazsa tahmin etmez: alan “Seç…” durumuna geçer ve yakıt alımını kaydetmeden önce seçmen gerekir.",
+    help_q5: "Birden fazla araba",
+    help_a5: "Üstteki menü arabayı değiştirir, <b>+</b> yeni araba ekler, kalem ise adını değiştirmeye veya silmeye yarar. Her arabanın kendi yakıt alımları, alışverişleri ve istatistikleri vardır.",
+    help_q6: "Yedekleme ve gizlilik",
+    help_a6: "Veriler uygulamada ve bir klasör seçersen her değişiklikte güncellenen <b>konso.json</b> dosyasında kalır. İnternete hiçbir şey gönderilmez: hesap yok, reklam yok, kullanım istatistiği yok.",
+    help_q7: "Kayıt silme",
+    help_a7: "Çöp kutusuna dokun, ardından 3 saniye içinde “Onaylıyor musun?” üzerine dokun."
   };
 
   D.ro = {
@@ -727,7 +889,25 @@
     note_litres_calc: "Litri calculați din sumă și din prețul pe litru.",
     note_montant_calc: "Sumă calculată din litri și din prețul pe litru.",
     note_prix_calc: "Preț pe litru calculat.",
-    note_unverified: "Valori citite fără o verificare încrucișată sigură: verifică-le."
+    note_unverified: "Valori citite fără o verificare încrucișată sigură: verifică-le.",
+    fuel_choose: "De ales…",
+    ocr_fuel_miss: "Combustibil nerecunoscut: alege-l din listă.",
+    need_fuel: "Alege combustibilul",
+    help_title: "Cum funcționează?",
+    help_q1: "Adăugarea unei alimentări",
+    help_a1: "Fă plinul complet de fiecare dată, apoi completează <b>distanța parcursă de la alimentarea precedentă</b>, litrii și suma. Sfat: resetează contorul de parcurs la fiecare alimentare. Consumul, costul la 100 km și prețul pe litru se calculează automat. Câmpul <b>Distanța</b> este încadrat cu verde: este primul de completat. Un câmp uitat devine roșu când salvezi.",
+    help_q2: "Combustibil preselectat",
+    help_a2: "Combustibilul propus este cel de la <b>ultima alimentare</b> cu această mașină, deci nu trebuie ales de fiecare dată. Pentru o mașină fără alimentări, este <b>combustibilul obișnuit</b> al mașinii (se schimbă cu creionul, sus).",
+    help_q3: "Scanarea unui bon",
+    help_a3: "Fotografiază bonul, drept și bine luminat. Citirea se face <b>pe telefon</b>, fără internet, și este gândită pentru bonuri franceze. Valorile găsite completează formularul: <b>verifică-le mereu</b>. Textul recunoscut apare la „Text citit”.",
+    help_q4: "Combustibil nerecunoscut",
+    help_a4: "Dacă scanerul nu găsește combustibilul pe bon, nu ghicește: câmpul trece pe „De ales…” și trebuie selectat înainte de a salva alimentarea.",
+    help_q5: "Mai multe mașini",
+    help_a5: "Sus, meniul schimbă mașina, <b>+</b> adaugă una, iar creionul permite redenumirea sau ștergerea ei. Fiecare mașină are propriile alimentări, achiziții și statistici.",
+    help_q6: "Copie de rezervă și confidențialitate",
+    help_a6: "Datele rămân în aplicație și, dacă alegi un dosar, în fișierul <b>konso.json</b>, actualizat la fiecare modificare. Nimic nu este trimis pe internet: fără cont, fără reclame, fără statistici de utilizare.",
+    help_q7: "Ștergerea unei înregistrări",
+    help_a7: "Atinge coșul de gunoi, apoi „Confirmi?” în cel mult 3 secunde."
   };
 
   const api = { LANGS, D };
