@@ -20,7 +20,7 @@ set -euo pipefail
 CORE_TAG=v7.0.0
 JS_TAG=v7.0.0
 EM_VERSION=4.0.15
-CORE_FILE=tesseract-core-simd-lstm.wasm.js   # SIMD build, LSTM engine only (oem 1, as used by index.html)
+CORE_FILE=tesseract-core-simd-lstm.wasm.js   # SIMD build, LSTM engine only (oem 1, as used by app.js)
 
 ROOT=$(cd "$(dirname "$0")/.." && pwd)
 WORK=$ROOT/build/tesseract

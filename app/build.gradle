@@ -2,8 +2,9 @@ plugins {
     id 'com.android.application'
 }
 
-// APK de test (branches) : ./gradlew assembleDebug -PkonsoTest=<nom-de-branche>
-// Donne une appli séparée "Konso Test" (app.konso.test), installable à côté de la vraie.
+// Test APK (built for every branch): ./gradlew assembleDebug -PkonsoTest=<branch-name>
+// It is a separate app, "Konso Test" (app.konso.test), installable next to the real one.
+// MainActivity gives it its own port and backup file, so it never touches the real app's data.
 def konsoTest = project.findProperty('konsoTest')
 
 android {
@@ -20,8 +21,8 @@ android {
     }
 
     signingConfigs {
-        // Clé de signature fixe, versionnée dans le dépôt : les mises à jour s'installent par-dessus la version précédente.
-        // Elle est publique : pour distribuer l'appli sérieusement, remplace-la par ta propre clé gardée secrète.
+        // Fixed signing key, committed in the repository, so that updates install over the previous version.
+        // It is public: anyone redistributing the app should use their own secret key instead.
         debug {
             storeFile file('debug.keystore')
             storePassword 'android'

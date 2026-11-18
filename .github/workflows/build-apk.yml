@@ -1,11 +1,11 @@
-name: Compiler l'APK
+name: Build APK
 
-# - main : compile l'APK ; sur lancement manuel ou si le message du commit contient [release],
-#   publie la release versionnée « v<versionName> » (une seule fois par version, son tag sert
-#   à F-Droid / IzzyOnDroid) et recrée la release « latest ».
-# - autre branche : compile un APK de test « Konso Test » (appli séparée, app.konso.test)
-#   et le publie dans la pré-release « test-<branche> ».
-# - branche supprimée : sa pré-release de test est supprimée.
+# - main: builds the APK. When run by hand, or when the commit message contains [release], it also
+#   publishes the versioned release "v<versionName>" (once per version; its tag is what F-Droid and
+#   IzzyOnDroid follow) and recreates the "latest" release linked from the README.
+# - any other branch: builds a test APK, "Konso Test" (separate app, app.konso.test), and publishes it
+#   in the "test-<branch>" pre-release.
+# - deleted branch: its test pre-release is deleted.
 
 on:
   push:
@@ -33,9 +33,9 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
-      - name: Rendre gradlew exécutable
+      - name: Make gradlew executable
         run: chmod +x gradlew
-      - name: Compiler
+      - name: Build
         run: |
           if [ "$IS_MAIN" = "true" ]; then
             ./gradlew assembleDebug --no-daemon
@@ -48,16 +48,16 @@ jobs:
         with:
           name: ${{ env.IS_MAIN == 'true' && 'konso-apk' || 'konso-test-apk' }}
           path: app/build/outputs/apk/debug/app-debug.apk
-      - name: Publier l'APK dans la release « latest » (main)
+      - name: Publish the APK in the releases (main)
         if: env.IS_MAIN == 'true' && (github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[release]'))
         run: |
-          # 1. Release versionnée v<versionName> (konso-<versionName>.apk), créée une seule fois par version :
-          #    son tag sert à F-Droid et IzzyOnDroid pour détecter les nouvelles versions.
-          #    Notes : fastlane/metadata/android/en-US/changelogs/<versionCode>.txt s'il existe.
+          # 1. Versioned release v<versionName> (konso-<versionName>.apk), created once per version:
+          #    F-Droid and IzzyOnDroid detect new versions from its tag.
+          #    Notes: fastlane/metadata/android/en-US/changelogs/<versionCode>.txt if it exists.
           VERSION=$(sed -n "s/^ *versionName '\(.*\)'.*/\1/p" app/build.gradle)
           CODE=$(sed -n "s/^ *versionCode \([0-9]*\).*/\1/p" app/build.gradle)
           if gh release view "v$VERSION" >/dev/null 2>&1; then
-            echo "::warning::La release v$VERSION existe déjà : augmente versionCode et versionName pour publier une nouvelle version."
+            echo "::warning::Release v$VERSION already exists: increase versionCode and versionName to publish a new version."
           else
             cp app/build/outputs/apk/debug/app-debug.apk "konso-$VERSION.apk"
             NOTES="fastlane/metadata/android/en-US/changelogs/$CODE.txt"
@@ -65,21 +65,21 @@ jobs:
             gh release create "v$VERSION" "konso-$VERSION.apk" \
               --title "Konso $VERSION" --notes-file "$NOTES" --target "$GITHUB_SHA" --latest=false
           fi
-          # 2. Release « latest » (konso.apk), recréée à chaque fois : c'est elle que pointe le README.
+          # 2. "latest" release (konso.apk), recreated every time: the README links to it.
           cp app/build/outputs/apk/debug/app-debug.apk konso.apk
           gh release delete latest --yes --cleanup-tag || true
           gh release create latest konso.apk \
-            --title "Konso – dernière version" \
-            --notes "APK compilé automatiquement depuis le commit ${GITHUB_SHA::7}." \
+            --title "Konso – latest version" \
+            --notes "APK built automatically from commit ${GITHUB_SHA::7}." \
             --target "$GITHUB_SHA"
-      - name: Publier l'APK de test dans la pré-release « test-<branche> »
+      - name: Publish the test APK in the test-<branch> pre-release
         if: env.IS_MAIN != 'true'
         run: |
           cp app/build/outputs/apk/debug/app-debug.apk konso-test.apk
           gh release delete "test-$SLUG" --yes --cleanup-tag || true
           gh release create "test-$SLUG" konso-test.apk --prerelease \
             --title "Konso Test – $BRANCH" \
-            --notes "APK de test de la branche $BRANCH (commit ${GITHUB_SHA::7}). S'installe à côté de Konso sous le nom « Konso Test », avec son propre fichier de sauvegarde konso-test.json : les données de la vraie appli ne sont jamais touchées." \
+            --notes "Test APK of branch $BRANCH (commit ${GITHUB_SHA::7}). Installs next to Konso as \"Konso Test\", with its own backup file konso-test.json: the data of the real app is never touched." \
             --target "$GITHUB_SHA"
 
   cleanup:
@@ -89,7 +89,7 @@ jobs:
       BRANCH: ${{ github.event.ref }}
       GH_TOKEN: ${{ github.token }}
     steps:
-      - name: Supprimer la pré-release de test de la branche
+      - name: Delete the test pre-release of the branch
         run: |
           SLUG=$(printf '%s' "$BRANCH" | sed 's#[^A-Za-z0-9._-]#-#g')
           gh release delete "test-$SLUG" --yes --cleanup-tag --repo "$GITHUB_REPOSITORY" || true

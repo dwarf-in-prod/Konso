@@ -12,7 +12,7 @@ const http = require('http'), fs = require('fs'), path = require('path');
 const ROOT = path.join(__dirname, '..', 'app', 'src', 'main', 'assets', 'www');
 const OUT = path.join(__dirname, '..', 'docs', 'screenshots');
 const STORE = path.join(__dirname, '..', 'fastlane', 'metadata', 'android', 'en-US', 'images');
-const TYPES = { '.html': 'text/html', '.js': 'text/javascript', '.wasm': 'application/wasm' };
+const TYPES = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.wasm': 'application/wasm' };
 
 const pad = n => String(n).padStart(2, '0');
 const day = n => { const d = new Date(); d.setDate(d.getDate() + n); return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); };
