@@ -558,7 +558,15 @@ const ICON = {
     'M19 14V6c0-1.1-.9-2-2-2H3c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zm-9-1c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm13-6v11c0 1.1-.9 2-2 2H4v-2h17V7h2z',
   install: 'M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z',
   file: 'M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z',
+  lock: 'M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z',
+  block:
+    'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zM4 12c0-4.42 3.58-8 8-8 1.85 0 3.55.63 4.9 1.69L5.69 16.9A7.902 7.902 0 014 12zm8 8c-1.85 0-3.55-.63-4.9-1.69L18.31 7.1A7.902 7.902 0 0120 12c0 4.42-3.58 8-8 8z',
+  code: 'M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0l4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z',
+  share:
+    'M16 5l-1.42 1.42-1.59-1.59V16h-1.98V4.83L9.42 6.42 8 5l4-4 4 4zm4 5v11c0 1.1-.9 2-2 2H6c-1.11 0-2-.9-2-2V10c0-1.11.89-2 2-2h3v2H6v11h12V10h-3V8h3c1.1 0 2 .89 2 2z',
 };
+// An icon of ICON as inline SVG, to put in a text (sized by the CSS of where it is used).
+const iconSvg = k => `<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="${ICON[k]}"/></svg>`;
 // Full-screen wheel with Cancel / Confirm: the app's way of choosing a value in a list
 // (preferred to native drop-down menus). Options:
 //   icon, color      icon of ICON and its color
@@ -971,9 +979,26 @@ let installEvt = null,
 const standalone = () => matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
 const isIOS = () =>
   /iPad|iPhone|iPod/.test(navigator.userAgent) || (/Mac/.test(navigator.platform) && navigator.maxTouchPoints > 1);
-// Where the browser's install command is, when it offers no install button (Safari, Firefox...).
-const installHow = () => tx(isIOS() ? 'inst_ios' : 'inst_other');
-// Settings > Install the app card: why, and the button or where the command is.
+// Safari on a Mac installs from its File menu ("Add to Dock"); other Mac browsers do not say "Safari".
+const isMacSafari = () =>
+  !isIOS() && /Macintosh/.test(navigator.userAgent) && /Safari\//.test(navigator.userAgent) &&
+  !/Chrome|Chromium|Edg|Firefox|OPR/.test(navigator.userAgent);
+// The two steps that install the app in this browser, when it offers no install button:
+// iPhone / iPad (Safari's Share button), Safari on a Mac (File menu), any other browser (its menu).
+function installSteps() {
+  const k = isIOS() ? 'ios' : isMacSafari() ? 'mac' : 'oth';
+  return [tx('adv_' + k + '1'), tx('adv_' + k + '2')];
+}
+// The blue "How to do it?" box with the numbered steps, in the style of the live results of the
+// fill-up form (advice dialog and Settings card). On iPhone the Share icon is drawn after step 1.
+function howtoHtml() {
+  const share = isIOS() ? ' ' + iconSvg('share') : '';
+  const steps = installSteps()
+    .map((s, i) => `<li><span class="n">${i + 1}</span><span>${esc(s)}${i === 0 ? share : ''}</span></li>`)
+    .join('');
+  return `<div class="howto"><b>${esc(tx('adv_how'))}</b><ol>${steps}</ol></div>`;
+}
+// Settings > Install the app card: why, and the button or how to do it.
 // Hidden in the Android app and once Konso runs installed.
 function renderInstall() {
   const card = $('inst');
@@ -983,7 +1008,7 @@ function renderInstall() {
   }
   card.classList.remove('hide');
   $('inst-btn').classList.toggle('hide', !installEvt);
-  $('inst-how').innerHTML = esc(tx('inst_txt')) + (installEvt ? '' : '<br>' + esc(installHow()));
+  $('inst-how').innerHTML = esc(tx('inst_txt')) + (installEvt ? '' : howtoHtml());
 }
 // Show the browser's own install prompt (only once: the browser gives a new one if it is dismissed).
 async function promptInstall() {
@@ -1015,16 +1040,28 @@ function installAdvice() {
   }
   showAdvice();
 }
-// The advice dialog: with an Install button when the browser offers one, otherwise where the
-// browser's install command is. Redrawn if the browser's offer arrives while it is open.
+// What the advice dialog says, written for people who know nothing about apps or code: why to
+// install (one line), then three reassuring points (data stays on the device, nothing commercial,
+// open code), each with an icon.
+function adviceHtml() {
+  const points = [
+    ['lock', 'adv_p1'],
+    ['block', 'adv_p2'],
+    ['code', 'adv_p3'],
+  ]
+    .map(([i, k]) => `<li>${iconSvg(i)}<span>${esc(tx(k))}</span></li>`)
+    .join('');
+  return `<p class="lead">${esc(tx('adv_lead'))}</p><ul class="pts">${points}</ul>`;
+}
+// The advice dialog: with an Install button when the browser offers one, otherwise the blue box
+// with the steps. Redrawn if the browser's offer arrives while it is open.
 function showAdvice() {
   adviceOpen = true;
   const done = () => (adviceOpen = false);
-  const msg = '<p>' + esc(tx('inst_adv_msg')) + '</p>';
   if (installEvt) {
     dialog(
       tx('inst_adv_title'),
-      msg,
+      adviceHtml(),
       [
         { t: tx('inst_later'), tonal: true, fn: done },
         { t: tx('inst_btn'), fn: () => (done(), promptInstall()) },
@@ -1032,7 +1069,7 @@ function showAdvice() {
       'install',
     );
   } else {
-    dialog(tx('inst_adv_title'), msg + '<p><b>' + esc(installHow()) + '</b></p>', [{ t: tx('ok'), fn: done }], 'install');
+    dialog(tx('inst_adv_title'), adviceHtml() + howtoHtml(), [{ t: tx('adv_ok'), fn: done }], 'install');
   }
 }
 // Web version only: install prompt, offline cache (sw.js exists only on the published site, the
