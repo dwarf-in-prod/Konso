@@ -433,6 +433,35 @@ textarea {
 #garList > .btn {
   margin-top: 16px;
 }
+/* My garage: a folded card whose summary is a button ("Car purchase & payback") */
+details.fold {
+  margin-top: 16px;
+}
+.fold > summary {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  list-style: none;
+  padding: 0;
+  font: 500 16px/1.4 var(--font);
+}
+.fold > summary::-webkit-details-marker {
+  display: none;
+}
+.fold > summary .lbl {
+  flex: 1;
+  min-width: 0;
+}
+.fold > summary .chev {
+  color: var(--on-surf-v);
+  transition: transform 0.2s;
+}
+.fold[open] > summary .chev {
+  transform: rotate(180deg);
+}
+.fold[open] > summary {
+  margin-bottom: 16px;
+}
 /* My garage, buying a new car: subheadings, notes under a field, switch, result */
 .card h4.sub {
   font: 500 14px/1.4 var(--font);
