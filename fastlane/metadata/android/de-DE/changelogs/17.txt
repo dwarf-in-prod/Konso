@@ -1,0 +1,1 @@
+Web-Version: Die Installationsmeldung ist jetzt kurz und klar. Sie erklärt, warum sich die Installation lohnt, erinnert daran, dass deine Daten auf deinem Gerät bleiben (kein Konto, keine Werbung, kein Tracking, Open-Source-Code), und zeigt die Schritte für deinen Browser in einem blauen Kasten. Die Android-App bleibt unverändert.

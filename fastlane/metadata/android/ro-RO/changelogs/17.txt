@@ -1,0 +1,1 @@
+Versiunea web: mesajul de instalare este acum scurt și clar. Explică de ce să instalezi aplicația, amintește că datele tale rămân pe dispozitiv (fără cont, fără reclame, fără urmărire, cod open source) și arată pașii pentru browserul tău într-o casetă albastră. Aplicația Android nu se schimbă.

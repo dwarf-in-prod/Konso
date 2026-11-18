@@ -1,0 +1,1 @@
+Webversie: de installatiemelding is nu kort en duidelijk. Ze legt uit waarom je de app installeert, herinnert eraan dat je gegevens op je apparaat blijven (geen account, geen reclame, geen tracking, open source) en toont de stappen voor je browser in een blauw vak. De Android-app blijft ongewijzigd.

@@ -1,0 +1,1 @@
+Versión web: el mensaje de instalación ahora es breve y claro. Explica por qué instalar la app, recuerda que tus datos se quedan en tu dispositivo (sin cuenta, sin anuncios, sin rastreo, código abierto) y muestra los pasos para tu navegador en un recuadro azul. La app Android no cambia.

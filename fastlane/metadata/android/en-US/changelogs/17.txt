@@ -1,0 +1,1 @@
+Web version: the install message is now short and clear. It explains why to install the app, reminds you that your data stays on your device (no account, no ads, no tracking, open source code), and shows the steps for your browser in a blue box. The Android app is unchanged.
