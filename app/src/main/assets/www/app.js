@@ -1727,7 +1727,9 @@ function lineChart() {
   const vs = data.map(x => x.v),
     lo = Math.min(...vs, avg),
     hi = Math.max(...vs, avg),
-    pad = (hi - lo || 1) * 0.15;
+    // a range below 1e-6 is rounding noise (all values equal): use 1, or niceTicks() would make
+    // billions of ticks
+    pad = (hi - lo > 1e-6 ? hi - lo : 1) * 0.15;
   const tk = niceTicks(lo - pad, hi + pad, 4),
     y0 = tk[0],
     y1 = tk[tk.length - 1];
