@@ -12,8 +12,10 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
+import android.view.DisplayCutout;
 import android.view.View;
 import android.view.Window;
+import android.view.WindowInsets;
 import android.view.WindowInsetsController;
 import android.view.WindowManager;
 import android.webkit.JavascriptInterface;
@@ -58,7 +60,8 @@ import java.util.concurrent.Executors;
  * - gives the page a small bridge, window.Android (class Bridge), to choose a backup folder and to
  *   read / write konso.json in it through the Storage Access Framework (works with Google Drive too);
  * - colours the status bar and the navigation bar like the page (light or dark theme), so the app
- *   looks like it fills the whole screen (Bridge.setBars()).
+ *   looks like it fills the whole screen (Bridge.setBars()), and in landscape lets the page draw
+ *   next to the camera cutout instead of leaving a black band (Bridge.insets()).
  */
 public class MainActivity extends Activity {
 
@@ -89,6 +92,8 @@ public class MainActivity extends Activity {
     private static final int REQ_IMAGE = 2;
 
     private WebView web;
+    /** Room taken by the camera cutout on the left and right edges, in CSS pixels ("left,right"). */
+    private volatile String cutout = "0,0";
     private SharedPreferences prefs;
     private ServerSocket server;
     private final ExecutorService pool = Executors.newFixedThreadPool(4);
@@ -116,8 +121,21 @@ public class MainActivity extends Activity {
             port = -1;
         }
 
+        // In landscape the camera cutout is on a short edge: draw the page there too (the page keeps
+        // its content clear of the cutout, see Bridge.insets()) instead of a black band.
+        WindowManager.LayoutParams lp = getWindow().getAttributes();
+        lp.layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
+        getWindow().setAttributes(lp);
+
         web = new WebView(this);
         setContentView(web);
+        web.setOnApplyWindowInsetsListener(new View.OnApplyWindowInsetsListener() {
+            @Override
+            public WindowInsets onApplyWindowInsets(View v, WindowInsets insets) {
+                readCutout(insets);
+                return v.onApplyWindowInsets(insets);
+            }
+        });
 
         WebSettings s = web.getSettings();
         s.setJavaScriptEnabled(true);
@@ -484,6 +502,21 @@ public class MainActivity extends Activity {
         }
     }
 
+    /**
+     * Keep the room taken by the camera cutout on the left and right edges (landscape), in CSS
+     * pixels, and tell the page (app.js: window.onInsets) so it moves its content clear of it.
+     * The top and bottom are left out: there the status and navigation bars already keep clear.
+     */
+    private void readCutout(WindowInsets insets) {
+        DisplayCutout c = insets.getDisplayCutout();
+        float d = getResources().getDisplayMetrics().density;
+        String now = c == null ? "0,0"
+                : Math.round(c.getSafeInsetLeft() / d) + "," + Math.round(c.getSafeInsetRight() / d);
+        if (now.equals(cutout)) return;
+        cutout = now;
+        web.evaluateJavascript("window.onInsets && window.onInsets()", null);
+    }
+
     // ------------------------------------------------------------------
     // Chosen folder (Storage Access Framework) and backup file
     // ------------------------------------------------------------------
@@ -622,7 +655,7 @@ public class MainActivity extends Activity {
 
     /**
      * Methods the page can call (app.js, NA): window.Android.folderName(), pickFolder(),
-     * writeFile(text), fileName(), readFile(), setOnline(on) and setBars(top, bottom, dark).
+     * writeFile(text), fileName(), readFile(), setOnline(on), setBars(top, bottom, dark) and insets().
      */
     public class Bridge {
         @JavascriptInterface
@@ -671,6 +704,12 @@ public class MainActivity extends Activity {
         @JavascriptInterface
         public void setOnline(boolean on) {
             prefs.edit().putBoolean(PREF_ONLINE, on).apply();
+        }
+
+        /** Room taken by the camera cutout on the left and right edges, in CSS pixels: "left,right". */
+        @JavascriptInterface
+        public String insets() {
+            return cutout;
         }
 
         /**

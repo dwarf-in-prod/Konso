@@ -6,7 +6,8 @@
  * .hide hides anything; .kb on <body> means the keyboard is open (the bottom bar is hidden).
  * Adaptive layout (end of the file): one column with a bottom bar on phones; on wide screens
  * (tablets, computers, phones in landscape) a navigation rail on the left and two columns.
- * env(safe-area-inset-*) keeps clear of the notch and rounded corners (viewport-fit=cover).
+ * env(safe-area-inset-*) keeps clear of the notch and rounded corners (viewport-fit=cover); on the
+ * left and right, --sa-l / --sa-r also cover the camera cutout of the Android app in landscape.
  */
 :root {
   --primary: #415f91;
@@ -41,6 +42,11 @@
   --font: system-ui, Roboto, -apple-system, 'Segoe UI', sans-serif;
   /* width of the single column (phones, small tablets) */
   --maxw: 640px;
+  /* space to keep clear on the left and right edges: the notch and rounded corners
+     (env(safe-area-inset-*)) or, in the Android app in landscape, the camera cutout (--cut-l,
+     --cut-r, set by syncInsets() in app.js). The larger of the two, so it is never counted twice. */
+  --sa-l: max(env(safe-area-inset-left, 0px), var(--cut-l, 0px));
+  --sa-r: max(env(safe-area-inset-right, 0px), var(--cut-r, 0px));
 }
 /* Dark theme: when the device is dark, unless the user chose Light in Settings (data-theme="light"
    on <html>, set by applyTheme() in app.js), and always when the user chose Dark. The two blocks
@@ -138,8 +144,8 @@ body {
   max-width: var(--maxw);
   margin-inline: auto;
   padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px));
-  padding-left: env(safe-area-inset-left, 0px);
-  padding-right: env(safe-area-inset-right, 0px);
+  padding-left: var(--sa-l);
+  padding-right: var(--sa-r);
 }
 svg.i {
   width: 24px;
@@ -1109,8 +1115,8 @@ body.kb #st {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding: calc(24px + env(safe-area-inset-top, 0px)) calc(20px + env(safe-area-inset-right, 0px))
-    calc(24px + env(safe-area-inset-bottom, 0px)) calc(20px + env(safe-area-inset-left, 0px));
+  padding: calc(24px + env(safe-area-inset-top, 0px)) calc(20px + var(--sa-r))
+    calc(24px + env(safe-area-inset-bottom, 0px)) calc(20px + var(--sa-l));
 }
 .lang .wrap {
   width: 100%;
@@ -1185,7 +1191,7 @@ body.kb #st {
 @media (min-width: 840px) {
   body {
     max-width: none;
-    padding: 0 env(safe-area-inset-right, 0px) 32px calc(88px + env(safe-area-inset-left, 0px));
+    padding: 0 var(--sa-r) 32px calc(88px + var(--sa-l));
   }
   .appbar,
   main {
@@ -1207,13 +1213,13 @@ body.kb #st {
   .nav {
     top: 0;
     right: auto;
-    width: calc(88px + env(safe-area-inset-left, 0px));
+    width: calc(88px + var(--sa-l));
     max-width: none;
     margin: 0;
     flex-direction: column;
     justify-content: flex-start;
     gap: 12px;
-    padding: calc(80px + env(safe-area-inset-top, 0px)) 0 16px env(safe-area-inset-left, 0px);
+    padding: calc(80px + env(safe-area-inset-top, 0px)) 0 16px var(--sa-l);
   }
   .nav button {
     flex: none;
@@ -1227,7 +1233,7 @@ body.kb #st {
   }
   #st,
   body.kb #st {
-    left: calc(88px + env(safe-area-inset-left, 0px));
+    left: calc(88px + var(--sa-l));
     right: 0;
     bottom: calc(24px + env(safe-area-inset-bottom, 0px));
     max-width: 560px;
