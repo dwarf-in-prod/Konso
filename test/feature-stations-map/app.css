@@ -1,0 +1,1479 @@
+/*
+ * Konso — styles. Material Design 3: tonal surfaces, rounded shapes, navigation bar at the bottom.
+ * Colours are variables (:root), redefined for the dark theme: the device's (prefers-color-scheme)
+ * or the one chosen in Settings (data-theme on <html>).
+ * Form field colours: .todo = green (to fill in), .need = red (missing after a save attempt).
+ * .hide hides anything; .kb on <body> means the keyboard is open (the bottom bar is hidden).
+ * Adaptive layout (end of the file): one column with a bottom bar on phones; on wide screens
+ * (tablets, computers, phones in landscape) a navigation rail on the left and two columns.
+ * env(safe-area-inset-*) keeps clear of the notch and rounded corners (viewport-fit=cover); on the
+ * left and right, --sa-l / --sa-r also cover the camera cutout of the Android app in landscape.
+ */
+:root {
+  --primary: #415f91;
+  --on-primary: #fff;
+  --primary-c: #d6e3ff;
+  --on-primary-c: #001b3e;
+  --secondary-c: #dbe2f9;
+  --on-secondary-c: #141b2c;
+  --surface: #f9f9ff;
+  --surf: #edeef4;
+  --surf-high: #e7e8ee;
+  --on-surf: #191c20;
+  --on-surf-v: #44474e;
+  --outline: #74777f;
+  --outline-v: #c4c6d0;
+  --error: #ba1a1a;
+  --on-error: #fff;
+  --ok: #386a20;
+  --amber: #7c5800;
+  --amber-c: #ffdf9e;
+  --on-amber-c: #261a00;
+  --inverse: #2e3036;
+  --on-inverse: #f0f0f7;
+  /* chart series colours: each one has at least 3:1 contrast with the cards (--surf) */
+  --s1: #2a78d6;
+  --s2: #d4561f;
+  /* more series colours, for the followed stations (Stations chart) */
+  --s3: #188a55;
+  --s4: #9b4dca;
+  --s5: #9e7400;
+  --s6: #d63c8c;
+  --font: system-ui, Roboto, -apple-system, 'Segoe UI', sans-serif;
+  /* width of the single column (phones, small tablets) */
+  --maxw: 640px;
+  /* space to keep clear on the left and right edges: the notch and rounded corners
+     (env(safe-area-inset-*)) or, in the Android app in landscape, the camera cutout (--cut-l,
+     --cut-r, set by syncInsets() in app.js). The larger of the two, so it is never counted twice. */
+  --sa-l: max(env(safe-area-inset-left, 0px), var(--cut-l, 0px));
+  --sa-r: max(env(safe-area-inset-right, 0px), var(--cut-r, 0px));
+  /* space to keep clear at the top and bottom (status bar, gesture bar, notch). In the Android app
+     (.native on <html>, set by syncInsets() in app.js) the app itself already keeps the page clear
+     of the bars and of the camera there (MainActivity.fitBars()), so the page adds nothing: the
+     WebView may still report the camera as a safe area, which would count the room twice. */
+  --sa-t: env(safe-area-inset-top, 0px);
+  --sa-b: env(safe-area-inset-bottom, 0px);
+}
+:root.native {
+  --sa-t: 0px;
+  --sa-b: 0px;
+}
+/* Dark theme: when the device is dark, unless the user chose Light in Settings (data-theme="light"
+   on <html>, set by applyTheme() in app.js), and always when the user chose Dark. The two blocks
+   below hold the same colours: change both. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --primary: #aac7ff;
+    --on-primary: #0a305f;
+    --primary-c: #284777;
+    --on-primary-c: #d6e3ff;
+    --secondary-c: #3e4759;
+    --on-secondary-c: #dbe2f9;
+    --surface: #111318;
+    --surf: #1d2024;
+    --surf-high: #282a2f;
+    --on-surf: #e2e2e9;
+    --on-surf-v: #c4c6d0;
+    --outline: #8e9099;
+    --outline-v: #44474e;
+    --error: #ffb4ab;
+    --on-error: #690005;
+    --ok: #9cd67d;
+    --amber: #f5bf48;
+    --amber-c: #5c4200;
+    --on-amber-c: #ffdf9e;
+    --inverse: #e2e2e9;
+    --on-inverse: #2e3036;
+    --s1: #3987e5;
+    --s2: #d95926;
+    --s3: #3bb57c;
+    --s4: #b07ae0;
+    --s5: #e0b020;
+    --s6: #e8609f;
+  }
+}
+:root[data-theme='dark'] {
+  --primary: #aac7ff;
+  --on-primary: #0a305f;
+  --primary-c: #284777;
+  --on-primary-c: #d6e3ff;
+  --secondary-c: #3e4759;
+  --on-secondary-c: #dbe2f9;
+  --surface: #111318;
+  --surf: #1d2024;
+  --surf-high: #282a2f;
+  --on-surf: #e2e2e9;
+  --on-surf-v: #c4c6d0;
+  --outline: #8e9099;
+  --outline-v: #44474e;
+  --error: #ffb4ab;
+  --on-error: #690005;
+  --ok: #9cd67d;
+  --amber: #f5bf48;
+  --amber-c: #5c4200;
+  --on-amber-c: #ffdf9e;
+  --inverse: #e2e2e9;
+  --on-inverse: #2e3036;
+  --s1: #3987e5;
+  --s2: #d95926;
+  --s3: #3bb57c;
+  --s4: #b07ae0;
+  --s5: #e0b020;
+  --s6: #e8609f;
+}
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+html {
+  background: var(--surface);
+}
+@keyframes tabin {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+section.tabin {
+  animation: tabin 0.32s cubic-bezier(0.2, 0, 0, 1);
+}
+@media (prefers-reduced-motion: reduce) {
+  section.tabin {
+    animation: none;
+  }
+}
+body {
+  margin: 0;
+  background: var(--surface);
+  color: var(--on-surf);
+  font: 16px/1.5 var(--font);
+  max-width: var(--maxw);
+  margin-inline: auto;
+  padding-bottom: calc(96px + var(--sa-b));
+  padding-left: var(--sa-l);
+  padding-right: var(--sa-r);
+}
+svg.i {
+  width: 24px;
+  height: 24px;
+  fill: currentColor;
+  flex: none;
+}
+.hide {
+  display: none !important;
+}
+
+/* top bar: logo and app name on the left, car selector in the middle, settings button (gear) on
+   the right. Three columns: the two side ones share the free room equally, so the car name stays
+   centered on the screen; a long car name takes the room it needs and is cut with "…" last. */
+.appbar {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  display: grid;
+  grid-template-columns: 1fr minmax(0, max-content) 1fr;
+  align-items: center;
+  gap: 4px;
+  height: calc(64px + var(--sa-t));
+  padding: var(--sa-t) 8px 0 8px;
+  background: var(--surface);
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-left: 8px;
+}
+.logo {
+  flex: none;
+  width: 32px;
+  height: 32px;
+}
+.appname {
+  color: var(--primary);
+  font: 600 18px/1 var(--font);
+  letter-spacing: 0.2px;
+}
+.carsel {
+  position: relative;
+  min-width: 0;
+  display: flex;
+  justify-content: center;
+}
+/* what the user sees: the name and the arrow, side by side */
+.carsel .cur {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  min-width: 0;
+  padding: 8px 4px;
+  border-radius: 12px;
+  color: var(--on-surf);
+  font: 500 22px/1.2 var(--font);
+}
+#carShown {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.carsel .cur svg {
+  color: var(--on-surf-v);
+}
+/* the native menu, invisible, over the whole area */
+.carsel select {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  border: 0;
+  font-size: 16px;
+  cursor: pointer;
+}
+/* keyboard focus only (a tap leaves the menu focused, without outline) */
+.carsel:has(select:focus-visible) .cur {
+  outline: 2px solid var(--primary);
+}
+.appbar .icon {
+  justify-self: end;
+}
+.icon {
+  width: 48px;
+  height: 48px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--on-surf-v);
+  display: grid;
+  place-items: center;
+  padding: 0;
+}
+.icon:active {
+  background: var(--surf-high);
+}
+/* gear of the top bar while the settings are shown */
+.icon.on {
+  background: var(--secondary-c);
+  color: var(--on-secondary-c);
+}
+
+main {
+  padding: 0 16px;
+}
+section {
+  display: block;
+}
+h2.sec {
+  font: 500 14px/1.4 var(--font);
+  color: var(--on-surf-v);
+  margin: 24px 4px 8px;
+  letter-spacing: 0.1px;
+}
+.card {
+  background: var(--surf);
+  border-radius: 20px;
+  padding: 16px;
+  margin: 0 0 12px;
+}
+.card h3 {
+  font: 500 16px/1.4 var(--font);
+  margin: 0 0 12px;
+}
+
+/* form fields: M3 outline with a floating label; .fieldbtn = a field that opens a wheel */
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px 12px;
+}
+.full {
+  grid-column: 1/-1;
+}
+.f {
+  position: relative;
+}
+.f input,
+.f select,
+.f .fieldbtn {
+  width: 100%;
+  height: 54px;
+  padding: 0 14px;
+  border: 1px solid var(--outline);
+  border-radius: 12px;
+  background: transparent;
+  color: var(--on-surf);
+  font: inherit;
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+}
+.f input:focus,
+.f select:focus,
+.f .fieldbtn:focus-visible {
+  border: 2px solid var(--primary);
+  padding: 0 13px;
+}
+.f label {
+  position: absolute;
+  left: 12px;
+  top: 15px;
+  padding: 0 4px;
+  background: var(--surf);
+  color: var(--on-surf-v);
+  font-size: 16px;
+  line-height: 22px;
+  pointer-events: none;
+  transition:
+    top 0.12s,
+    font-size 0.12s;
+  max-width: calc(100% - 28px);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.f input:focus + label,
+.f input:not(:placeholder-shown) + label,
+.f.fl label {
+  top: -10px;
+  font-size: 12px;
+  line-height: 18px;
+}
+.f input:focus + label,
+.f select:focus + label {
+  color: var(--primary);
+}
+.f.todo input,
+.f.todo select,
+.f.todo .fieldbtn {
+  border: 2px solid var(--ok);
+  padding: 0 13px;
+}
+.f.todo label,
+.f.todo input:focus + label,
+.f.todo select:focus + label {
+  color: var(--ok);
+}
+.f.need input,
+.f.need select,
+.f.need .fieldbtn {
+  border: 2px solid var(--error);
+  padding: 0 13px;
+}
+.f.need label,
+.f.need input:focus + label,
+.f.need select:focus + label {
+  color: var(--error);
+}
+.f .fieldbtn {
+  text-align: left;
+  cursor: pointer;
+}
+.f.sel::after {
+  content: '';
+  position: absolute;
+  right: 14px;
+  top: 23px;
+  border: 5px solid transparent;
+  border-top-color: var(--on-surf-v);
+  pointer-events: none;
+}
+textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid var(--outline);
+  border-radius: 12px;
+  background: transparent;
+  color: var(--on-surf);
+  font: 12px/1.4 monospace;
+  outline: none;
+}
+
+/* buttons */
+.btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  height: 48px;
+  border: 0;
+  border-radius: 24px;
+  background: var(--primary);
+  color: var(--on-primary);
+  font: 500 15px/1 var(--font);
+  margin-top: 14px;
+  cursor: pointer;
+}
+.btn:active {
+  filter: brightness(0.92);
+}
+.btn.tonal {
+  background: var(--secondary-c);
+  color: var(--on-secondary-c);
+}
+.btn.danger {
+  background: var(--error);
+  color: var(--on-error);
+}
+.btn.first {
+  margin-top: 0;
+}
+.btns2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.btns2 .btn {
+  margin-top: 14px;
+}
+
+/* live results under the fill-up form */
+.live {
+  background: var(--primary-c);
+  color: var(--on-primary-c);
+  border-radius: 16px;
+  padding: 12px 8px;
+  margin-top: 16px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  text-align: center;
+}
+.live b {
+  display: block;
+  font: 500 20px/1.3 var(--font);
+}
+.live span {
+  font-size: 12px;
+  opacity: 0.8;
+}
+
+/* history lists (.hl = highlighted cost per 100 km) */
+.row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 0;
+  border-top: 1px solid var(--outline-v);
+}
+.row:first-child {
+  border-top: 0;
+}
+.row .l {
+  flex: 1;
+  min-width: 0;
+}
+.row .t {
+  font-weight: 500;
+}
+.row .m {
+  font-size: 13px;
+  color: var(--on-surf-v);
+  overflow-wrap: anywhere;
+}
+.row .r {
+  text-align: right;
+  white-space: nowrap;
+}
+/* a piece of the details that must not be cut, and the small unit after the consumption */
+.row .nw {
+  white-space: nowrap;
+}
+.row .r .u {
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--on-surf-v);
+}
+.row .hl {
+  display: inline-block;
+  margin: 3px 0 2px;
+  padding: 1px 8px;
+  border-radius: 8px;
+  background: var(--primary-c);
+  color: var(--on-primary-c);
+  font-size: 13px;
+  font-weight: 600;
+}
+/* a button that looks like a link (Stats: "Open purchases") */
+.link {
+  border: 0;
+  background: none;
+  padding: 0;
+  font: inherit;
+  color: var(--primary);
+  text-decoration: underline;
+  cursor: pointer;
+}
+/* My garage: the two buttons at the top (cars / purchases), M3 segmented buttons */
+.seg {
+  display: flex;
+  border: 1px solid var(--outline);
+  border-radius: 20px;
+  overflow: hidden;
+  margin: 4px 0 16px;
+}
+.seg button {
+  flex: 1;
+  min-width: 0;
+  height: 40px;
+  border: 0;
+  background: transparent;
+  color: var(--on-surf);
+  font: 500 14px/1.2 var(--font);
+  cursor: pointer;
+}
+.seg button + button {
+  border-left: 1px solid var(--outline);
+}
+.seg button.on {
+  background: var(--secondary-c);
+  color: var(--on-secondary-c);
+}
+/* Stations: postcode field and its Search button on one line */
+.stsearch {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+.stsearch .f {
+  flex: 1;
+}
+.stsearch .btn {
+  width: auto;
+  margin: 0;
+  padding: 0 24px;
+}
+/* colour of a followed station's line in the chart, at the start of its row */
+.row .dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 5px;
+  flex: none;
+}
+/* a search result already followed, or the + button to follow it */
+.st-add {
+  border: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: 20px;
+  background: var(--primary);
+  color: var(--on-primary);
+  display: grid;
+  place-items: center;
+  padding: 0;
+  flex: none;
+  cursor: pointer;
+}
+.st-done {
+  font-size: 13px;
+  color: var(--on-surf-v);
+  flex: none;
+}
+/* Stations map: the map (Leaflet, OpenStreetMap tiles), the "Locate me" button over its top right
+   corner, the price labels (.pin, from green = cheapest of the area to red) and the window of a
+   station. The #stMap selectors win over vendor/leaflet.css, loaded later. */
+.stmapwrap {
+  position: relative;
+}
+#stMap {
+  height: min(60vh, 520px);
+  min-height: 300px;
+  border-radius: 16px;
+  overflow: hidden;
+  background: var(--surf-high);
+  z-index: 0;
+  font: 14px/1.4 var(--font);
+}
+.maploc {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 500;
+  width: 48px;
+  height: 48px;
+  border: 0;
+  border-radius: 24px;
+  background: var(--surface);
+  color: var(--primary);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
+  display: grid;
+  place-items: center;
+  padding: 0;
+  cursor: pointer;
+}
+/* the label sits above its point, with a small arrow pointing at it */
+.pin span {
+  position: absolute;
+  left: 0;
+  bottom: 7px;
+  transform: translateX(-50%);
+  padding: 1px 7px;
+  border: 2px solid #fff;
+  border-radius: 10px;
+  color: #fff;
+  font: 600 13px/1.4 var(--font);
+  white-space: nowrap;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+  cursor: pointer;
+}
+.pin span::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: -9px;
+  margin-left: -5px;
+  border: 5px solid transparent;
+}
+.pin .pin-lo {
+  background: #1b7a37;
+}
+.pin .pin-lo::after {
+  border-top-color: #1b7a37;
+}
+.pin .pin-mid {
+  background: #9a5a00;
+}
+.pin .pin-mid::after {
+  border-top-color: #9a5a00;
+}
+.pin .pin-hi {
+  background: #b3261e;
+}
+.pin .pin-hi::after {
+  border-top-color: #b3261e;
+}
+/* a followed station: a blue ring around its label */
+.pin .pin-f {
+  box-shadow:
+    0 0 0 2px #1f4e79,
+    0 1px 4px rgba(0, 0, 0, 0.35);
+}
+#stMap .leaflet-popup-content-wrapper,
+#stMap .leaflet-popup-tip {
+  background: var(--surface);
+  color: var(--on-surf);
+}
+#stMap .leaflet-popup-content {
+  margin: 12px 14px;
+  font: 14px/1.45 var(--font);
+}
+#stMap .leaflet-control-attribution {
+  font-size: 11px;
+}
+/* zoom buttons big enough for a finger */
+#stMap .leaflet-bar a {
+  width: 40px;
+  height: 40px;
+  line-height: 40px;
+  font-size: 22px;
+}
+.mappop .mp-t {
+  font-weight: 600;
+  padding-right: 12px;
+}
+.mappop .mp-m {
+  color: var(--on-surf-v);
+  font-size: 13px;
+  margin-bottom: 6px;
+}
+.mappop .mp-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+.mappop .mp-row.cur b {
+  color: var(--primary);
+}
+.mappop .mp-b {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.mappop .btn {
+  height: 40px;
+  margin-top: 6px;
+  font-size: 14px;
+}
+.mappop .btn:disabled {
+  opacity: 0.6;
+}
+/* dark theme: the map tiles are darkened too, so the map does not dazzle */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) #stMap .leaflet-tile-pane {
+    filter: invert(1) hue-rotate(180deg) brightness(0.9) contrast(0.9);
+  }
+}
+:root[data-theme='dark'] #stMap .leaflet-tile-pane {
+  filter: invert(1) hue-rotate(180deg) brightness(0.9) contrast(0.9);
+}
+/* My garage: one line per car, the whole line is a button that opens the edit form */
+.carrow {
+  width: 100%;
+  border-left: 0;
+  border-right: 0;
+  border-bottom: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  padding-inline: 0;
+}
+.carrow .l {
+  display: flex;
+  flex-direction: column;
+}
+.carrow > svg.i {
+  color: var(--on-surf-v);
+}
+.carico {
+  width: 40px;
+  height: 40px;
+  border-radius: 20px;
+  display: grid;
+  place-items: center;
+  flex: none;
+  background: var(--secondary-c);
+  color: var(--on-secondary-c);
+}
+/* small label next to the name of the car selected in the top bar */
+.chip {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 0 8px;
+  border-radius: 8px;
+  background: var(--primary-c);
+  color: var(--on-primary-c);
+  font-size: 12px;
+  font-weight: 600;
+  vertical-align: 1px;
+}
+#garList > .btn {
+  margin-top: 16px;
+}
+/* My garage: a folded card whose summary is a button ("Car purchase & payback") */
+details.fold {
+  margin-top: 16px;
+}
+.fold > summary {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  list-style: none;
+  padding: 0;
+  font: 500 16px/1.4 var(--font);
+}
+.fold > summary::-webkit-details-marker {
+  display: none;
+}
+.fold > summary .lbl {
+  flex: 1;
+  min-width: 0;
+}
+.fold > summary .chev {
+  color: var(--on-surf-v);
+  transition: transform 0.2s;
+}
+.fold[open] > summary .chev {
+  transform: rotate(180deg);
+}
+.fold[open] > summary {
+  margin-bottom: 16px;
+}
+/* My garage, buying a new car: subheadings, notes under a field, switch, result */
+.card h4.sub {
+  font: 500 14px/1.4 var(--font);
+  color: var(--primary);
+  margin: 20px 0 12px;
+}
+.note.fnote {
+  margin-top: -6px;
+}
+.fnote:empty {
+  display: none;
+}
+/* M3 switch: the real checkbox is hidden, .trk draws the track and its thumb (::after) */
+.switch {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 18px;
+  font-size: 14px;
+  cursor: pointer;
+}
+.switch input {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+}
+.switch .trk {
+  position: relative;
+  flex: none;
+  width: 52px;
+  height: 32px;
+  border-radius: 16px;
+  border: 2px solid var(--outline);
+  background: var(--surf-high);
+  transition: background 0.15s, border-color 0.15s;
+}
+.switch .trk::after {
+  content: '';
+  position: absolute;
+  left: 6px;
+  top: 6px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--outline);
+  transition: left 0.15s, width 0.15s, height 0.15s, top 0.15s, background 0.15s;
+}
+.switch input:checked + .trk {
+  background: var(--primary);
+  border-color: var(--primary);
+}
+.switch input:checked + .trk::after {
+  left: 22px;
+  top: 2px;
+  width: 24px;
+  height: 24px;
+  background: var(--on-primary);
+}
+.switch input:focus-visible + .trk {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+.planres {
+  background: var(--primary-c);
+  color: var(--on-primary-c);
+  border-radius: 16px;
+  padding: 12px 14px;
+  font-size: 14px;
+  margin-top: 16px;
+}
+.planres .kv {
+  padding: 4px 0;
+}
+.planres .kv span:last-child {
+  font-weight: 500;
+  white-space: nowrap;
+  padding-left: 12px;
+}
+.planres .big {
+  font-size: 16px;
+  font-weight: 600;
+  margin-top: 10px;
+}
+.planres .kv + .big {
+  border-top: 1px solid currentColor;
+  padding-top: 10px;
+}
+.del {
+  border: 0;
+  background: transparent;
+  color: var(--on-surf-v);
+  width: 48px;
+  height: 48px;
+  border-radius: 24px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  flex: none;
+}
+.del svg {
+  width: 22px;
+  height: 22px;
+}
+.del.armed {
+  width: auto;
+  padding: 0 14px;
+  background: var(--error);
+  color: var(--on-error);
+  font: 500 13px var(--font);
+}
+.empty {
+  color: var(--on-surf-v);
+  text-align: center;
+  padding: 20px 0;
+  font-size: 14px;
+}
+.note {
+  font-size: 13px;
+  color: var(--on-surf-v);
+  margin-top: 12px;
+  line-height: 1.5;
+}
+
+/* Stats tab: figures, totals, charts and their information bubble (.tip) */
+.stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px 12px;
+}
+.stat b {
+  display: block;
+  font: 500 26px/1.2 var(--font);
+  color: var(--primary);
+}
+.stat span {
+  font-size: 13px;
+  color: var(--on-surf-v);
+}
+.kv {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0;
+}
+.kv.tot {
+  border-top: 1px solid var(--outline-v);
+  margin-top: 6px;
+  padding-top: 12px;
+  font-weight: 500;
+}
+.bar {
+  height: 8px;
+  border-radius: 4px;
+  background: var(--primary-c);
+  margin-top: 6px;
+  overflow: hidden;
+}
+.bar i {
+  display: block;
+  height: 100%;
+  background: var(--primary);
+  border-radius: 4px;
+}
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  font-size: 13px;
+  color: var(--on-surf-v);
+  margin-bottom: 8px;
+}
+/* each item on one line, cut with "…" when too long (station addresses) */
+.legend > span {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.legend i {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 5px;
+  margin-right: 6px;
+}
+.chart {
+  position: relative;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+.chart svg {
+  width: 100%;
+  height: auto;
+  display: block;
+  touch-action: pan-y;
+}
+/* Charts are drawn in 600-unit-wide SVG coordinates, then scaled to the card: --chart-k
+   (600 / drawn width in px, set by watchChartScale() in app.js) keeps the labels at 12 px on
+   screen. 1.8 is the value for a common phone, used until the first measure. */
+.chart text {
+  fill: var(--on-surf-v);
+  font-size: calc(12px * var(--chart-k, 1.8));
+}
+.chart .grid {
+  stroke: var(--outline-v);
+  stroke-width: 1;
+}
+.tip {
+  position: absolute;
+  top: 0;
+  pointer-events: none;
+  background: var(--inverse);
+  color: var(--on-inverse);
+  font-size: 12px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  white-space: nowrap;
+  transform: translate(-50%, -5vh);
+  display: none;
+  z-index: 2;
+  line-height: 1.4;
+}
+.sum {
+  font-size: 14px;
+  margin-top: 10px;
+  color: var(--on-surf-v);
+}
+.sum b {
+  color: var(--on-surf);
+}
+
+/* receipt scan result */
+.scanres {
+  background: var(--primary-c);
+  color: var(--on-primary-c);
+  border-radius: 16px;
+  padding: 12px 14px;
+  font-size: 14px;
+  margin: 12px 0 0;
+}
+.scanres.warn {
+  outline: 2px solid var(--error);
+}
+.scanres .w {
+  color: var(--error);
+  margin-top: 6px;
+}
+.scanres .note {
+  color: inherit;
+  opacity: 0.8;
+}
+details {
+  margin-top: 12px;
+}
+/* raw text read on the receipt, or the technical log of a failed scan */
+.ocrtext {
+  white-space: pre-wrap;
+  font-size: 12px;
+}
+summary {
+  cursor: pointer;
+  font-weight: 500;
+  padding: 4px 0;
+}
+details .note {
+  margin-top: 8px;
+}
+
+/* bottom navigation bar */
+.nav {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 10;
+  display: flex;
+  justify-content: space-around;
+  max-width: var(--maxw);
+  margin-inline: auto;
+  background: var(--surf);
+  padding: 12px 8px calc(16px + var(--sa-b));
+}
+.nav button {
+  flex: 1;
+  border: 0;
+  background: transparent;
+  color: var(--on-surf-v);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  font: 500 12px/1.2 var(--font);
+  padding: 0;
+  min-width: 0;
+}
+.nav .pill {
+  width: 64px;
+  height: 32px;
+  border-radius: 16px;
+  display: grid;
+  place-items: center;
+  transition: background 0.15s;
+}
+.nav button.on {
+  color: var(--on-surf);
+}
+.nav button.on .pill {
+  background: var(--secondary-c);
+  color: var(--on-secondary-c);
+}
+.nav span.lbl {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+body.kb .nav {
+  display: none;
+}
+
+/* status message at the bottom (snackbar) */
+#st {
+  position: fixed;
+  left: 16px;
+  right: 16px;
+  bottom: calc(104px + var(--sa-b));
+  max-width: calc(var(--maxw) - 32px);
+  margin-inline: auto;
+  z-index: 20;
+  background: var(--inverse);
+  color: var(--on-inverse);
+  border-radius: 12px;
+  padding: 14px 16px;
+  font-size: 14px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s;
+}
+#st.show {
+  opacity: 1;
+}
+body.kb #st {
+  bottom: 16px;
+}
+
+/* service reminder: amber banner at the top of the screen, dialog in the middle */
+.svcbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  border: 0;
+  border-radius: 16px;
+  padding: 12px 14px;
+  margin: 0 0 12px;
+  background: var(--amber-c);
+  color: var(--on-amber-c);
+  font: 500 14px/1.35 var(--font);
+  text-align: left;
+  cursor: pointer;
+}
+.svcbar span {
+  flex: 1;
+}
+.svcbar svg.i:first-child {
+  color: var(--amber);
+}
+.scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+.dialog {
+  width: 100%;
+  max-width: 360px;
+  max-height: calc(100vh - 48px);
+  overflow-y: auto;
+  background: var(--surf-high);
+  color: var(--on-surf);
+  border-radius: 28px;
+  padding: 24px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+}
+.dialog > svg.i {
+  width: 28px;
+  height: 28px;
+  color: var(--amber);
+  display: block;
+  margin: 0 auto;
+}
+.dialog h2 {
+  font: 400 22px/1.3 var(--font);
+  text-align: center;
+  margin: 14px 0 12px;
+}
+.dialog p {
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--on-surf-v);
+  margin: 0 0 10px;
+}
+/* install advice (dialog): one line, then three points with an icon */
+.dialog .lead {
+  color: var(--on-surf);
+  font-size: 15px;
+  text-align: center;
+  margin: 0 0 16px;
+}
+.pts {
+  list-style: none;
+  margin: 0 0 16px;
+  padding: 0;
+  display: grid;
+  gap: 12px;
+}
+.pts li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 14px;
+  line-height: 1.4;
+}
+.pts svg.i {
+  width: 20px;
+  height: 20px;
+  color: var(--primary);
+}
+/* "How to do it?" box with numbered steps, in the blue of the live results of the fill-up form */
+.howto {
+  background: var(--primary-c);
+  color: var(--on-primary-c);
+  border-radius: 16px;
+  padding: 12px 14px;
+  margin: 12px 0 4px;
+  font-size: 14px;
+  line-height: 1.4;
+}
+.howto b {
+  display: block;
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+.howto ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+.howto li {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+.howto .n {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 11px;
+  background: var(--primary);
+  color: var(--on-primary);
+  font: 500 12px/22px var(--font);
+  text-align: center;
+}
+.howto svg.i {
+  width: 18px;
+  height: 18px;
+  vertical-align: -4px;
+}
+.dbtns {
+  display: flex;
+  gap: 12px;
+  margin-top: 6px;
+}
+.dbtns .btn {
+  margin-top: 8px;
+}
+
+/* full-screen wheel: language at first launch (#lang) and every other choice (#picker) */
+.lang {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  background: var(--surface);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: calc(24px + var(--sa-t)) calc(20px + var(--sa-r))
+    calc(24px + var(--sa-b)) calc(20px + var(--sa-l));
+}
+.lang .wrap {
+  width: 100%;
+  max-width: 440px;
+  margin: 0 auto;
+  text-align: center;
+}
+.lang h1 {
+  font: 500 28px/1.25 var(--font);
+  margin: 12px 0 20px;
+}
+.wheel {
+  --it: 56px;
+  position: relative;
+  height: calc(var(--it) * 5);
+  margin-bottom: 24px;
+}
+.wheel .band {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(var(--it) * 2);
+  height: var(--it);
+  border-radius: 16px;
+  background: var(--primary-c);
+  pointer-events: none;
+}
+.wl {
+  position: relative;
+  height: 100%;
+  overflow-y: scroll;
+  scroll-snap-type: y mandatory;
+  padding: calc(var(--it) * 2) 0;
+  scrollbar-width: none;
+  overscroll-behavior: contain;
+  -webkit-mask-image: linear-gradient(transparent, #000 28%, #000 72%, transparent);
+  mask-image: linear-gradient(transparent, #000 28%, #000 72%, transparent);
+}
+.wl::-webkit-scrollbar {
+  display: none;
+}
+.wl .it {
+  height: var(--it);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  scroll-snap-align: center;
+  font: 500 22px var(--font);
+  color: var(--on-surf-v);
+  cursor: pointer;
+  user-select: none;
+  will-change: transform, opacity;
+}
+
+/* ================================================================================================
+ * Adaptive layout
+ * - under 600 px (phones): one column, bottom navigation bar (the styles above);
+ * - 600 to 839 px (large phones, small tablets): a wider column, four figures per row in Stats;
+ * - 840 px and more (tablets, computers, phones in landscape): navigation rail on the left;
+ * - 1,024 px and more (tablets in landscape, computers): content up to 1,160 px wide in two columns:
+ *   the form next to its history, charts side by side, the help next to the other settings.
+ * Plus, with a mouse: hover states and a visible focus for keyboard users.
+ * ================================================================================================ */
+@media (min-width: 600px) {
+  :root {
+    --maxw: 760px;
+  }
+  .stats {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+@media (min-width: 840px) {
+  body {
+    max-width: none;
+    padding: 0 var(--sa-r) 32px calc(88px + var(--sa-l));
+  }
+  .appbar,
+  main {
+    max-width: calc(var(--maxw) + 48px);
+    margin-inline: auto;
+  }
+  .appbar {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+  main {
+    padding: 0 24px;
+  }
+  #garCars,
+  #garage > .seg {
+    max-width: 640px;
+  }
+  /* navigation rail */
+  .nav {
+    top: 0;
+    right: auto;
+    width: calc(88px + var(--sa-l));
+    max-width: none;
+    margin: 0;
+    flex-direction: column;
+    justify-content: flex-start;
+    gap: 12px;
+    padding: calc(80px + var(--sa-t)) 0 16px var(--sa-l);
+  }
+  .nav button {
+    flex: none;
+    padding: 4px 0;
+  }
+  .nav .pill {
+    width: 56px;
+  }
+  body.kb .nav {
+    display: flex;
+  }
+  #st,
+  body.kb #st {
+    left: calc(88px + var(--sa-l));
+    right: 0;
+    bottom: calc(24px + var(--sa-b));
+    max-width: 560px;
+  }
+}
+@media (min-width: 1024px) {
+  :root {
+    --maxw: 1112px;
+  }
+  /* Fill-ups and Purchases: the form on the left, the history on the right */
+  #fuel,
+  #buys {
+    display: grid;
+    grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+    column-gap: 24px;
+    align-items: start;
+  }
+  .hist > h2.sec {
+    margin-top: 4px;
+  }
+  /* Stats: figures and spending across, the two charts side by side (same height) */
+  #stats {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    column-gap: 16px;
+  }
+  #stats > .card:first-child,
+  #stats > .card:last-child {
+    grid-column: 1 / -1;
+  }
+  /* Stations: the switch and the chart on the left, the followed stations on the right */
+  #stations {
+    display: grid;
+    grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+    column-gap: 24px;
+    align-items: start;
+  }
+  #stations > .hist {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+  }
+  /* Settings: the help on the right of the other cards */
+  #save {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    column-gap: 16px;
+    align-items: start;
+  }
+}
+@media (hover: hover) and (pointer: fine) {
+  .icon,
+  .del,
+  .carrow,
+  .nav button,
+  .svcbar,
+  summary {
+    cursor: pointer;
+  }
+  .icon:not(.on):hover,
+  .del:not(.armed):hover {
+    background: var(--surf-high);
+  }
+  .btn:hover,
+  .svcbar:hover {
+    filter: brightness(1.06);
+  }
+  .carrow:hover .t {
+    color: var(--primary);
+  }
+  .nav button:not(.on):hover .pill {
+    background: var(--surf-high);
+  }
+  .wl .it:hover {
+    color: var(--on-surf);
+  }
+}
+button:focus-visible,
+summary:focus-visible,
+.btn:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
