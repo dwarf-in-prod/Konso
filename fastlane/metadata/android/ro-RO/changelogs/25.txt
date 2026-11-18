@@ -1,0 +1,1 @@
+Corecție de afișare pe Android: bara de sus (logo, numele Konso și mașina) este din nou chiar sub bara de stare, fără un spațiu gol mare deasupra, pe telefoanele cu camera în partea de sus a ecranului.

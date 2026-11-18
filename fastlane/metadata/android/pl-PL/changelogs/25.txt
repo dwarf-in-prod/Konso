@@ -1,0 +1,1 @@
+Poprawka wyświetlania na Androidzie: górny pasek (logo, nazwa Konso i samochód) jest znów tuż pod paskiem stanu, bez dużej pustej przestrzeni nad nim, na telefonach z aparatem u góry ekranu.

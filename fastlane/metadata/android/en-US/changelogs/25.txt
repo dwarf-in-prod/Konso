@@ -1,0 +1,1 @@
+Display fix on Android: the top bar (logo, Konso name and car) is back right under the status bar, with no large empty space above it, on phones whose camera is at the top of the screen.
