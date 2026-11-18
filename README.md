@@ -63,7 +63,7 @@ Written by an AI does not mean unchecked: all the source code is open, so anyone
 - 💾 **Automatic backup** to `konso.json`, updated after every change.
 - 🎡 **Wheel pickers** for language, units, currency, categories and service distance.
 - 🌍 **10 languages**: English, French, Spanish, German, Italian, Portuguese, Dutch, Polish, Turkish, Romanian.
-- ❓ **Built-in help** ("How it works" in Settings) and a Material Design 3 interface with light and dark themes.
+- ❓ **Built-in help** ("How it works" in Settings) and a Material Design 3 interface with light and dark themes: automatic (like the device), or chosen in Settings.
 - 🖥️ **Adaptive layout**: bottom bar on phones; on tablets, computers and phones in landscape, a navigation rail on the left and two columns.
 
 ## Install
@@ -185,7 +185,7 @@ Comment elle est faite :
 - 💾 **Sauvegarde automatique** dans `konso.json`, mise à jour à chaque modification.
 - 🎡 **Choix par roue** pour la langue, les unités, la monnaie, les catégories et le kilométrage d'entretien.
 - 🌍 **10 langues** : français, anglais, espagnol, allemand, italien, portugais, néerlandais, polonais, turc, roumain.
-- ❓ **Aide intégrée** (« Comment ça marche ? » dans les Réglages) et interface Material Design 3, en thème clair ou sombre.
+- ❓ **Aide intégrée** (« Comment ça marche ? » dans les Réglages) et interface Material Design 3, en thème clair ou sombre : automatique (comme l'appareil) ou choisi dans les Réglages.
 - 🖥️ **Mise en page adaptative** : barre en bas sur téléphone ; sur tablette, ordinateur et téléphone à l'horizontale, un rail de navigation à gauche et deux colonnes.
 
 ## Installer
