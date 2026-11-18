@@ -556,6 +556,8 @@ const ICON = {
     'M21 6H3c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm0 10H3V8h2v4h2V8h2v4h2V8h2v4h2V8h2v4h2V8h2v8z',
   money:
     'M19 14V6c0-1.1-.9-2-2-2H3c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zm-9-1c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm13-6v11c0 1.1-.9 2-2 2H4v-2h17V7h2z',
+  install: 'M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z',
+  file: 'M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z',
 };
 // Full-screen wheel with Cancel / Confirm: the app's way of choosing a value in a list
 // (preferred to native drop-down menus). Options:
@@ -666,6 +668,7 @@ function onboardMoney() {
       obMoney = MONEY[i];
       setMoney(obMoney, true);
       render();
+      installAdvice();
     },
   });
 }
@@ -950,10 +953,15 @@ $('sv-file').onchange = async e => {
   };
   if (!S.fuel.length && !S.buys.length) return apply();
   const n = { c: (d.cars && d.cars.length) || 1, f: d.fuel.length, b: d.buys.length };
-  dialog(tx('imp_title'), '<p>' + esc(tx('imp_msg', n)) + '</p>', [
-    { t: tx('cancel'), tonal: true },
-    { t: tx('imp_yes'), fn: apply },
-  ]);
+  dialog(
+    tx('imp_title'),
+    '<p>' + esc(tx('imp_msg', n)) + '</p>',
+    [
+      { t: tx('cancel'), tonal: true },
+      { t: tx('imp_yes'), fn: apply },
+    ],
+    'file',
+  );
 };
 
 // Install: installEvt is the browser's install prompt, kept for the "Install Konso" button (Chrome, Edge,
@@ -963,7 +971,10 @@ let installEvt = null,
 const standalone = () => matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
 const isIOS = () =>
   /iPad|iPhone|iPod/.test(navigator.userAgent) || (/Mac/.test(navigator.platform) && navigator.maxTouchPoints > 1);
-// Settings > Install the app card: hidden in the Android app and once Konso runs installed.
+// Where the browser's install command is, when it offers no install button (Safari, Firefox...).
+const installHow = () => tx(isIOS() ? 'inst_ios' : 'inst_other');
+// Settings > Install the app card: why, and the button or where the command is.
+// Hidden in the Android app and once Konso runs installed.
 function renderInstall() {
   const card = $('inst');
   if (NA || installed || standalone()) {
@@ -972,9 +983,10 @@ function renderInstall() {
   }
   card.classList.remove('hide');
   $('inst-btn').classList.toggle('hide', !installEvt);
-  $('inst-how').textContent = tx(installEvt ? 'inst_txt' : isIOS() ? 'inst_ios' : 'inst_other');
+  $('inst-how').innerHTML = esc(tx('inst_txt')) + (installEvt ? '' : '<br>' + esc(installHow()));
 }
-$('inst-btn').onclick = async () => {
+// Show the browser's own install prompt (only once: the browser gives a new one if it is dismissed).
+async function promptInstall() {
   if (!installEvt) return;
   const e = installEvt;
   installEvt = null;
@@ -982,7 +994,47 @@ $('inst-btn').onclick = async () => {
     await e.prompt();
   } catch (x) {}
   renderInstall();
-};
+}
+$('inst-btn').onclick = promptInstall;
+
+// Install advice, at the first launch of the web version in a browser tab: the data of a website can
+// be erased by the browser (Safari erases it after 7 days without a visit), never that of an
+// installed app. Shown once (IK), at the end of the first-launch wheels, or at the next start for
+// people who chose their language before this advice existed; the Settings card stays afterwards.
+const IK = KP + 'install-seen';
+let adviceOpen = false;
+function installAdvice() {
+  if (NA || installed || standalone()) return;
+  // Not over the first-launch screens or another dialog: it will be shown at the next start.
+  if (!['lang', 'picker', 'dlg'].every(id => $(id).classList.contains('hide'))) return;
+  try {
+    if (localStorage.getItem(IK)) return;
+    localStorage.setItem(IK, today());
+  } catch (e) {
+    return;
+  }
+  showAdvice();
+}
+// The advice dialog: with an Install button when the browser offers one, otherwise where the
+// browser's install command is. Redrawn if the browser's offer arrives while it is open.
+function showAdvice() {
+  adviceOpen = true;
+  const done = () => (adviceOpen = false);
+  const msg = '<p>' + esc(tx('inst_adv_msg')) + '</p>';
+  if (installEvt) {
+    dialog(
+      tx('inst_adv_title'),
+      msg,
+      [
+        { t: tx('inst_later'), tonal: true, fn: done },
+        { t: tx('inst_btn'), fn: () => (done(), promptInstall()) },
+      ],
+      'install',
+    );
+  } else {
+    dialog(tx('inst_adv_title'), msg + '<p><b>' + esc(installHow()) + '</b></p>', [{ t: tx('ok'), fn: done }], 'install');
+  }
+}
 // Web version only: install prompt, offline cache (sw.js exists only on the published site, the
 // registration simply fails elsewhere), and a message when an update has been downloaded.
 function initWeb() {
@@ -991,6 +1043,7 @@ function initWeb() {
     e.preventDefault();
     installEvt = e;
     renderInstall();
+    if (adviceOpen) showAdvice();
   });
   addEventListener('appinstalled', () => {
     installEvt = null;
@@ -1006,6 +1059,7 @@ function initWeb() {
     navigator.serviceWorker.register('sw.js').catch(() => {});
   }
   if (standalone()) keepStorage();
+  installAdvice();
 }
 
 // ================================================================================================
@@ -1739,7 +1793,10 @@ function svcMarkSeen(k) {
   } catch (e) {}
 }
 // Dialog in the middle of the screen. btns: [{t: text, tonal: lighter style, fn: action}].
-function dialog(title, html, btns) {
+// icon: a key of ICON, shown in the app's colour; without it, the amber wrench of the service reminder.
+function dialog(title, html, btns, icon) {
+  $('dlgP').setAttribute('d', ICON[icon] || ICON.wrench);
+  $('dlgP').parentNode.style.color = icon ? 'var(--primary)' : '';
   $('dlgT').textContent = title;
   $('dlgM').innerHTML = html;
   $('dlgB').innerHTML = '';

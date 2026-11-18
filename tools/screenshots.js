@@ -57,6 +57,7 @@ function demo(serviceDaysAgo, svcKm) {
       const json = JSON.stringify(d);
       localStorage.setItem('konso-lang', 'en');
       localStorage.setItem('konso-data', json);
+      localStorage.setItem('konso-install-seen', '1'); // web version: no install advice over the screenshot
       // stand-in for the Android bridge of MainActivity: a backup folder is already chosen
       if (!web) window.Android = { folderName: () => 'Konso', fileName: () => 'konso.json', pickFolder: () => {}, readFile: () => json, writeFile: () => 'ok' };
     }, [data, !!web]);
