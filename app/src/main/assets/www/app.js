@@ -129,6 +129,43 @@ function curName(code) {
 const moneyLabel = code => curSym(code) + ' — ' + curName(code);
 
 // ================================================================================================
+// Theme
+// A preference of the device, like the language: 'auto' follows the device (prefers-color-scheme),
+// 'light' and 'dark' force a theme. The colours are in app.css; a forced theme is the data-theme
+// attribute of <html>.
+// ================================================================================================
+
+// localStorage key of the theme, the three choices, and the current one (loaded by init()).
+const TK = KP + 'theme';
+const THEMES = ['auto', 'light', 'dark'];
+let THEME = 'auto';
+// Colours of the browser bar (web version), as in the <meta name="theme-color"> tags of index.html.
+const BAR_COLOR = { light: '#f9f9ff', dark: '#111318' };
+// Show theme t: data-theme on <html> (none for 'auto'), the colour scheme of the native controls
+// (date fields, menus), and the colour of the browser bar. Does not save it (see setTheme()).
+function applyTheme(t) {
+  const root = document.documentElement;
+  if (t === 'auto') root.removeAttribute('data-theme');
+  else root.dataset.theme = t;
+  root.style.colorScheme = t === 'auto' ? '' : t;
+  document.querySelectorAll('meta[name="theme-color"]').forEach(m => {
+    const own = /dark/.test(m.media) ? 'dark' : 'light';
+    m.content = BAR_COLOR[t === 'auto' ? own : t];
+  });
+}
+// Choose theme t; store = remember it on this device.
+function setTheme(t, store) {
+  THEME = THEMES.includes(t) ? t : 'auto';
+  applyTheme(THEME);
+  if (store) {
+    try {
+      localStorage.setItem(TK, THEME);
+    } catch (e) {}
+  }
+  $('themeBtn').textContent = tx('theme_' + THEME);
+}
+
+// ================================================================================================
 // Dates and HTML escaping
 // ================================================================================================
 
@@ -523,6 +560,7 @@ function applyI18n() {
   $('langBtn').textContent = (LANGS.find(l => l[0] === LANG) || LANGS[0])[1];
   $('unitBtn').textContent = UNIT_LABEL[UNIT];
   $('moneyBtn').textContent = moneyLabel(MONEYC);
+  $('themeBtn').textContent = tx('theme_' + THEME);
   $('fl').nextElementSibling.textContent = tx(UNIT === 'us' ? 'gallons' : 'litres');
 }
 // Switch language and redraw everything. store = also remember it (false while previewing in a wheel).
@@ -603,6 +641,8 @@ const ICON = {
   globe: document.querySelector('#lang svg path').getAttribute('d'),
   wrench: document.querySelector('#svcBar svg path').getAttribute('d'),
   pump: document.querySelector('.nav [data-t="fuel"] svg path').getAttribute('d'),
+  theme:
+    'M20 15.31L23.31 12 20 8.69V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69zM12 18V6c3.31 0 6 2.69 6 6s-2.69 6-6 6z',
   ruler:
     'M21 6H3c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm0 10H3V8h2v4h2V8h2v4h2V8h2v4h2V8h2v4h2V8h2v8z',
   money:
@@ -662,7 +702,7 @@ function picker(o) {
 }
 
 // ================================================================================================
-// First launch and Settings: language, units, currency
+// First launch and Settings: language, units, currency, theme
 // ================================================================================================
 
 // First launch, step 1: the language wheel (its own screen, #lang, with a single Next button).
@@ -757,7 +797,7 @@ function setMoney(m, store) {
   }
   refreshAll();
 }
-// Settings: the Units, Currency and Language fields open their wheel.
+// Settings: the Units, Currency, Language and Theme fields open their wheel.
 $('unitBtn').onclick = () =>
   picker({
     icon: 'ruler',
@@ -794,6 +834,19 @@ $('langBtn').onclick = () => {
     onCancel: () => setLang(orig, false),
   });
 };
+// Theme: the wheel shows each theme while scrolling; Cancel goes back to the saved one.
+$('themeBtn').onclick = () =>
+  picker({
+    icon: 'theme',
+    title: 'set_theme',
+    labels: THEMES.map(t => tx('theme_' + t)),
+    sel: THEMES.indexOf(THEME),
+    loop: false,
+    sub: () => tx('theme_sub'),
+    onPick: i => applyTheme(THEMES[i]),
+    onOk: i => setTheme(THEMES[i], true),
+    onCancel: () => applyTheme(THEME),
+  });
 
 // ================================================================================================
 // Settings: automatic backup
@@ -2010,7 +2063,7 @@ const carCounts = id => ({
   f: S.fuel.filter(x => x.car === id).length,
   b: S.buys.filter(x => x.car === id).length,
 });
-// Car selector in the top bar.
+// Car selector in the top bar: the options of the (invisible) menu and the name shown in the middle.
 function renderCars() {
   const sel = $('car');
   sel.innerHTML = S.cars
@@ -2025,6 +2078,7 @@ function renderCars() {
         '</option>',
     )
     .join('');
+  $('carShown').textContent = carName(curCar());
   renderGarage();
 }
 // One line of the garage: car icon, name (with a "Shown" chip for the car selected at the top),
@@ -2398,10 +2452,13 @@ function init() {
   } catch (e) {}
   try {
     const u = localStorage.getItem(UK),
-      m = localStorage.getItem(MK);
+      m = localStorage.getItem(MK),
+      t = localStorage.getItem(TK);
     if (UNITS.includes(u)) UNIT = u;
     if (MONEY.includes(m)) MONEYC = m;
+    if (THEMES.includes(t)) THEME = t;
   } catch (e) {}
+  applyTheme(THEME);
   const known = LANGS.some(l => l[0] === saved);
   setLang(known ? saved : guessLang(), false);
   if (!known) showLangScreen();
