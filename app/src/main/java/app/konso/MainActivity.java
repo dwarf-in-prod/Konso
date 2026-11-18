@@ -541,15 +541,20 @@ public class MainActivity extends Activity {
 
     /**
      * Pad v (the WebView's frame) by the room the status bar, the navigation bar and the keyboard
-     * take, but not by the camera cutout: the page itself keeps clear of the cutout (Bridge.insets()).
+     * take, and at the top and bottom by the camera cutout too, but not by a cutout on the left or
+     * right (landscape): the page itself keeps clear of that one (Bridge.insets()). The page adds
+     * no room of its own at the top and bottom in the app (app.css: .native).
      * The keyboard is counted too, as adjustResize no longer shrinks a window laid out behind the
      * bars. Returns the insets left for the WebView, without the bars and the keyboard, so the page
      * does not keep clear of them a second time.
      */
     private WindowInsets fitBars(View v, WindowInsets insets) {
         if (Build.VERSION.SDK_INT >= 30) {
-            Insets bars = insets.getInsets(WindowInsets.Type.systemBars() | WindowInsets.Type.ime());
-            v.setPadding(bars.left, bars.top, bars.right, bars.bottom);
+            Insets bars = insets.getInsets(WindowInsets.Type.systemBars() | WindowInsets.Type.ime()),
+                    cut = insets.getInsets(WindowInsets.Type.displayCutout());
+            // top and bottom: also clear of a camera there (usually inside the status bar anyway);
+            // left and right: the page keeps clear of the camera itself (Bridge.insets())
+            v.setPadding(bars.left, Math.max(bars.top, cut.top), bars.right, Math.max(bars.bottom, cut.bottom));
             return new WindowInsets.Builder(insets)
                     .setInsets(WindowInsets.Type.systemBars(), Insets.NONE)
                     .setInsets(WindowInsets.Type.ime(), Insets.NONE)
