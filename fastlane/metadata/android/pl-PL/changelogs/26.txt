@@ -1,0 +1,1 @@
+Nowa mapa stacji (zakładka Stacje, połączenie opcjonalne): stacje wokół ciebie z ceną twojego paliwa, od zielonej (najtańsza) do czerwonej. Dotknij ceny, aby zobaczyć wszystkie paliwa, śledzić stację lub wyznaczyć trasę. Przycisk lokalizacji z przypomnieniem o włączeniu GPS. Moje stacje są przed wykresem, najtańsza pierwsza i na zielono. Mapa: OpenStreetMap.
