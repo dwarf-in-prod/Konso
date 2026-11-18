@@ -1,6 +1,7 @@
 /*
  * Konso — styles. Material Design 3: tonal surfaces, rounded shapes, navigation bar at the bottom.
- * Colours are variables (:root), redefined for the dark theme (prefers-color-scheme: dark).
+ * Colours are variables (:root), redefined for the dark theme: the device's (prefers-color-scheme)
+ * or the one chosen in Settings (data-theme on <html>).
  * Form field colours: .todo = green (to fill in), .need = red (missing after a save attempt).
  * .hide hides anything; .kb on <body> means the keyboard is open (the bottom bar is hidden).
  * Adaptive layout (end of the file): one column with a bottom bar on phones; on wide screens
@@ -40,8 +41,11 @@
   /* width of the single column (phones, small tablets) */
   --maxw: 640px;
 }
+/* Dark theme: when the device is dark, unless the user chose Light in Settings (data-theme="light"
+   on <html>, set by applyTheme() in app.js), and always when the user chose Dark. The two blocks
+   below hold the same colours: change both. */
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme='light']) {
     --primary: #aac7ff;
     --on-primary: #0a305f;
     --primary-c: #284777;
@@ -70,6 +74,35 @@
     --s5: #e0b020;
     --s6: #e8609f;
   }
+}
+:root[data-theme='dark'] {
+  --primary: #aac7ff;
+  --on-primary: #0a305f;
+  --primary-c: #284777;
+  --on-primary-c: #d6e3ff;
+  --secondary-c: #3e4759;
+  --on-secondary-c: #dbe2f9;
+  --surface: #111318;
+  --surf: #1d2024;
+  --surf-high: #282a2f;
+  --on-surf: #e2e2e9;
+  --on-surf-v: #c4c6d0;
+  --outline: #8e9099;
+  --outline-v: #44474e;
+  --error: #ffb4ab;
+  --on-error: #690005;
+  --ok: #9cd67d;
+  --amber: #f5bf48;
+  --amber-c: #5c4200;
+  --on-amber-c: #ffdf9e;
+  --inverse: #e2e2e9;
+  --on-inverse: #2e3036;
+  --s1: #3987e5;
+  --s2: #d95926;
+  --s3: #3bb57c;
+  --s4: #b07ae0;
+  --s5: #e0b020;
+  --s6: #e8609f;
 }
 * {
   box-sizing: border-box;
@@ -117,7 +150,8 @@ svg.i {
   display: none !important;
 }
 
-/* top bar: car selector, settings button (gear) */
+/* top bar: logo on the left, car selector in the middle, settings button (gear) on the right.
+   The logo and the gear take the same width (48 px), so the car name is centered on the screen. */
 .appbar {
   position: sticky;
   top: 0;
@@ -126,33 +160,55 @@ svg.i {
   align-items: center;
   gap: 4px;
   height: calc(64px + env(safe-area-inset-top, 0px));
-  padding: env(safe-area-inset-top, 0px) 8px 0 16px;
+  padding: env(safe-area-inset-top, 0px) 8px 0 8px;
   background: var(--surface);
+}
+.logo {
+  flex: none;
+  width: 32px;
+  height: 32px;
+  margin: 0 8px;
 }
 .carsel {
   position: relative;
   flex: 1;
   min-width: 0;
+  display: flex;
+  justify-content: center;
 }
-.carsel select {
-  appearance: none;
-  -webkit-appearance: none;
-  width: 100%;
-  border: 0;
-  background: transparent;
+/* what the user sees: the name and the arrow, side by side */
+.carsel .cur {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  min-width: 0;
+  padding: 8px 4px;
+  border-radius: 12px;
   color: var(--on-surf);
   font: 500 22px/1.2 var(--font);
-  padding: 8px 32px 8px 0;
-  text-overflow: ellipsis;
-  outline: none;
 }
-.carsel svg {
-  position: absolute;
-  right: 0;
-  top: 50%;
-  transform: translateY(-50%);
-  pointer-events: none;
+#carShown {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.carsel .cur svg {
   color: var(--on-surf-v);
+}
+/* the native menu, invisible, over the whole area */
+.carsel select {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  border: 0;
+  font-size: 16px;
+  cursor: pointer;
+}
+/* keyboard focus only (a tap leaves the menu focused, without outline) */
+.carsel:has(select:focus-visible) .cur {
+  outline: 2px solid var(--primary);
 }
 .icon {
   width: 48px;
@@ -1106,12 +1162,8 @@ body.kb #st {
     margin-inline: auto;
   }
   .appbar {
-    padding-left: 24px;
+    padding-left: 16px;
     padding-right: 16px;
-  }
-  .carsel {
-    flex: 0 1 auto;
-    margin-right: auto;
   }
   main {
     padding: 0 24px;

@@ -20,11 +20,20 @@
     <link rel="stylesheet" href="app.css" />
   </head>
   <body>
-    <!-- Top bar: car selector, settings (gear) on the right -->
+    <!-- Top bar: Konso logo on the left, car selector in the middle, settings (gear) on the right -->
     <header class="appbar">
+      <!-- The app icon (same drawing as res/drawable/ic_fg.xml on the ic_bg colour), decorative -->
+      <svg class="logo" viewBox="0 0 108 108" aria-hidden="true">
+        <rect width="108" height="108" rx="24" fill="#1F4E79" />
+        <path fill="#FFFFFF" d="M54,30 C54,30 38,50 38,62 C38,71 45,78 54,78 C63,78 70,71 70,62 C70,50 54,30 54,30 Z" />
+      </svg>
+      <!-- The name of the selected car is shown centered with its arrow (#carShown); the native menu
+           (#car) lies invisible on top of the whole area and opens when it is tapped. -->
       <div class="carsel">
+        <span class="cur"
+          ><span id="carShown"></span><svg class="i" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z" /></svg
+        ></span>
         <select id="car" data-i18n-title="car_label"></select>
-        <svg class="i" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z" /></svg>
       </div>
       <button class="icon" id="setBtn" data-i18n-title="nav_settings">
         <svg class="i" viewBox="0 0 24 24">
@@ -341,7 +350,7 @@
       </div>
       </section>
 
-      <!-- Settings, opened with the gear of the top bar (install, language, units, currency, servicing, backup, help) -->
+      <!-- Settings, opened with the gear of the top bar (install, language, units, currency, theme, servicing, backup, help) -->
       <section id="save" class="hide">
         <!-- Two columns on wide screens: these cards on the left, the help on the right -->
         <div class="col">
@@ -364,6 +373,10 @@
               <div class="f fl sel full">
                 <button type="button" class="fieldbtn" id="moneyBtn"></button
                 ><label data-i18n="set_money"></label>
+              </div>
+              <div class="f fl sel full">
+                <button type="button" class="fieldbtn" id="themeBtn"></button
+                ><label data-i18n="set_theme"></label>
               </div>
             </div>
           </div>
