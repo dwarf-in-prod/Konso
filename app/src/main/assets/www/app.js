@@ -5,7 +5,8 @@
  * (installable PWA) is the same files, published by tools/build-web.js with web/ (offline cache, icons).
  *
  * Files
- * - index.html: the screens (four tabs: Fill-ups, Purchases, Stats, Settings, plus overlays).
+ * - index.html: the screens (four tabs: Fill-ups, Purchases, Stats, My garage; Settings, opened
+ *               with the gear of the top bar; plus overlays).
  * - app.css:    the styles (Material Design 3, light and dark theme).
  * - app.js:     this file, all the behaviour.
  * - i18n.js:    every text shown, in 10 languages. The code never contains visible text: tx(key).
@@ -468,7 +469,7 @@ function applyI18n() {
     if (list.includes(v)) el.value = v;
   };
   opts($('fc'), ['', ...FUELV], x => (x ? fuelLabel(x) : tx('fuel_choose')));
-  opts($('carFuel'), FUELV, fuelLabel);
+  if ($('carFuel').value) setCarFuel($('carFuel').value);
   setCat($('bc').value || CATSHOW[0]);
   $('langBtn').textContent = (LANGS.find(l => l[0] === LANG) || LANGS[0])[1];
   $('unitBtn').textContent = UNIT_LABEL[UNIT];
@@ -548,10 +549,11 @@ function makeWheel(list, labels, sel, loop, onPick) {
   paint();
   return at;
 }
-// Icons of the wheel screen (SVG paths). globe and wrench are copied from icons already in the page.
+// Icons of the wheel screen (SVG paths). globe, wrench and pump are copied from icons already in the page.
 const ICON = {
   globe: document.querySelector('#lang svg path').getAttribute('d'),
   wrench: document.querySelector('#svcBar svg path').getAttribute('d'),
+  pump: document.querySelector('.nav [data-t="fuel"] svg path').getAttribute('d'),
   ruler:
     'M21 6H3c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm0 10H3V8h2v4h2V8h2v4h2V8h2v4h2V8h2v4h2V8h2v8z',
   money:
@@ -1941,10 +1943,21 @@ $('svcKmBtn').onclick = () => {
 // Cars
 // ================================================================================================
 
-// Cars: selector in the top bar, add / edit / delete form.
+// Cars: selector in the top bar, and the "My garage" tab (list of the cars, add / edit / delete form).
 // carEditing: id of the car being edited (null = new car); carDelArmed: delete needs a second tap.
 let carEditing = null,
   carDelArmed = false;
+// Car icon of the garage list (Material "directions_car").
+const CAR_SVG =
+  '<svg class="i" viewBox="0 0 24 24"><path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM5 11l1.5-4.5h11L19 11H5z"/></svg>';
+// Pencil icon at the end of a garage line: tells that the line opens the edit form.
+const PEN_SVG =
+  '<svg class="i" viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 000-1.41l-2.34-2.34a1 1 0 00-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>';
+// Number of fill-ups and purchases of car id (shown in the garage, and before deleting a car).
+const carCounts = id => ({
+  f: S.fuel.filter(x => x.car === id).length,
+  b: S.buys.filter(x => x.car === id).length,
+});
 // Car selector in the top bar.
 function renderCars() {
   const sel = $('car');
@@ -1960,31 +1973,83 @@ function renderCars() {
         '</option>',
     )
     .join('');
+  renderGarage();
 }
-// Open the car form, empty (new car) or filled with the selected car (edit).
-function openCarForm(edit) {
-  carEditing = edit ? S.cur : null;
+// One line of the garage: car icon, name (with a "Shown" chip for the car selected at the top),
+// usual fuel and number of records, pencil. The whole line is a button that opens the edit form.
+function garageRow(c) {
+  const n = carCounts(c.id),
+    shown = c.id === S.cur ? ` <span class="chip">${esc(tx('g_shown'))}</span>` : '',
+    meta = [c.fuel ? fuelLabel(c.fuel) : '', tx('g_count', n)].filter(Boolean).join(' · ');
+  return (
+    `<button type="button" class="row carrow" data-id="${esc(c.id)}">` +
+    `<span class="carico">${CAR_SVG}</span>` +
+    `<span class="l"><span class="t">${esc(carName(c))}${shown}</span>` +
+    `<span class="m">${esc(meta)}</span></span>` +
+    PEN_SVG +
+    '</button>'
+  );
+}
+// List of the cars in the "My garage" tab; a tap on a line opens the form for that car.
+function renderGarage() {
+  const list = $('cars-list');
+  list.innerHTML = S.cars.map(garageRow).join('');
+  list.querySelectorAll('.carrow').forEach(b => (b.onclick = () => openCarForm(b.dataset.id)));
+}
+// Usual fuel of the car form: a field button that opens the wheel (value kept in its value
+// attribute, like the purchase category).
+function setCarFuel(v) {
+  $('carFuel').value = v;
+  $('carFuel').textContent = fuelLabel(v);
+}
+$('carFuel').onclick = () =>
+  picker({
+    icon: 'pump',
+    title: 'car_fuel',
+    labels: FUELV.map(fuelLabel),
+    sel: Math.max(0, FUELV.indexOf($('carFuel').value)),
+    loop: false,
+    onOk: i => setCarFuel(FUELV[i]),
+  });
+// Open the car form in the garage, in place of the list: empty for a new car (id = null),
+// or filled with car id (edit, with the delete button when there is more than one car).
+function openCarForm(id) {
+  const c = id ? S.cars.find(x => x.id === id) : null;
+  carEditing = c ? c.id : null;
   carDelArmed = false;
-  $('carFormTitle').textContent = edit ? tx('car_edit') : tx('car_new');
-  const c = edit ? curCar() : null;
+  $('carFormTitle').textContent = c ? tx('car_edit') : tx('car_new');
   $('carName').value = c ? carName(c) : '';
-  $('carFuel').value = (c && c.fuel) || 'SP95-E10';
-  $('carDel').classList.toggle('hide', !(edit && S.cars.length > 1));
+  setCarFuel((c && FUELV.includes(c.fuel) && c.fuel) || 'SP95-E10');
+  $('carDel').classList.toggle('hide', !(c && S.cars.length > 1));
   $('carDel').textContent = tx('car_del');
-  $('carNote').textContent = edit ? (S.cars.length > 1 ? tx('car_note_del') : tx('car_note_keep')) : '';
+  $('carNote').textContent = c ? (S.cars.length > 1 ? tx('car_note_del') : tx('car_note_keep')) : '';
+  $('garList').classList.add('hide');
   $('carForm').classList.remove('hide');
-  $('carName').focus();
+  window.scrollTo(0, 0);
+  if (!c) $('carName').focus();
 }
-// Selecting another car, and the buttons of the car form.
+// Close the car form and show the list of the garage again.
+function closeCarForm() {
+  $('carForm').classList.add('hide');
+  $('garList').classList.remove('hide');
+}
+// After a change of the cars: save, redraw, back to the list.
+function carsChanged() {
+  closeCarForm();
+  persist();
+  render();
+  applyCarDefaults();
+}
+// Selecting another car in the top bar.
 $('car').onchange = () => {
   S.cur = $('car').value;
   persist();
   render();
   applyCarDefaults();
 };
-$('carAdd').onclick = () => openCarForm(false);
-$('carEdit').onclick = () => openCarForm(true);
-$('carCancel').onclick = () => $('carForm').classList.add('hide');
+$('carAdd').onclick = () => openCarForm(null);
+$('carCancel').onclick = closeCarForm;
+// Save the form: the name is required and must be unique. A new car becomes the selected one.
 $('carSave').onclick = () => {
   const name = $('carName').value.trim();
   if (!name) {
@@ -2004,37 +2069,37 @@ $('carSave').onclick = () => {
     S.cars.push({ id, name, fuel: $('carFuel').value });
     S.cur = id;
   }
-  $('carForm').classList.add('hide');
-  persist();
-  render();
-  applyCarDefaults();
+  carsChanged();
 };
+// Delete the car being edited, with its fill-ups and purchases. First tap: ask to confirm with
+// the number of records; second tap: delete.
 $('carDel').onclick = () => {
+  const id = carEditing;
   if (!carDelArmed) {
     carDelArmed = true;
-    const n = FU().length + BU().length;
-    $('carDel').textContent = tx('car_del_confirm', { n });
+    const n = carCounts(id);
+    $('carDel').textContent = tx('car_del_confirm', { n: n.f + n.b });
     return;
   }
-  const id = carEditing;
   S.cars = S.cars.filter(c => c.id !== id);
   S.fuel = S.fuel.filter(f => f.car !== id);
   S.buys = S.buys.filter(b => b.car !== id);
-  S.cur = S.cars[0].id;
-  $('carForm').classList.add('hide');
-  persist();
-  render();
-  applyCarDefaults();
+  if (!S.cars.some(c => c.id === S.cur)) S.cur = S.cars[0].id;
+  carsChanged();
 };
 
 // ================================================================================================
 // Navigation and keyboard
 // ================================================================================================
 
-// Show tab t (fuel, buys, stats or save) with a short animation.
+// Show tab t (fuel, buys, stats, garage, or save = the settings) with a short animation.
+// The settings are not in the bottom bar: they open with the gear of the top bar, which is then
+// highlighted. Leaving the garage closes its car form.
 function showTab(t) {
   document.querySelectorAll('.nav button').forEach(x => x.classList.toggle('on', x.dataset.t === t));
-  ['fuel', 'buys', 'stats', 'save'].forEach(id => $(id).classList.toggle('hide', id !== t));
+  $('setBtn').classList.toggle('on', t === 'save');
+  ['fuel', 'buys', 'stats', 'garage', 'save'].forEach(id => $(id).classList.toggle('hide', id !== t));
+  if (t !== 'garage') closeCarForm();
   const el = $(t);
   el.classList.remove('tabin');
   void el.offsetWidth;
@@ -2042,6 +2107,7 @@ function showTab(t) {
   window.scrollTo(0, 0);
 }
 document.querySelectorAll('.nav button').forEach(b => (b.onclick = () => showTab(b.dataset.t)));
+$('setBtn').onclick = () => showTab('save');
 document.addEventListener('focusin', e => {
   if (/^(INPUT|TEXTAREA)$/.test(e.target.tagName) && e.target.type !== 'date')
     document.body.classList.add('kb');

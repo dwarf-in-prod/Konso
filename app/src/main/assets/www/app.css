@@ -108,7 +108,7 @@ svg.i {
   display: none !important;
 }
 
-/* top bar: car selector, add and edit buttons */
+/* top bar: car selector, settings button (gear) */
 .appbar {
   position: sticky;
   top: 0;
@@ -158,6 +158,11 @@ svg.i {
 }
 .icon:active {
   background: var(--surf-high);
+}
+/* gear of the top bar while the settings are shown */
+.icon.on {
+  background: var(--secondary-c);
+  color: var(--on-secondary-c);
 }
 
 main {
@@ -383,6 +388,50 @@ textarea {
   color: var(--on-primary-c);
   font-size: 13px;
   font-weight: 600;
+}
+/* My garage: one line per car, the whole line is a button that opens the edit form */
+.carrow {
+  width: 100%;
+  border-left: 0;
+  border-right: 0;
+  border-bottom: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  padding-inline: 0;
+}
+.carrow .l {
+  display: flex;
+  flex-direction: column;
+}
+.carrow > svg.i {
+  color: var(--on-surf-v);
+}
+.carico {
+  width: 40px;
+  height: 40px;
+  border-radius: 20px;
+  display: grid;
+  place-items: center;
+  flex: none;
+  background: var(--secondary-c);
+  color: var(--on-secondary-c);
+}
+/* small label next to the name of the car selected in the top bar */
+.chip {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 0 8px;
+  border-radius: 8px;
+  background: var(--primary-c);
+  color: var(--on-primary-c);
+  font-size: 12px;
+  font-weight: 600;
+  vertical-align: 1px;
+}
+#garList > .btn {
+  margin-top: 16px;
 }
 .del {
   border: 0;
@@ -868,7 +917,7 @@ body.kb #st {
   main {
     padding: 0 24px;
   }
-  #carForm {
+  #garage {
     max-width: 640px;
   }
   /* navigation rail */
@@ -937,18 +986,22 @@ body.kb #st {
 @media (hover: hover) and (pointer: fine) {
   .icon,
   .del,
+  .carrow,
   .nav button,
   .svcbar,
   summary {
     cursor: pointer;
   }
-  .icon:hover,
+  .icon:not(.on):hover,
   .del:not(.armed):hover {
     background: var(--surf-high);
   }
   .btn:hover,
   .svcbar:hover {
     filter: brightness(1.06);
+  }
+  .carrow:hover .t {
+    color: var(--primary);
   }
   .nav button:not(.on):hover .pill {
     background: var(--surf-high);
