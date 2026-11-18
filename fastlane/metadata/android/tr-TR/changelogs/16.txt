@@ -1,0 +1,1 @@
+Yeni: Konso artık bir web uygulaması olarak da var; iPhone, iPad, bilgisayar ve her telefona yüklenebilir (bağlantı proje sayfasında). Fiş okuma dahil çevrimdışı çalışır, kaydedip açabileceğin bir yedek dosyası kullanır. Tablet, bilgisayar ve yatay tutulan telefonlarda görünüm ekrana uyar: solda gezinme çubuğu ve iki sütun. Android uygulaması ve verilerin değişmez.

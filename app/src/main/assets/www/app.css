@@ -3,6 +3,9 @@
  * Colours are variables (:root), redefined for the dark theme (prefers-color-scheme: dark).
  * Form field colours: .todo = green (to fill in), .need = red (missing after a save attempt).
  * .hide hides anything; .kb on <body> means the keyboard is open (the bottom bar is hidden).
+ * Adaptive layout (end of the file): one column with a bottom bar on phones; on wide screens
+ * (tablets, computers, phones in landscape) a navigation rail on the left and two columns.
+ * env(safe-area-inset-*) keeps clear of the notch and rounded corners (viewport-fit=cover).
  */
 :root {
   --primary: #415f91;
@@ -29,6 +32,8 @@
   --s1: #2a78d6;
   --s2: #eb6834;
   --font: system-ui, Roboto, -apple-system, 'Segoe UI', sans-serif;
+  /* width of the single column (phones, small tablets) */
+  --maxw: 640px;
 }
 @media (prefers-color-scheme: dark) {
   :root {
@@ -87,9 +92,11 @@ body {
   background: var(--surface);
   color: var(--on-surf);
   font: 16px/1.5 var(--font);
-  max-width: 640px;
+  max-width: var(--maxw);
   margin-inline: auto;
   padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px));
+  padding-left: env(safe-area-inset-left, 0px);
+  padding-right: env(safe-area-inset-right, 0px);
 }
 svg.i {
   width: 24px;
@@ -109,8 +116,8 @@ svg.i {
   display: flex;
   align-items: center;
   gap: 4px;
-  height: 64px;
-  padding: 0 8px 0 16px;
+  height: calc(64px + env(safe-area-inset-top, 0px));
+  padding: env(safe-area-inset-top, 0px) 8px 0 16px;
   background: var(--surface);
 }
 .carsel {
@@ -551,7 +558,7 @@ details .note {
   z-index: 10;
   display: flex;
   justify-content: space-around;
-  max-width: 640px;
+  max-width: var(--maxw);
   margin-inline: auto;
   background: var(--surf);
   padding: 12px 8px calc(16px + env(safe-area-inset-bottom, 0px));
@@ -600,7 +607,7 @@ body.kb .nav {
   left: 16px;
   right: 16px;
   bottom: calc(104px + env(safe-area-inset-bottom, 0px));
-  max-width: 608px;
+  max-width: calc(var(--maxw) - 32px);
   margin-inline: auto;
   z-index: 20;
   background: var(--inverse);
@@ -697,7 +704,8 @@ body.kb #st {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding: 24px 20px;
+  padding: calc(24px + env(safe-area-inset-top, 0px)) calc(20px + env(safe-area-inset-right, 0px))
+    calc(24px + env(safe-area-inset-bottom, 0px)) calc(20px + env(safe-area-inset-left, 0px));
 }
 .lang .wrap {
   width: 100%;
@@ -750,4 +758,138 @@ body.kb #st {
   cursor: pointer;
   user-select: none;
   will-change: transform, opacity;
+}
+
+/* ================================================================================================
+ * Adaptive layout
+ * - under 600 px (phones): one column, bottom navigation bar (the styles above);
+ * - 600 to 839 px (large phones, small tablets): a wider column, four figures per row in Stats;
+ * - 840 px and more (tablets, computers, phones in landscape): navigation rail on the left;
+ * - 1,024 px and more (tablets in landscape, computers): content up to 1,160 px wide in two columns:
+ *   the form next to its history, charts side by side, the help next to the other settings.
+ * Plus, with a mouse: hover states and a visible focus for keyboard users.
+ * ================================================================================================ */
+@media (min-width: 600px) {
+  :root {
+    --maxw: 760px;
+  }
+  .stats {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+@media (min-width: 840px) {
+  body {
+    max-width: none;
+    padding: 0 env(safe-area-inset-right, 0px) 32px calc(88px + env(safe-area-inset-left, 0px));
+  }
+  .appbar,
+  main {
+    max-width: calc(var(--maxw) + 48px);
+    margin-inline: auto;
+  }
+  .appbar {
+    padding-left: 24px;
+    padding-right: 16px;
+  }
+  .carsel {
+    flex: 0 1 auto;
+    margin-right: auto;
+  }
+  main {
+    padding: 0 24px;
+  }
+  #carForm {
+    max-width: 640px;
+  }
+  /* navigation rail */
+  .nav {
+    top: 0;
+    right: auto;
+    width: calc(88px + env(safe-area-inset-left, 0px));
+    max-width: none;
+    margin: 0;
+    flex-direction: column;
+    justify-content: flex-start;
+    gap: 12px;
+    padding: calc(80px + env(safe-area-inset-top, 0px)) 0 16px env(safe-area-inset-left, 0px);
+  }
+  .nav button {
+    flex: none;
+    padding: 4px 0;
+  }
+  .nav .pill {
+    width: 56px;
+  }
+  body.kb .nav {
+    display: flex;
+  }
+  #st,
+  body.kb #st {
+    left: calc(88px + env(safe-area-inset-left, 0px));
+    right: 0;
+    bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    max-width: 560px;
+  }
+}
+@media (min-width: 1024px) {
+  :root {
+    --maxw: 1112px;
+  }
+  /* Fill-ups and Purchases: the form on the left, the history on the right */
+  #fuel,
+  #buys {
+    display: grid;
+    grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+    column-gap: 24px;
+    align-items: start;
+  }
+  .hist > h2.sec {
+    margin-top: 4px;
+  }
+  /* Stats: figures and spending across, the two charts side by side (same height) */
+  #stats {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    column-gap: 16px;
+  }
+  #stats > .card:first-child,
+  #stats > .card:last-child {
+    grid-column: 1 / -1;
+  }
+  /* Settings: the help on the right of the other cards */
+  #save {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    column-gap: 16px;
+    align-items: start;
+  }
+}
+@media (hover: hover) and (pointer: fine) {
+  .icon,
+  .del,
+  .nav button,
+  .svcbar,
+  summary {
+    cursor: pointer;
+  }
+  .icon:hover,
+  .del:not(.armed):hover {
+    background: var(--surf-high);
+  }
+  .btn:hover,
+  .svcbar:hover {
+    filter: brightness(1.06);
+  }
+  .nav button:not(.on):hover .pill {
+    background: var(--surf-high);
+  }
+  .wl .it:hover {
+    color: var(--on-surf);
+  }
+}
+button:focus-visible,
+summary:focus-visible,
+.btn:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
 }

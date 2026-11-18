@@ -1,0 +1,91 @@
+name: Publier la version web
+
+# Version web (PWA installable) publiée par GitHub Pages depuis la branche gh-pages
+# (réglage du dépôt : Settings → Pages → Deploy from a branch → gh-pages, / (root)).
+# - main : le site, à la racine : https://<propriétaire>.github.io/Konso/
+# - autre branche : une version de test « Konso Test », dans test/<branche>/ (les / deviennent des -),
+#   avec ses propres données et son propre cache hors ligne : la vraie version n'est jamais touchée.
+# - branche supprimée : son dossier de test est supprimé.
+# Le site est construit par tools/build-web.js (appli de l'APK + web/ : icônes, manifeste, cache hors ligne).
+
+on:
+  push:
+    branches: ['**', '!gh-pages']
+  workflow_dispatch:
+  delete:
+
+permissions:
+  contents: write
+
+# Un seul envoi à la fois vers gh-pages, sans en annuler aucun.
+concurrency:
+  group: gh-pages
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    env:
+      EVENT: ${{ github.event_name }}
+      BRANCH: ${{ github.event_name == 'delete' && github.event.ref || github.ref_name }}
+      REF_TYPE: ${{ github.event.ref_type }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+        if: github.event_name != 'delete'
+      - uses: actions/setup-node@v4
+        if: github.event_name != 'delete'
+        with:
+          node-version: '20'
+      - name: Construire le site
+        if: github.event_name != 'delete'
+        run: |
+          if [ "$BRANCH" = "main" ] || [ "$BRANCH" = "master" ]; then
+            node tools/build-web.js "$RUNNER_TEMP/site"
+          else
+            node tools/build-web.js "$RUNNER_TEMP/site" --test "$BRANCH"
+          fi
+      - name: Publier dans gh-pages
+        run: |
+          if [ "$EVENT" = "delete" ] && [ "$REF_TYPE" != "branch" ]; then exit 0; fi
+          SLUG=$(printf '%s' "$BRANCH" | sed 's#[^A-Za-z0-9._-]#-#g')
+          mkdir "$RUNNER_TEMP/pages" && cd "$RUNNER_TEMP/pages"
+          git init -q
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git remote add origin "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          if git fetch -q --depth 1 origin gh-pages; then
+            git checkout -q -b gh-pages FETCH_HEAD
+          else
+            git checkout -q --orphan gh-pages
+          fi
+          if [ "$EVENT" = "delete" ]; then
+            # Branche supprimée : on retire sa version de test.
+            [ -d "test/$SLUG" ] || exit 0
+            git rm -rq "test/$SLUG"
+            MSG="Remove the web test build of $BRANCH"
+          elif [ "$BRANCH" = "main" ] || [ "$BRANCH" = "master" ]; then
+            # main : tout le site est remplacé, sauf les versions de test des branches.
+            find . -mindepth 1 -maxdepth 1 ! -name .git ! -name test -exec rm -rf {} +
+            cp -a "$RUNNER_TEMP/site/." .
+            MSG="Web version from ${GITHUB_SHA::7}"
+          else
+            rm -rf "test/$SLUG" && mkdir -p test
+            cp -a "$RUNNER_TEMP/site" "test/$SLUG"
+            touch .nojekyll
+            MSG="Web test build of $BRANCH from ${GITHUB_SHA::7}"
+          fi
+          git add -A
+          if git diff --cached --quiet; then echo "Rien à publier."; exit 0; fi
+          git commit -qm "$MSG"
+          for i in 1 2 3 4; do git push -q origin gh-pages && exit 0; sleep $((i * 5)); done
+          exit 1
+      - name: Lien
+        if: github.event_name != 'delete'
+        run: |
+          OWNER="${GITHUB_REPOSITORY%%/*}"; REPO="${GITHUB_REPOSITORY#*/}"
+          URL="https://${OWNER,,}.github.io/${REPO}/"
+          if [ "$BRANCH" != "main" ] && [ "$BRANCH" != "master" ]; then
+            URL="${URL}test/$(printf '%s' "$BRANCH" | sed 's#[^A-Za-z0-9._-]#-#g')/"
+          fi
+          echo "Version web : $URL (en ligne une à deux minutes après, le temps que GitHub Pages la déploie)" | tee -a "$GITHUB_STEP_SUMMARY"

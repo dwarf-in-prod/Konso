@@ -1,7 +1,8 @@
 /*
  * Konso — application logic.
  *
- * Runs inside the Android app (a WebView, see MainActivity.java) or in any browser for testing.
+ * Runs inside the Android app (a WebView, see MainActivity.java) or in any browser: the web version
+ * (installable PWA) is the same files, published by tools/build-web.js with web/ (offline cache, icons).
  *
  * Files
  * - index.html: the screens (four tabs: Fill-ups, Purchases, Stats, Settings, plus overlays).
@@ -15,6 +16,7 @@
  *   code calls persist() to save S, then render() to redraw the screens from S.
  * - S is saved twice: in localStorage (always), and in the Android app to a konso.json file in a
  *   folder the user picked, through the `Android` bridge (NA) provided by MainActivity.java.
+ *   In the web version there is no folder: the user saves and opens backup files (see "Web version").
  * - Distances are always stored in km and volumes in litres. The units chosen by the user only
  *   change what is displayed and typed (see "Units and currency").
  * - Short names used everywhere: $ = getElementById, tx = translate, fmt = format a number,
@@ -31,8 +33,11 @@
 const $ = id => document.getElementById(id);
 // LANGS: [code, name, locale] of the 10 languages; DICT: the texts, by language (i18n.js).
 const { LANGS, D: DICT } = I18N;
+// Prefix of every localStorage key. A test build of the web version (published under /test/<branch>/ on
+// the same site) uses its own keys, so it never touches the data of the real one.
+const KP = /\/test\/[^/]+\//.test(location.pathname) ? 'konso-test-' : 'konso-';
 // localStorage key of the chosen language. LANG is its code, LOC the locale used to format numbers and dates.
-const LK = 'konso-lang';
+const LK = KP + 'lang';
 let LANG = 'fr',
   LOC = 'fr-FR';
 // Translate: returns the text of key k in the current language (French if missing).
@@ -58,8 +63,8 @@ const fmt = (n, d = 2) =>
 // ================================================================================================
 
 // localStorage keys of the chosen units and currency.
-const UK = 'konso-units',
-  MK = 'konso-money';
+const UK = KP + 'units',
+  MK = KP + 'money';
 const UNITS = ['km', 'uk', 'us']; // km + litres (L/100 km); miles + litres (imperial mpg, UK); miles + US gallons (US mpg)
 const UNIT_LABEL = { km: 'km · L/100 km', uk: 'miles · mpg (UK)', us: 'miles · mpg (US)' };
 const MONEY = ['EUR', 'GBP', 'USD', 'CHF', 'PLN', 'RON', 'TRY']; // currencies of the countries of the 10 languages
@@ -199,7 +204,7 @@ const catLabel = c => {
 //   buys: purchases [{id, car, d: date, e: amount, c: category, n: description, k: odometer in km, s: shop}]
 // Lists are kept sorted from the most recent date. LS is the localStorage key of the copy.
 let S = { cars: [{ id: 'c1', name: '', fuel: 'SP95-E10' }], cur: 'c1', fuel: [], buys: [] },
-  LS = 'konso-data';
+  LS = KP + 'data';
 const carName = c => c.name || tx('car_default'); // the default car has no name: translated label
 // Clean data coming from a file, an import or localStorage: types checked, texts cut to a maximum
 // length, unusable lines dropped, unique ids. Accepts the old format (without cars) and attaches every
@@ -551,6 +556,8 @@ const ICON = {
     'M21 6H3c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm0 10H3V8h2v4h2V8h2v4h2V8h2v4h2V8h2v4h2V8h2v8z',
   money:
     'M19 14V6c0-1.1-.9-2-2-2H3c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zm-9-1c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm13-6v11c0 1.1-.9 2-2 2H4v-2h17V7h2z',
+  install: 'M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z',
+  file: 'M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z',
 };
 // Full-screen wheel with Cancel / Confirm: the app's way of choosing a value in a list
 // (preferred to native drop-down menus). Options:
@@ -661,6 +668,7 @@ function onboardMoney() {
       obMoney = MONEY[i];
       setMoney(obMoney, true);
       render();
+      installAdvice();
     },
   });
 }
@@ -736,9 +744,14 @@ $('langBtn').onclick = () => {
 function renderSave() {
   const f = $('sv-folder');
   if (!f) return;
+  $('sv-title').textContent = tx(NA ? 'set_backup' : 'set_backup_web');
+  $('sv-web').classList.toggle('hide', !!NA);
+  $('sv-drive').classList.toggle('hide', !NA);
   if (!NA) {
     f.innerHTML = tx('b_browser');
     $('sv-btns').classList.add('hide');
+    const d = lastExport();
+    $('sv-last').textContent = d ? tx('b_last', { d: fdate(d.slice(0, 10)) }) : tx('b_never');
   } else {
     $('sv-btns').classList.remove('hide');
     f.innerHTML = folder
@@ -781,6 +794,7 @@ function renderSave() {
     };
   } else p.classList.add('hide');
   $('sv-count').textContent = tx('b_count', { c: S.cars.length, f: S.fuel.length, b: S.buys.length });
+  renderInstall();
 }
 // Called by MainActivity once the user has picked a backup folder (name = folder name).
 // If the folder already contains a konso.json and the app has data too, the user chooses which to keep
@@ -858,6 +872,195 @@ $('sv-import').onclick = () => {
     status(tx('st_json_bad'));
   }
 };
+
+// ================================================================================================
+// Web version (installable PWA, in a browser on any phone, tablet or computer)
+// There is no backup folder: the data lives in the browser (localStorage), and the user saves a backup
+// file and opens it again, on the same device or another one. The published site also has an offline
+// cache (sw.js) and can be installed: Settings shows how, or an "Install" button where the browser
+// offers one. None of this runs in the Android app (NA is set there).
+// ================================================================================================
+
+// localStorage key of the date of the last backup file saved.
+const EK = KP + 'export';
+function lastExport() {
+  try {
+    return localStorage.getItem(EK) || '';
+  } catch (e) {
+    return '';
+  }
+}
+// Ask the browser not to clear the data when space runs low (granted to installed apps).
+function keepStorage() {
+  try {
+    if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
+  } catch (e) {}
+}
+// "Save a backup file": konso-<date>.json. On phones and tablets the share sheet is used when it accepts
+// the file (on iPhone it offers "Save to Files"); otherwise, and on computers, a normal download.
+async function exportFile() {
+  const name = KP + today() + '.json',
+    blob = new Blob([payload()], { type: 'application/json' });
+  let shared = false;
+  if (matchMedia('(pointer: coarse)').matches && navigator.canShare) {
+    try {
+      const file = new File([blob], name, { type: 'application/json' });
+      if (navigator.canShare({ files: [file] })) {
+        await navigator.share({ files: [file] });
+        shared = true;
+      }
+    } catch (e) {
+      if (e && e.name === 'AbortError') return; // share sheet closed: nothing saved
+    }
+  }
+  if (!shared) {
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = name;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 10000);
+  }
+  try {
+    localStorage.setItem(EK, today());
+  } catch (e) {}
+  keepStorage();
+  renderSave();
+  status(tx('st_exported'));
+}
+$('sv-export').onclick = () => exportFile();
+// "Open a backup file": the data of the file replaces the app's, after a confirmation if the app has data.
+$('sv-open').onclick = () => $('sv-file').click();
+$('sv-file').onchange = async e => {
+  const f = e.target.files && e.target.files[0];
+  e.target.value = '';
+  if (!f) return;
+  let d = null;
+  try {
+    d = JSON.parse(await f.text());
+  } catch (x) {}
+  if (!validData(d)) {
+    status(tx('st_unreadable'));
+    return;
+  }
+  const apply = () => {
+    S = norm(d);
+    cacheSave();
+    render();
+    renderSave();
+    status(tx('st_import_ok'));
+  };
+  if (!S.fuel.length && !S.buys.length) return apply();
+  const n = { c: (d.cars && d.cars.length) || 1, f: d.fuel.length, b: d.buys.length };
+  dialog(
+    tx('imp_title'),
+    '<p>' + esc(tx('imp_msg', n)) + '</p>',
+    [
+      { t: tx('cancel'), tonal: true },
+      { t: tx('imp_yes'), fn: apply },
+    ],
+    'file',
+  );
+};
+
+// Install: installEvt is the browser's install prompt, kept for the "Install Konso" button (Chrome, Edge,
+// Samsung Internet). Safari and Firefox have none: the card explains where the browser's command is.
+let installEvt = null,
+  installed = false;
+const standalone = () => matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+const isIOS = () =>
+  /iPad|iPhone|iPod/.test(navigator.userAgent) || (/Mac/.test(navigator.platform) && navigator.maxTouchPoints > 1);
+// Where the browser's install command is, when it offers no install button (Safari, Firefox...).
+const installHow = () => tx(isIOS() ? 'inst_ios' : 'inst_other');
+// Settings > Install the app card: why, and the button or where the command is.
+// Hidden in the Android app and once Konso runs installed.
+function renderInstall() {
+  const card = $('inst');
+  if (NA || installed || standalone()) {
+    card.classList.add('hide');
+    return;
+  }
+  card.classList.remove('hide');
+  $('inst-btn').classList.toggle('hide', !installEvt);
+  $('inst-how').innerHTML = esc(tx('inst_txt')) + (installEvt ? '' : '<br>' + esc(installHow()));
+}
+// Show the browser's own install prompt (only once: the browser gives a new one if it is dismissed).
+async function promptInstall() {
+  if (!installEvt) return;
+  const e = installEvt;
+  installEvt = null;
+  try {
+    await e.prompt();
+  } catch (x) {}
+  renderInstall();
+}
+$('inst-btn').onclick = promptInstall;
+
+// Install advice, at the first launch of the web version in a browser tab: the data of a website can
+// be erased by the browser (Safari erases it after 7 days without a visit), never that of an
+// installed app. Shown once (IK), at the end of the first-launch wheels, or at the next start for
+// people who chose their language before this advice existed; the Settings card stays afterwards.
+const IK = KP + 'install-seen';
+let adviceOpen = false;
+function installAdvice() {
+  if (NA || installed || standalone()) return;
+  // Not over the first-launch screens or another dialog: it will be shown at the next start.
+  if (!['lang', 'picker', 'dlg'].every(id => $(id).classList.contains('hide'))) return;
+  try {
+    if (localStorage.getItem(IK)) return;
+    localStorage.setItem(IK, today());
+  } catch (e) {
+    return;
+  }
+  showAdvice();
+}
+// The advice dialog: with an Install button when the browser offers one, otherwise where the
+// browser's install command is. Redrawn if the browser's offer arrives while it is open.
+function showAdvice() {
+  adviceOpen = true;
+  const done = () => (adviceOpen = false);
+  const msg = '<p>' + esc(tx('inst_adv_msg')) + '</p>';
+  if (installEvt) {
+    dialog(
+      tx('inst_adv_title'),
+      msg,
+      [
+        { t: tx('inst_later'), tonal: true, fn: done },
+        { t: tx('inst_btn'), fn: () => (done(), promptInstall()) },
+      ],
+      'install',
+    );
+  } else {
+    dialog(tx('inst_adv_title'), msg + '<p><b>' + esc(installHow()) + '</b></p>', [{ t: tx('ok'), fn: done }], 'install');
+  }
+}
+// Web version only: install prompt, offline cache (sw.js exists only on the published site, the
+// registration simply fails elsewhere), and a message when an update has been downloaded.
+function initWeb() {
+  if (NA) return;
+  addEventListener('beforeinstallprompt', e => {
+    e.preventDefault();
+    installEvt = e;
+    renderInstall();
+    if (adviceOpen) showAdvice();
+  });
+  addEventListener('appinstalled', () => {
+    installEvt = null;
+    installed = true;
+    renderInstall();
+    keepStorage();
+  });
+  if ('serviceWorker' in navigator && isSecureContext) {
+    const had = !!navigator.serviceWorker.controller;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (had) status(tx('st_update'));
+    });
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+  }
+  if (standalone()) keepStorage();
+  installAdvice();
+}
 
 // ================================================================================================
 // Receipt scanning (OCR on the phone, offline)
@@ -1572,7 +1775,7 @@ function barChart() {
 // Service reminder, what the user sees: when a service is due, a dialog in the middle of the screen
 // (once per due date, remembered in localStorage under SK), then an amber banner at the top until a
 // service is recorded.
-const SK = 'konso-svc-seen',
+const SK = KP + 'svc-seen',
   svcShown = new Set();
 const svcKey = (c, i) => c.id + '|' + i.ref;
 function svcSeen(k) {
@@ -1590,7 +1793,10 @@ function svcMarkSeen(k) {
   } catch (e) {}
 }
 // Dialog in the middle of the screen. btns: [{t: text, tonal: lighter style, fn: action}].
-function dialog(title, html, btns) {
+// icon: a key of ICON, shown in the app's colour; without it, the amber wrench of the service reminder.
+function dialog(title, html, btns, icon) {
+  $('dlgP').setAttribute('d', ICON[icon] || ICON.wrench);
+  $('dlgP').parentNode.style.color = icon ? 'var(--primary)' : '';
   $('dlgT').textContent = title;
   $('dlgM').innerHTML = html;
   $('dlgB').innerHTML = '';
@@ -1855,6 +2061,7 @@ function init() {
 $('fd').value = today();
 $('bd').value = today();
 init();
+initWeb();
 initScan();
 applyCarDefaults();
 marks();
