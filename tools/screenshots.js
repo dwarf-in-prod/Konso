@@ -1,5 +1,6 @@
 // Regenerates the README screenshots (docs/screenshots/*.png) from the web app, in English,
-// with made-up demo data. Also copies them to the F-Droid / IzzyOnDroid listing
+// with made-up demo data: the phone screens (1-…6-…png) and the web version on a computer
+// (desktop.png). Also copies the phone screens to the F-Droid / IzzyOnDroid listing
 // (fastlane/metadata/android/en-US/images/phoneScreenshots/) and renders its 512 px icon
 // from the launcher icon (res/drawable/ic_fg.xml on the res/values/colors.xml background). Usage, from the repository root:
 //   npm install --no-save playwright && npx playwright install chromium   (once)
@@ -48,16 +49,17 @@ function demo(serviceDaysAgo, svcKm) {
   const url = 'http://127.0.0.1:' + srv.address().port + '/';
   const browser = await chromium.launch({ args: ['--lang=en-GB'], env: { ...process.env, LANG: 'en_GB.UTF-8', LANGUAGE: 'en_GB' } });
 
-  async function open(data) {
-    const ctx = await browser.newContext({ viewport: { width: 412, height: 915 }, deviceScaleFactor: 2, reducedMotion: 'reduce', locale: 'en-GB' });
+  // web = the web version on a computer (no Android bridge, wide window); otherwise the Android app on a phone.
+  async function open(data, web) {
+    const ctx = await browser.newContext({ viewport: web ? { width: 1280, height: 800 } : { width: 412, height: 915 }, deviceScaleFactor: 2, reducedMotion: 'reduce', locale: 'en-GB' });
     const page = await ctx.newPage();
-    await page.addInitScript(d => {
+    await page.addInitScript(([d, web]) => {
       const json = JSON.stringify(d);
       localStorage.setItem('konso-lang', 'en');
       localStorage.setItem('konso-data', json);
       // stand-in for the Android bridge of MainActivity: a backup folder is already chosen
-      window.Android = { folderName: () => 'Konso', fileName: () => 'konso.json', pickFolder: () => {}, readFile: () => json, writeFile: () => 'ok' };
-    }, data);
+      if (!web) window.Android = { folderName: () => 'Konso', fileName: () => 'konso.json', pickFolder: () => {}, readFile: () => json, writeFile: () => 'ok' };
+    }, [data, !!web]);
     await page.goto(url);
     await page.waitForTimeout(400);
     return page;
@@ -97,10 +99,16 @@ function demo(serviceDaysAgo, svcKm) {
   await shot(page, '4-service-reminder.png');
   await page.context().close();
 
+  // Web version on a computer: navigation rail, charts side by side
+  page = await open(demo(150, 10000), true);
+  await page.evaluate(() => showTab('stats'));
+  await shot(page, 'desktop.png');
+  await page.context().close();
+
   // Store listing: same screenshots, and the icon (the adaptive icon's layers, full square).
   const shots = path.join(STORE, 'phoneScreenshots');
   fs.mkdirSync(shots, { recursive: true });
-  for (const f of fs.readdirSync(OUT).filter(f => f.endsWith('.png'))) fs.copyFileSync(path.join(OUT, f), path.join(shots, f));
+  for (const f of fs.readdirSync(OUT).filter(f => /^\d-.*\.png$/.test(f))) fs.copyFileSync(path.join(OUT, f), path.join(shots, f));
   const res = path.join(__dirname, '..', 'app', 'src', 'main', 'res');
   const bg = fs.readFileSync(path.join(res, 'values', 'colors.xml'), 'utf8').match(/name="ic_bg">([^<]+)</)[1];
   const fg = fs.readFileSync(path.join(res, 'drawable', 'ic_fg.xml'), 'utf8');

@@ -1,10 +1,11 @@
 # Konso
 
-**Fuel consumption and car maintenance tracker for Android.**
+**Fuel consumption and car maintenance tracker for Android — and for any phone, tablet or computer as a web app.**
 Offline, private, open source — and proudly built with AI.
 
 ![License: GPL v3](https://img.shields.io/badge/license-GPL--3.0-blue)
 ![Android 10+](https://img.shields.io/badge/Android-10%2B-3ddc84)
+![Web app (PWA)](https://img.shields.io/badge/web-PWA-5a0fc8)
 ![No tracking](https://img.shields.io/badge/tracking-none-success)
 ![Languages](https://img.shields.io/badge/languages-10-informational)
 ![Built with AI](https://img.shields.io/badge/built%20with-AI%20(Claude%20Code)-8a2be2)
@@ -21,6 +22,9 @@ Offline, private, open source — and proudly built with AI.
     <td align="center"><img src="docs/screenshots/4-service-reminder.png" width="240" alt="Service reminder"><br><sub>Service reminder</sub></td>
     <td align="center"><img src="docs/screenshots/5-settings.png" width="240" alt="Settings"><br><sub>Settings</sub></td>
     <td align="center"><img src="docs/screenshots/6-wheel-picker.png" width="240" alt="Wheel picker"><br><sub>Wheel picker</sub></td>
+  </tr>
+  <tr>
+    <td align="center" colspan="3"><img src="docs/screenshots/desktop.png" width="740" alt="Web version on a computer"><br><sub>Web version on a computer: the layout adapts to the screen</sub></td>
   </tr>
 </table>
 
@@ -42,6 +46,7 @@ Written by an AI does not mean unchecked: all the source code is open, so anyone
 - **Works fully offline.** The only network permission is used to serve the app's own files on `127.0.0.1`; every request to any other host is blocked in `MainActivity`.
 - **Receipts are read on the phone.** The OCR engine (Tesseract) is embedded; photos never leave the device.
 - **Your data stays yours**: inside the app, and in a plain `konso.json` file saved to the folder you choose (on the phone, or on Google Drive through the Android file picker). You can read it, copy it or delete it at any time.
+- **Web version**: the site is made of static files only, with no server code. GitHub, which hosts it, sees the requests for the app's files like for any website, never your data, which stays in your browser.
 - **Open source** under the GPL-3.0 licence: nothing is hidden.
 
 ## Features
@@ -57,6 +62,7 @@ Written by an AI does not mean unchecked: all the source code is open, so anyone
 - 🎡 **Wheel pickers** for language, units, currency, categories and service distance.
 - 🌍 **10 languages**: English, French, Spanish, German, Italian, Portuguese, Dutch, Polish, Turkish, Romanian.
 - ❓ **Built-in help** ("How it works" in Settings) and a Material Design 3 interface with light and dark themes.
+- 🖥️ **Adaptive layout**: bottom bar on phones; on tablets, computers and phones in landscape, a navigation rail on the left and two columns.
 
 ## Install
 
@@ -64,6 +70,16 @@ Written by an AI does not mean unchecked: all the source code is open, so anyone
 2. Open it on your phone and allow installing apps from unknown sources.
 
 Requires Android 10 or later.
+
+### Web version (iPhone, iPad, computers, any Android phone)
+
+Konso is also a web app (PWA), published with GitHub Pages: the link is in the *About* section of this repository. Open it once, then install it:
+
+- **iPhone / iPad**: in Safari, *Share* → *Add to Home Screen*.
+- **Android, Windows, Linux, macOS**: in Chrome or Edge, the install icon in the address bar, or the menu → *Install app*.
+- **Mac with Safari**: *File* → *Add to Dock*.
+
+Once installed it has its own icon and works without internet, receipt scanning included. Data stays in the browser of each device: in Settings, *Save a backup file* keeps a copy (and moves your data to another device with *Open a backup file*). The web version shares the code of the Android app; the APK is not changed by it.
 
 ## Build
 
@@ -73,6 +89,7 @@ Requires Android 10 or later.
   ./gradlew assembleDebug
   ```
 - **GitHub Actions**: every push to `main` builds the APK (artifact `konso-apk`). Running the workflow manually, or a commit on `main` whose message contains `[release]`, publishes the APK in the `latest` release, and once per version in a `v<versionName>` release (`konso-<version>.apk`), whose tag is used by F-Droid-style app stores.
+- **Web version**: `node tools/build-web.js <folder>` builds the site (the files of `assets/www`, plus `web/`: icons, offline cache). The *Publier la version web* workflow publishes it to the `gh-pages` branch, which GitHub Pages serves (*Settings → Pages → Deploy from a branch → gh-pages*).
 - **OCR engine from source**: `tools/build-tesseract.sh` rebuilds the Tesseract files of `vendor/` from the source code of [tesseract.js-core](https://github.com/naptha/tesseract.js-core) and [tesseract.js](https://github.com/naptha/tesseract.js) (Emscripten 4.0.15, Node.js). The *Tesseract from source* workflow runs it and checks the result with `tools/ocr-test.js`.
 
 ## Development
@@ -82,7 +99,8 @@ Requires Android 10 or later.
 1. Each feature or fix is developed on its own branch: `feature/<name>` or `fix/<name>`.
 2. Each push to a branch builds a **test APK**, published in the `test-<branch>` pre-release (`/` becomes `-`) as `konso-test.apk`.
 3. The test APK installs **next to** the real app as **Konso Test** (`app.konso.test`) and uses its own backup file, `konso-test.json`, so real data is never touched. To test with your real data, copy `konso.json` to `konso-test.json` in the chosen folder.
-4. Once validated, the branch is merged into `main` through a pull request and deleted; its test pre-release is then deleted automatically.
+4. Each push to a branch also publishes a **web test build**, "Konso Test", in `test/<branch>/` of the web version, with its own data and offline cache.
+5. Once validated, the branch is merged into `main` through a pull request and deleted; its test pre-release and web test build are then deleted automatically.
 
 Commit messages are written in English and explain what changed and why. Locally, `./gradlew assembleDebug -PkonsoTest=demo` builds the same test APK. The screenshots above are generated by `node tools/screenshots.js` (requires Playwright).
 
@@ -103,7 +121,12 @@ app/src/main/
 │   └── vendor/         Tesseract.js and the French language model
 └── java/app/konso/
     └── MainActivity.java   WebView, local server, camera, backup file
+web/                        Web version only (never in the APK)
+├── sw.js                   Offline cache (service worker)
+└── icons/                  App icons for browsers and home screens
 tools/
+├── build-web.js            Builds the web version (app + web/ + manifest)
+├── web-icons.js            Regenerates web/icons from the Android launcher icon
 ├── screenshots.js          Regenerates the screenshots (README and store listing)
 ├── build-tesseract.sh      Rebuilds the OCR engine from source
 └── ocr-test.js             Checks that an OCR engine build reads text
@@ -120,7 +143,7 @@ Third-party components: [Tesseract.js](https://github.com/naptha/tesseract.js) a
 
 # Konso — Français
 
-**Suivi de consommation de carburant et d'entretien de voiture, pour Android.**
+**Suivi de consommation de carburant et d'entretien de voiture, pour Android — et pour tout téléphone, tablette ou ordinateur en version web.**
 Hors ligne, respectueuse de la vie privée, open source — et fièrement créée avec l'IA.
 
 Les captures d'écran ci-dessus montrent l'appli en anglais ; elle est aussi disponible en français et dans 8 autres langues.
@@ -143,6 +166,7 @@ Comment elle est faite :
 - **Fonctionne entièrement hors ligne.** La seule permission réseau sert à afficher les fichiers de l'appli sur `127.0.0.1` ; toute requête vers un autre hôte est bloquée dans `MainActivity`.
 - **Les tickets sont lus sur le téléphone.** Le moteur de lecture (Tesseract) est embarqué ; les photos ne quittent jamais l'appareil.
 - **Vos données restent à vous** : dans l'appli, et dans un simple fichier `konso.json` enregistré dans le dossier de votre choix (téléphone, ou Google Drive via le sélecteur de fichiers Android). Vous pouvez le lire, le copier ou le supprimer à tout moment.
+- **Version web** : le site n'est fait que de fichiers statiques, sans code côté serveur. GitHub, qui l'héberge, voit les demandes des fichiers de l'appli comme pour n'importe quel site, jamais vos données, qui restent dans votre navigateur.
 - **Open source**, sous licence GPL-3.0 : rien n'est caché.
 
 ## Fonctionnalités
@@ -158,6 +182,7 @@ Comment elle est faite :
 - 🎡 **Choix par roue** pour la langue, les unités, la monnaie, les catégories et le kilométrage d'entretien.
 - 🌍 **10 langues** : français, anglais, espagnol, allemand, italien, portugais, néerlandais, polonais, turc, roumain.
 - ❓ **Aide intégrée** (« Comment ça marche ? » dans les Réglages) et interface Material Design 3, en thème clair ou sombre.
+- 🖥️ **Mise en page adaptative** : barre en bas sur téléphone ; sur tablette, ordinateur et téléphone à l'horizontale, un rail de navigation à gauche et deux colonnes.
 
 ## Installer
 
@@ -166,11 +191,22 @@ Comment elle est faite :
 
 Android 10 ou plus récent.
 
+### Version web (iPhone, iPad, ordinateurs, tout téléphone Android)
+
+Konso est aussi une appli web (PWA), publiée avec GitHub Pages : le lien est dans la section *About* de ce dépôt. Ouvrez-la une fois, puis installez-la :
+
+- **iPhone / iPad** : dans Safari, *Partager* → *Sur l'écran d'accueil*.
+- **Android, Windows, Linux, macOS** : dans Chrome ou Edge, l'icône d'installation de la barre d'adresse, ou le menu → *Installer l'application*.
+- **Mac avec Safari** : *Fichier* → *Ajouter au Dock*.
+
+Une fois installée, elle a sa propre icône et fonctionne sans internet, lecture de ticket comprise. Les données restent dans le navigateur de chaque appareil : dans les Réglages, *Enregistrer un fichier de sauvegarde* en garde une copie (et permet de passer à un autre appareil avec *Ouvrir un fichier de sauvegarde*). La version web partage le code de l'appli Android ; elle ne change rien à l'APK.
+
 ## Compiler
 
 - **Android Studio** : ouvrir le dossier, puis *Build → Build APK(s)*.
 - **Ligne de commande** (JDK 17 + SDK Android) : `./gradlew assembleDebug`
 - **GitHub Actions** : chaque push sur `main` compile l'APK (artefact `konso-apk`). Un lancement manuel du workflow, ou un commit sur `main` dont le message contient `[release]`, publie l'APK dans la release `latest`, et une fois par version dans une release `v<versionName>` (`konso-<version>.apk`) dont le tag sert aux magasins d'applis de type F-Droid.
+- **Version web** : `node tools/build-web.js <dossier>` construit le site (les fichiers de `assets/www`, plus `web/` : icônes, cache hors ligne). Le workflow *Publier la version web* le publie dans la branche `gh-pages`, servie par GitHub Pages (*Settings → Pages → Deploy from a branch → gh-pages*).
 - **Moteur OCR depuis les sources** : `tools/build-tesseract.sh` recompile les fichiers Tesseract de `vendor/` depuis le code source de [tesseract.js-core](https://github.com/naptha/tesseract.js-core) et [tesseract.js](https://github.com/naptha/tesseract.js) (Emscripten 4.0.15, Node.js). Le workflow *Tesseract depuis les sources* le lance et vérifie le résultat avec `tools/ocr-test.js`.
 
 ## Développement
@@ -180,7 +216,8 @@ Android 10 ou plus récent.
 1. Chaque fonctionnalité ou correction se fait sur sa propre branche : `feature/<nom>` ou `fix/<nom>`.
 2. Chaque push sur la branche compile un **APK de test**, publié dans la pré-release `test-<branche>` (les `/` deviennent des `-`), fichier `konso-test.apk`.
 3. L'APK de test s'installe **à côté** de la vraie appli, sous le nom **Konso Test** (`app.konso.test`), avec son propre fichier `konso-test.json` : les vraies données ne sont jamais touchées. Pour tester avec ses vraies données, copier `konso.json` en `konso-test.json` dans le dossier choisi.
-4. Une fois validée, la branche est fusionnée dans `main` par pull request puis supprimée ; sa pré-release de test est alors supprimée automatiquement.
+4. Chaque push sur une branche publie aussi une **version web de test**, « Konso Test », dans `test/<branche>/` de la version web, avec ses propres données et son propre cache hors ligne.
+5. Une fois validée, la branche est fusionnée dans `main` par pull request puis supprimée ; sa pré-release de test et sa version web de test sont alors supprimées automatiquement.
 
 Les messages de commit sont rédigés en anglais et expliquent ce qui a changé et pourquoi. Les captures d'écran sont générées par `node tools/screenshots.js` (nécessite Playwright).
 

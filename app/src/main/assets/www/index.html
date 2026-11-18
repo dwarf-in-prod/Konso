@@ -2,9 +2,19 @@
 <html lang="fr">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="color-scheme" content="light dark" />
-    <link rel="icon" href="data:," />
+    <meta name="description" content="Fuel consumption and car maintenance tracker. Offline, private, open source." />
+    <meta name="theme-color" content="#f9f9ff" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#111318" media="(prefers-color-scheme: dark)" />
+    <!-- Web version (PWA): manifest and icons come from web/ (tools/build-web.js), not from the Android app -->
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="icon" href="icons/icon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-title" content="Konso" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <title>Konso</title>
     <!-- Konso: the screens. Behaviour in app.js, styles in app.css, texts in i18n.js (data-i18n attributes). -->
     <link rel="stylesheet" href="app.css" />
@@ -113,8 +123,10 @@
           <button class="btn" id="addF" data-i18n="add_fill"></button>
           <div class="note" data-i18n="fill_tip"></div>
         </div>
-        <h2 class="sec" data-i18n="hist_fuel"></h2>
-        <div class="card" id="fl-list"></div>
+        <div class="hist">
+          <h2 class="sec" data-i18n="hist_fuel"></h2>
+          <div class="card" id="fl-list"></div>
+        </div>
       </section>
 
       <!-- Tab 2: purchases (form, history) -->
@@ -146,8 +158,10 @@
           </div>
           <button class="btn" id="addB" data-i18n="add_buy"></button>
         </div>
-        <h2 class="sec" data-i18n="hist_buys"></h2>
-        <div class="card" id="bl-list"></div>
+        <div class="hist">
+          <h2 class="sec" data-i18n="hist_buys"></h2>
+          <div class="card" id="bl-list"></div>
+        </div>
       </section>
 
       <!-- Tab 3: stats (figures, charts, spending) -->
@@ -176,56 +190,72 @@
         </div>
       </section>
 
-      <!-- Tab 4: settings (language, units, currency, servicing, backup, help) -->
+      <!-- Tab 4: settings (install, language, units, currency, servicing, backup, help) -->
       <section id="save" class="hide">
-        <div class="card">
-          <div class="grid">
-            <div class="f fl sel full">
-              <button type="button" class="fieldbtn" id="langBtn"></button
-              ><label data-i18n="set_lang"></label>
-            </div>
-            <div class="f fl sel full">
-              <button type="button" class="fieldbtn" id="unitBtn"></button
-              ><label data-i18n="set_units"></label>
-            </div>
-            <div class="f fl sel full">
-              <button type="button" class="fieldbtn" id="moneyBtn"></button
-              ><label data-i18n="set_money"></label>
+        <!-- Two columns on wide screens: these cards on the left, the help on the right -->
+        <div class="col">
+          <!-- Web version only: how to install the app (renderInstall() in app.js) -->
+          <div class="card hide" id="inst">
+            <h3 data-i18n="inst_title"></h3>
+            <div class="note" id="inst-how" style="margin-top: 0"></div>
+            <button class="btn" id="inst-btn" data-i18n="inst_btn"></button>
+          </div>
+          <div class="card" id="prefs">
+            <div class="grid">
+              <div class="f fl sel full">
+                <button type="button" class="fieldbtn" id="langBtn"></button
+                ><label data-i18n="set_lang"></label>
+              </div>
+              <div class="f fl sel full">
+                <button type="button" class="fieldbtn" id="unitBtn"></button
+                ><label data-i18n="set_units"></label>
+              </div>
+              <div class="f fl sel full">
+                <button type="button" class="fieldbtn" id="moneyBtn"></button
+                ><label data-i18n="set_money"></label>
+              </div>
             </div>
           </div>
-        </div>
-        <div class="card">
-          <h3 data-i18n="svc_title"></h3>
-          <div class="sum" id="svcInfo"></div>
-          <div class="note" data-i18n="svc_note"></div>
-          <button class="btn tonal" id="svcKmBtn" data-i18n="svc_change"></button>
-        </div>
-        <div class="card">
-          <h3 data-i18n="set_backup"></h3>
-          <div id="sv-folder" class="sum"></div>
-          <div id="sv-pending" class="scanres warn hide"></div>
-          <div id="sv-btns" class="hide">
-            <button class="btn" id="sv-pick"></button>
-            <button class="btn tonal" id="sv-now" data-i18n="b_now"></button>
-            <button class="btn tonal" id="sv-reload" data-i18n="b_reload"></button>
+          <div class="card" id="svcCard">
+            <h3 data-i18n="svc_title"></h3>
+            <div class="sum" id="svcInfo"></div>
+            <div class="note" data-i18n="svc_note"></div>
+            <button class="btn tonal" id="svcKmBtn" data-i18n="svc_change"></button>
           </div>
-          <div class="note" id="sv-count"></div>
-          <details>
-            <summary data-i18n="drive_title"></summary>
-            <div class="note" data-i18n-html="drive_steps"></div>
-            <div class="note" data-i18n="drive_note"></div>
-          </details>
-          <details>
-            <summary data-i18n="manual_title"></summary>
-            <textarea id="sv-text" rows="6" style="margin-top: 8px" data-i18n-ph="manual_ph"></textarea>
-            <div class="btns2">
-              <button class="btn tonal" id="sv-copy" data-i18n="manual_copy"></button
-              ><button class="btn tonal" id="sv-import" data-i18n="manual_import"></button>
+          <div class="card" id="backup">
+            <h3 id="sv-title"></h3>
+            <div id="sv-folder" class="sum"></div>
+            <div id="sv-pending" class="scanres warn hide"></div>
+            <div id="sv-btns" class="hide">
+              <button class="btn" id="sv-pick"></button>
+              <button class="btn tonal" id="sv-now" data-i18n="b_now"></button>
+              <button class="btn tonal" id="sv-reload" data-i18n="b_reload"></button>
             </div>
-            <div class="note" data-i18n="manual_note"></div>
-          </details>
+            <!-- Web version: no folder, backup files saved and opened by the user -->
+            <div id="sv-web" class="hide">
+              <button class="btn" id="sv-export" data-i18n="b_export"></button>
+              <button class="btn tonal" id="sv-open" data-i18n="b_import"></button>
+              <input type="file" id="sv-file" accept=".json,application/json" hidden />
+              <div class="note" id="sv-last"></div>
+            </div>
+            <div class="note" id="sv-count"></div>
+            <details id="sv-drive">
+              <summary data-i18n="drive_title"></summary>
+              <div class="note" data-i18n-html="drive_steps"></div>
+              <div class="note" data-i18n="drive_note"></div>
+            </details>
+            <details>
+              <summary data-i18n="manual_title"></summary>
+              <textarea id="sv-text" rows="6" style="margin-top: 8px" data-i18n-ph="manual_ph"></textarea>
+              <div class="btns2">
+                <button class="btn tonal" id="sv-copy" data-i18n="manual_copy"></button
+                ><button class="btn tonal" id="sv-import" data-i18n="manual_import"></button>
+              </div>
+              <div class="note" data-i18n="manual_note"></div>
+            </details>
+          </div>
         </div>
-        <div class="card">
+        <div class="card" id="help">
           <h3 data-i18n="help_title"></h3>
           <details>
             <summary data-i18n="help_q1"></summary>
@@ -266,6 +296,10 @@
           <details>
             <summary data-i18n="help_q10"></summary>
             <div class="note" data-i18n-html="help_a10"></div>
+          </details>
+          <details>
+            <summary data-i18n="help_q11"></summary>
+            <div class="note" data-i18n-html="help_a11"></div>
           </details>
         </div>
       </section>

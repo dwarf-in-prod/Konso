@@ -9,7 +9,7 @@ name: Build APK
 
 on:
   push:
-    branches: ['**']
+    branches: ['**', '!gh-pages'] # gh-pages holds the web version (web.yml), not code
   workflow_dispatch:
   delete:
 
