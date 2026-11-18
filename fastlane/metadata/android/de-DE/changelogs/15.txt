@@ -1,0 +1,1 @@
+Unter der Haube: Der Quellcode wurde neu geordnet und vollständig dokumentiert, damit ihn jeder lesen, prüfen und verbessern kann. Die App funktioniert genau wie vorher: keine Änderung an Funktionen, Bildschirmen oder Daten.

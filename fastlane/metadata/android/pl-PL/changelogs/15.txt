@@ -1,0 +1,1 @@
+Pod maską: kod źródłowy został uporządkowany i w pełni udokumentowany, aby każdy mógł go czytać, sprawdzać i ulepszać. Aplikacja działa dokładnie tak jak wcześniej: bez zmian w funkcjach, ekranach i danych.

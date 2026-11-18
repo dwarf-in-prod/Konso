@@ -1,0 +1,1 @@
+Sotto il cofano: il codice sorgente è stato riorganizzato e documentato completamente, perché chiunque possa leggerlo, verificarlo e migliorarlo. L'app funziona esattamente come prima: nessuna modifica a funzioni, schermate o dati.
