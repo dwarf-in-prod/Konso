@@ -2729,14 +2729,15 @@ function showGarage(part) {
   closeCarForm();
 }
 document.querySelectorAll('.seg button').forEach(b => (b.onclick = () => showGarage(b.dataset.g)));
+// Keyboard open (body.kb hides the bottom bar): while a field that is typed into has the focus.
+// Date fields, switches (checkboxes) and file inputs open no keyboard.
+const typesIn = e => !!e && /^(INPUT|TEXTAREA)$/.test(e.tagName) && !/^(date|checkbox|radio|file)$/.test(e.type);
 document.addEventListener('focusin', e => {
-  if (/^(INPUT|TEXTAREA)$/.test(e.target.tagName) && e.target.type !== 'date')
-    document.body.classList.add('kb');
+  if (typesIn(e.target)) document.body.classList.add('kb');
 });
 document.addEventListener('focusout', () =>
   setTimeout(() => {
-    const a = document.activeElement;
-    if (!a || !/^(INPUT|TEXTAREA)$/.test(a.tagName)) document.body.classList.remove('kb');
+    if (!typesIn(document.activeElement)) document.body.classList.remove('kb');
   }, 150),
 );
 
