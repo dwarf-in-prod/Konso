@@ -433,6 +433,94 @@ textarea {
 #garList > .btn {
   margin-top: 16px;
 }
+/* My garage, buying a new car: subheadings, notes under a field, switch, result */
+.card h4.sub {
+  font: 500 14px/1.4 var(--font);
+  color: var(--primary);
+  margin: 20px 0 12px;
+}
+.note.fnote {
+  margin-top: -6px;
+}
+.fnote:empty {
+  display: none;
+}
+/* M3 switch: the real checkbox is hidden, .trk draws the track and its thumb (::after) */
+.switch {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 18px;
+  font-size: 14px;
+  cursor: pointer;
+}
+.switch input {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+}
+.switch .trk {
+  position: relative;
+  flex: none;
+  width: 52px;
+  height: 32px;
+  border-radius: 16px;
+  border: 2px solid var(--outline);
+  background: var(--surf-high);
+  transition: background 0.15s, border-color 0.15s;
+}
+.switch .trk::after {
+  content: '';
+  position: absolute;
+  left: 6px;
+  top: 6px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--outline);
+  transition: left 0.15s, width 0.15s, height 0.15s, top 0.15s, background 0.15s;
+}
+.switch input:checked + .trk {
+  background: var(--primary);
+  border-color: var(--primary);
+}
+.switch input:checked + .trk::after {
+  left: 22px;
+  top: 2px;
+  width: 24px;
+  height: 24px;
+  background: var(--on-primary);
+}
+.switch input:focus-visible + .trk {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+.planres {
+  background: var(--primary-c);
+  color: var(--on-primary-c);
+  border-radius: 16px;
+  padding: 12px 14px;
+  font-size: 14px;
+  margin-top: 16px;
+}
+.planres .kv {
+  padding: 4px 0;
+}
+.planres .kv span:last-child {
+  font-weight: 500;
+  white-space: nowrap;
+  padding-left: 12px;
+}
+.planres .big {
+  font-size: 16px;
+  font-weight: 600;
+  margin-top: 10px;
+}
+.planres .kv + .big {
+  border-top: 1px solid currentColor;
+  padding-top: 10px;
+}
 .del {
   border: 0;
   background: transparent;
