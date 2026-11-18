@@ -1,0 +1,1 @@
+Onder de motorkap: de broncode is opnieuw geordend en volledig gedocumenteerd, zodat iedereen hem kan lezen, controleren en verbeteren. De app werkt precies zoals voorheen: geen wijzigingen in functies, schermen of gegevens.

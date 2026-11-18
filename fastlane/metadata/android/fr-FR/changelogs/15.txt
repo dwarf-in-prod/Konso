@@ -1,0 +1,1 @@
+Sous le capot : le code source a été réorganisé et entièrement documenté, pour que chacun puisse le lire, l'auditer et l'améliorer. L'appli fonctionne exactement comme avant : aucun changement de fonctions, d'écrans ni de données.

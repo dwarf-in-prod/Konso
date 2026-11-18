@@ -1,0 +1,1 @@
+Por dentro: o código-fonte foi reorganizado e totalmente documentado, para que qualquer pessoa o possa ler, auditar e melhorar. A app funciona exatamente como antes: sem alterações nas funções, ecrãs ou dados.

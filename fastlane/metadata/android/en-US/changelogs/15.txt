@@ -1,0 +1,1 @@
+Under the hood: the source code has been reorganised and fully documented, so that anyone can read, audit and improve it. The app works exactly as before: no change to its features, screens or your data.

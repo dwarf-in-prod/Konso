@@ -1,0 +1,1 @@
+Perde arkası: kaynak kod herkesin okuyup denetleyebilmesi ve geliştirebilmesi için yeniden düzenlendi ve tamamen belgelendi. Uygulama tam olarak önceki gibi çalışır: özelliklerde, ekranlarda ve verilerde değişiklik yok.

@@ -1,0 +1,1 @@
+Sub capotă: codul sursă a fost reorganizat și documentat complet, ca oricine să-l poată citi, verifica și îmbunătăți. Aplicația funcționează exact ca înainte: nicio schimbare la funcții, ecrane sau date.
