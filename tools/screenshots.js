@@ -8,7 +8,7 @@
 // The Android bridge is stubbed (a backup folder named "Konso") and the OCR engine is replaced
 // by a fixed receipt text, so the output is the same on every run (apart from the dates).
 const { chromium } = require('playwright');
-const http = require('http'), fs = require('fs'), path = require('path');
+const http = require('http'), fs = require('fs'), path = require('path'), zlib = require('zlib');
 
 const ROOT = path.join(__dirname, '..', 'app', 'src', 'main', 'assets', 'www');
 const OUT = path.join(__dirname, '..', 'docs', 'screenshots');
@@ -43,9 +43,43 @@ function demoStations() {
   const st = (id, adr, base, step) => {
     const h = [];
     for (let i = 60; i >= 0; i -= step) h.push([day(-i) + 'T08:00', r2((base + 0.04 * Math.sin(i / 9) + (i % 7) * 0.002) * 1000) / 1000]);
-    return { id, adr, ville: 'Lyon', cp: '69007', h: { e10: h } };
+    const [lat, lon] = MAP_SPOTS[id - 69007901];
+    return { id, adr, ville: 'Lyon', cp: '69007', lat, lon, h: { e10: h } };
   };
   return [st(69007901, '12 Avenue de la Gare', 1.79, 4), st(69007902, 'Route de Vienne', 1.82, 6), st(69007903, 'Centre commercial des Lilas', 1.75, 5)];
+}
+
+// Stations map: made-up stations around the demo followed ones (their first three records), as the
+// official feed would answer them, the cheapest first.
+const MAP_CENTRE = [45.7465, 4.8425];
+const MAP_SPOTS = Array.from({ length: 22 }, (_, i) => {
+  const a = i * 2.39, d = 0.003 + (i % 5) * 0.0028;
+  return [+(MAP_CENTRE[0] + Math.sin(a) * d).toFixed(5), +(MAP_CENTRE[1] + Math.cos(a) * d * 1.4).toFixed(5)];
+});
+function demoMapRecords() {
+  const names = ['12 Avenue de la Gare', 'Route de Vienne', 'Centre commercial des Lilas'];
+  return MAP_SPOTS.map(([lat, lon], i) => ({
+    id: 69007901 + i,
+    adresse: names[i] || (8 + i * 6) + ' Rue des Exemples',
+    ville: 'Lyon',
+    cp: '69007',
+    geom: { lat, lon },
+    e10_prix: [1.79, 1.82, 1.75][i] || r2(1.73 + ((i * 37) % 23) / 100),
+    e10_maj: day(0) + 'T08:00:00+00:00',
+    gazole_prix: r2(1.66 + ((i * 13) % 17) / 100),
+    gazole_maj: day(0) + 'T07:30:00+00:00',
+  })).sort((a, b) => a.e10_prix - b.e10_prix);
+}
+// A plain map tile (256 x 256 PNG, the colour of empty OpenStreetMap land), used when the
+// OpenStreetMap tile server cannot be reached, so the screenshots can still be made.
+function plainTile() {
+  const crcTable = Array.from({ length: 256 }, (_, n) => { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1; return c >>> 0; });
+  const crc = b => { let c = 0xffffffff; for (const x of b) c = crcTable[(c ^ x) & 0xff] ^ (c >>> 8); return (c ^ 0xffffffff) >>> 0; };
+  const chunk = (t, d) => { const len = Buffer.alloc(4), sum = Buffer.alloc(4), td = Buffer.concat([Buffer.from(t), d]); len.writeUInt32BE(d.length); sum.writeUInt32BE(crc(td)); return Buffer.concat([len, td, sum]); };
+  const ihdr = Buffer.alloc(13); ihdr.writeUInt32BE(256, 0); ihdr.writeUInt32BE(256, 4); ihdr[8] = 8; ihdr[9] = 2;
+  const row = Buffer.concat([Buffer.from([0]), Buffer.from(Array(256).fill([242, 239, 233]).flat())]);
+  const raw = Buffer.concat(Array(256).fill(row));
+  return Buffer.concat([Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]), chunk('IHDR', ihdr), chunk('IDAT', zlib.deflateSync(raw)), chunk('IEND', Buffer.alloc(0))]);
 }
 
 (async () => {
@@ -62,23 +96,33 @@ function demoStations() {
   // web = the web version on a computer (no Android bridge, wide window); otherwise the Android app on a phone.
   async function open(data, web) {
     const ctx = await browser.newContext({ viewport: web ? { width: 1280, height: 800 } : { width: 412, height: 915 }, deviceScaleFactor: 2, reducedMotion: 'reduce', locale: 'en-GB' });
+    // map tiles: from OpenStreetMap when it can be reached, else a plain tile
+    const tile = plainTile();
+    await ctx.route('https://tile.openstreetmap.org/**', async route => {
+      try { await route.fulfill({ response: await route.fetch({ timeout: 8000 }) }); }
+      catch (e) { await route.fulfill({ contentType: 'image/png', body: tile }); }
+    });
     const page = await ctx.newPage();
-    await page.addInitScript(([d, web]) => {
+    await page.addInitScript(([d, web, mapRecs, centre]) => {
       const json = JSON.stringify(d);
       localStorage.setItem('konso-lang', 'en');
       localStorage.setItem('konso-data', json);
       localStorage.setItem('konso-install-seen', '1'); // web version: no install advice over the screenshot
-      // Stations: connection allowed, but the official price site is answered here with no new
-      // price, so the screenshots never use the internet and stay the same on every run
+      // Stations: connection allowed, but the official price site is answered here (no new price
+      // for the followed stations, the demo stations for the map), so the screenshots never ask it
+      // and stay the same on every run
       localStorage.setItem('konso-online', '1');
+      localStorage.setItem('konso-mapview', JSON.stringify([centre[0], centre[1], 14]));
       const realFetch = window.fetch;
-      window.fetch = (u, o) =>
-        String(u).includes('data.economie.gouv.fr')
-          ? Promise.resolve(new Response(JSON.stringify({ total_count: 0, results: [] }), { headers: { 'Content-Type': 'application/json' } }))
-          : realFetch(u, o);
+      const answer = u => {
+        const m = /in_bbox\(geom, ([\d.-]+), ([\d.-]+), ([\d.-]+), ([\d.-]+)\)/.exec(decodeURIComponent(String(u)).replace(/\+/g, ' '));
+        const recs = m ? mapRecs.filter(r => r.geom.lat <= +m[1] && r.geom.lat >= +m[3] && r.geom.lon >= +m[2] && r.geom.lon <= +m[4]) : [];
+        return new Response(JSON.stringify({ total_count: recs.length, results: recs }), { headers: { 'Content-Type': 'application/json' } });
+      };
+      window.fetch = (u, o) => (String(u).includes('data.economie.gouv.fr') ? Promise.resolve(answer(u)) : realFetch(u, o));
       // stand-in for the Android bridge of MainActivity: a backup folder is already chosen
       if (!web) window.Android = { folderName: () => 'Konso', fileName: () => 'konso.json', pickFolder: () => {}, readFile: () => json, writeFile: () => 'ok' };
-    }, [data, !!web]);
+    }, [data, !!web, demoMapRecords(), MAP_CENTRE]);
     await page.goto(url);
     await page.waitForTimeout(400);
     return page;
@@ -107,7 +151,8 @@ function demoStations() {
   await shot(page, '3-overview.png');
 
   await page.evaluate(() => showTab('stations'));
-  await page.waitForTimeout(300);
+  await page.waitForSelector('.pin span');
+  await page.waitForTimeout(800);
   await shot(page, '5-stations.png');
 
   await page.evaluate(() => showTab('save'));

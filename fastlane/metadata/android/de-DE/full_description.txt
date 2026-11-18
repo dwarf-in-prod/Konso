@@ -6,11 +6,11 @@ Funktionen:
 * Einkäufe: Öl, Teile, Reifen, Wartung… nach Kategorie sortiert.
 * Wartungserinnerungen: jedes Jahr oder alle 10.000 km, je nachdem, was zuerst eintritt (pro Auto einstellbar).
 * Übersicht: Durchschnittswerte, Verbrauchskurve, monatliche Ausgaben.
-* Tankstellenpreise (Frankreich, optional): Verfolge beliebig viele Tankstellen, mit dem letzten offiziellen Preis und einem Diagramm des Preises deines Kraftstoffs.
+* Tankstellenpreise (Frankreich, optional): Karte der Tankstellen um dich herum mit dem Preis deines Kraftstoffs, von der günstigsten bis zur teuersten, und verfolge beliebig viele Tankstellen, mit einem Preisdiagramm.
 * Mehrere Autos, jedes mit eigenem Verlauf und eigenen Erinnerungen.
 * Automatische Sicherung in einer einfachen Datei konso.json, im Ordner deiner Wahl.
 * 10 Sprachen, helles und dunkles Design, eingebaute Hilfe.
 
-Datenschutz: Die Netzwerkberechtigung dient nur dazu, die Dateien der App auf 127.0.0.1 bereitzustellen; jede Anfrage an einen anderen Host wird blockiert. Einzige Ausnahme, standardmäßig aus: Wenn du sie im Tab Tankstellen einschaltest, darf die App die offizielle französische Seite für Kraftstoffpreise (data.economie.gouv.fr) erreichen, und nur diese.
+Datenschutz: Die Netzwerkberechtigung dient nur dazu, die Dateien der App auf 127.0.0.1 bereitzustellen; jede Anfrage an einen anderen Host wird blockiert. Einzige Ausnahme, standardmäßig aus: Wenn du sie im Tab Tankstellen einschaltest, darf die App die offizielle französische Seite für Kraftstoffpreise (data.economie.gouv.fr) und für den Kartenhintergrund OpenStreetMap (tile.openstreetmap.org) erreichen, und nur diese. Die Standortberechtigung nutzt nur die Taste „Mein Standort“ der Karte: Dein Standort bleibt auf dem Handy.
 
 Konso wurde mit KI (Claude Code) entwickelt; jede Version wird von einem Menschen auf einem echten Handy getestet. Der Quellcode ist offen, unter der Lizenz GPL-3.0.

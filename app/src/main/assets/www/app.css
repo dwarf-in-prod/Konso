@@ -572,6 +572,143 @@ textarea {
   color: var(--on-surf-v);
   flex: none;
 }
+/* Stations map: the map (Leaflet, OpenStreetMap tiles), the "Locate me" button over its top right
+   corner, the price labels (.pin, from green = cheapest of the area to red) and the window of a
+   station. The #stMap selectors win over vendor/leaflet.css, loaded later. */
+.stmapwrap {
+  position: relative;
+}
+#stMap {
+  height: min(60vh, 520px);
+  min-height: 300px;
+  border-radius: 16px;
+  overflow: hidden;
+  background: var(--surf-high);
+  z-index: 0;
+  font: 14px/1.4 var(--font);
+}
+.maploc {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 500;
+  width: 48px;
+  height: 48px;
+  border: 0;
+  border-radius: 24px;
+  background: var(--surface);
+  color: var(--primary);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
+  display: grid;
+  place-items: center;
+  padding: 0;
+  cursor: pointer;
+}
+/* the label sits above its point, with a small arrow pointing at it */
+.pin span {
+  position: absolute;
+  left: 0;
+  bottom: 7px;
+  transform: translateX(-50%);
+  padding: 1px 7px;
+  border: 2px solid #fff;
+  border-radius: 10px;
+  color: #fff;
+  font: 600 13px/1.4 var(--font);
+  white-space: nowrap;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+  cursor: pointer;
+}
+.pin span::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: -9px;
+  margin-left: -5px;
+  border: 5px solid transparent;
+}
+.pin .pin-lo {
+  background: #1b7a37;
+}
+.pin .pin-lo::after {
+  border-top-color: #1b7a37;
+}
+.pin .pin-mid {
+  background: #9a5a00;
+}
+.pin .pin-mid::after {
+  border-top-color: #9a5a00;
+}
+.pin .pin-hi {
+  background: #b3261e;
+}
+.pin .pin-hi::after {
+  border-top-color: #b3261e;
+}
+/* a followed station: a blue ring around its label */
+.pin .pin-f {
+  box-shadow:
+    0 0 0 2px #1f4e79,
+    0 1px 4px rgba(0, 0, 0, 0.35);
+}
+#stMap .leaflet-popup-content-wrapper,
+#stMap .leaflet-popup-tip {
+  background: var(--surface);
+  color: var(--on-surf);
+}
+#stMap .leaflet-popup-content {
+  margin: 12px 14px;
+  font: 14px/1.45 var(--font);
+}
+#stMap .leaflet-control-attribution {
+  font-size: 11px;
+}
+/* zoom buttons big enough for a finger */
+#stMap .leaflet-bar a {
+  width: 40px;
+  height: 40px;
+  line-height: 40px;
+  font-size: 22px;
+}
+.mappop .mp-t {
+  font-weight: 600;
+  padding-right: 12px;
+}
+.mappop .mp-m {
+  color: var(--on-surf-v);
+  font-size: 13px;
+  margin-bottom: 6px;
+}
+.mappop .mp-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+.mappop .mp-row.cur b {
+  color: var(--primary);
+}
+.mappop .mp-b {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.mappop .btn {
+  height: 40px;
+  margin-top: 6px;
+  font-size: 14px;
+}
+.mappop .btn:disabled {
+  opacity: 0.6;
+}
+/* dark theme: the map tiles are darkened too, so the map does not dazzle */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) #stMap .leaflet-tile-pane {
+    filter: invert(1) hue-rotate(180deg) brightness(0.9) contrast(0.9);
+  }
+}
+:root[data-theme='dark'] #stMap .leaflet-tile-pane {
+  filter: invert(1) hue-rotate(180deg) brightness(0.9) contrast(0.9);
+}
 /* My garage: one line per car, the whole line is a button that opens the edit form */
 .carrow {
   width: 100%;

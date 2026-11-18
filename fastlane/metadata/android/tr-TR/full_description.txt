@@ -6,11 +6,11 @@ Konso, araçlarının yakıt tüketimini ve masraflarını kaydeder. Çevrimdı�
 * Alışverişler: yağ, parça, lastik, bakım… kategoriye göre sıralı.
 * Bakım hatırlatıcıları: her yıl ya da her 10.000 km'de, hangisi önce gelirse (her araç için ayarlanabilir).
 * Özet: ortalamalar, tüketim grafiği, aylık harcamalar.
-* İstasyon fiyatları (Fransa, isteğe bağlı): istediğin kadar istasyonu izle; son resmi fiyat ve yakıtının fiyat grafiği.
+* İstasyon fiyatları (Fransa, isteğe bağlı): çevrendeki istasyonların yakıt fiyatınla, en ucuzdan en pahalıya haritası ve istediğin kadar istasyonu fiyat grafiğiyle izleme.
 * Birden fazla araç, her birinin kendi geçmişi ve hatırlatıcıları.
 * Seçtiğin klasörde, basit bir konso.json dosyasına otomatik yedekleme.
 * 10 dil, açık ve koyu tema, yerleşik yardım.
 
-Gizlilik: ağ izni yalnızca uygulamanın dosyalarını 127.0.0.1 üzerinde sunmak içindir; başka bir sunucuya yapılan her istek engellenir. Tek istisna, varsayılan olarak kapalı: İstasyonlar sekmesinde açarsan uygulama resmi Fransız akaryakıt fiyatları sitesine (data.economie.gouv.fr), yalnızca ona bağlanabilir.
+Gizlilik: ağ izni yalnızca uygulamanın dosyalarını 127.0.0.1 üzerinde sunmak içindir; başka bir sunucuya yapılan her istek engellenir. Tek istisna, varsayılan olarak kapalı: İstasyonlar sekmesinde açarsan uygulama resmi Fransız akaryakıt fiyatları sitesine (data.economie.gouv.fr) ve harita arka planı için OpenStreetMap'e (tile.openstreetmap.org), yalnızca bunlara bağlanabilir. Konum izni yalnızca haritadaki "Konumumu bul" düğmesi için kullanılır: konumun telefonda kalır.
 
 Konso yapay zekâ (Claude Code) ile geliştirildi; her sürüm bir insan tarafından gerçek bir telefonda test edilir. Kaynak kodu GPL-3.0 lisansıyla açıktır.
