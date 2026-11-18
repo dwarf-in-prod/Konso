@@ -20,13 +20,17 @@
     <link rel="stylesheet" href="app.css" />
   </head>
   <body>
-    <!-- Top bar: Konso logo on the left, car selector in the middle, settings (gear) on the right -->
+    <!-- Top bar: Konso logo and name on the left, car selector in the middle, settings (gear) on the right -->
     <header class="appbar">
-      <!-- The app icon (same drawing as res/drawable/ic_fg.xml on the ic_bg colour), decorative -->
-      <svg class="logo" viewBox="0 0 108 108" aria-hidden="true">
-        <rect width="108" height="108" rx="24" fill="#1F4E79" />
-        <path fill="#FFFFFF" d="M54,30 C54,30 38,50 38,62 C38,71 45,78 54,78 C63,78 70,71 70,62 C70,50 54,30 54,30 Z" />
-      </svg>
+      <!-- The app icon (same drawing as res/drawable/ic_fg.xml on the ic_bg colour) and the app's name
+           (a brand name, the same in every language, like the page title) -->
+      <div class="brand">
+        <svg class="logo" viewBox="0 0 108 108" aria-hidden="true">
+          <rect width="108" height="108" rx="24" fill="#1F4E79" />
+          <path fill="#FFFFFF" d="M54,30 C54,30 38,50 38,62 C38,71 45,78 54,78 C63,78 70,71 70,62 C70,50 54,30 54,30 Z" />
+        </svg>
+        <span class="appname">Konso</span>
+      </div>
       <!-- The name of the selected car is shown centered with its arrow (#carShown); the native menu
            (#car) lies invisible on top of the whole area and opens when it is tapped. -->
       <div class="carsel">
