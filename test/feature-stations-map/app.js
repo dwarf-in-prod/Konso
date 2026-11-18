@@ -2752,22 +2752,33 @@ function renderStations() {
   const prices = S.stations.map(st => stLast(st, key)).filter(Boolean).map(x => x[1]),
     best = prices.length > 1 ? Math.min(...prices) : null;
   $('st-list').innerHTML = S.stations.length
-    ? S.stations.map((st, i) => stationRow(st, i, key, fuel, best)).join('')
+    ? stationsByPrice(key)
+        .map(({ st, i }) => stationRow(st, i, key, fuel, best))
+        .join('')
     : '<div class="empty">' + esc(tx('st_none')) + '</div>';
   $('st-list')
     .querySelectorAll('.del')
     .forEach(b => (b.onclick = () => delClick('stations', +b.dataset.i, b)));
   stationChart(fuel, key);
 }
+// The followed stations in the order shown: cheapest price of the car's fuel first, the ones
+// without that fuel at the end (in the order followed). i = place in S.stations, which gives the
+// colour of the station's line in the chart.
+function stationsByPrice(key) {
+  const price = st => (stLast(st, key) || [0, Infinity])[1];
+  return S.stations.map((st, i) => ({ st, i })).sort((a, b) => price(a.st) - price(b.st) || a.i - b.i);
+}
 // One followed station: colour of its line in the chart, address, postcode and town; on the
-// right the last price of the car's fuel (highlighted when it is the cheapest) and its date.
+// right the last price of the car's fuel and its date. The cheapest station (shown first) is in
+// green: its name and its price.
 function stationRow(st, i, key, fuel, best) {
   const last = stLast(st, key),
+    isBest = !!last && last[1] === best,
     price = last
-      ? `<div class="${last[1] === best ? 'hl' : 't'}">${stPrice(last[1])}</div><div class="m">${stWhen(last[0])}</div>`
+      ? `<div class="${isBest ? 'hl best' : 't'}">${stPrice(last[1])}</div><div class="m">${stWhen(last[0])}</div>`
       : `<div class="m">${esc(tx('st_nofuel', { fuel: fuelLabel(fuel) }))}</div>`;
   return (
-    '<div class="row">' +
+    `<div class="row${isBest ? ' best' : ''}">` +
     `<i class="dot" style="background:${stColor(i)}"></i>` +
     `<div class="l"><div class="t">${esc(prettyAdr(st.adr))}</div><div class="m">${esc(st.cp + ' ' + st.ville)}</div></div>` +
     `<div class="r">${price}</div>` +

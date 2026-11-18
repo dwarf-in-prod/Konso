@@ -553,6 +553,15 @@ textarea {
   border-radius: 5px;
   flex: none;
 }
+/* My stations: the cheapest one (shown first) stands out in green, its name and its price */
+.row.best .l .t {
+  color: var(--ok);
+  font-weight: 600;
+}
+.row .hl.best {
+  background: var(--ok);
+  color: var(--surface);
+}
 /* a search result already followed, or the + button to follow it */
 .st-add {
   border: 0;
