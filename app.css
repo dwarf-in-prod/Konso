@@ -157,28 +157,39 @@ svg.i {
   display: none !important;
 }
 
-/* top bar: logo on the left, car selector in the middle, settings button (gear) on the right.
-   The logo and the gear take the same width (48 px), so the car name is centered on the screen. */
+/* top bar: logo and app name on the left, car selector in the middle, settings button (gear) on
+   the right. Three columns: the two side ones share the free room equally, so the car name stays
+   centered on the screen; a long car name takes the room it needs and is cut with "…" last. */
 .appbar {
   position: sticky;
   top: 0;
   z-index: 5;
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr minmax(0, max-content) 1fr;
   align-items: center;
   gap: 4px;
   height: calc(64px + env(safe-area-inset-top, 0px));
   padding: env(safe-area-inset-top, 0px) 8px 0 8px;
   background: var(--surface);
 }
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-left: 8px;
+}
 .logo {
   flex: none;
   width: 32px;
   height: 32px;
-  margin: 0 8px;
+}
+.appname {
+  color: var(--primary);
+  font: 600 18px/1 var(--font);
+  letter-spacing: 0.2px;
 }
 .carsel {
   position: relative;
-  flex: 1;
   min-width: 0;
   display: flex;
   justify-content: center;
@@ -216,6 +227,9 @@ svg.i {
 /* keyboard focus only (a tap leaves the menu focused, without outline) */
 .carsel:has(select:focus-visible) .cur {
   outline: 2px solid var(--primary);
+}
+.appbar .icon {
+  justify-self: end;
 }
 .icon {
   width: 48px;
