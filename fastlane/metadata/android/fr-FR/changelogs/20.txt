@@ -1,0 +1,1 @@
+Les barres du téléphone (heure, batterie, barre de gestes) prennent les couleurs de l'appli, en thème clair comme en sombre : plus de bandes noires en haut et en bas. Au premier lancement, une 4ᵉ étape propose le thème (automatique, clair ou sombre), Clair présélectionné. Dans le Bilan, un petit texte rappelle que les achats s'ajoutent dans Mon garage, avec un lien direct.

@@ -1,0 +1,1 @@
+Telefonun çubukları (saat, pil, hareket çubuğu) artık açık ve koyu temada uygulamanın renklerini alıyor: üstte ve altta siyah şerit yok. İlk açılışta 4. adım temayı soruyor (otomatik, açık veya koyu), Açık seçili. Özet'te kısa bir not, alışverişlerin Garajım'a eklendiğini hatırlatıyor ve doğrudan bağlantı veriyor.

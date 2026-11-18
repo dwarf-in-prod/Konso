@@ -6,10 +6,16 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.UriPermission;
 import android.database.Cursor;
+import android.graphics.Color;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
+import android.view.View;
+import android.view.Window;
+import android.view.WindowInsetsController;
+import android.view.WindowManager;
 import android.webkit.JavascriptInterface;
 import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
@@ -50,7 +56,9 @@ import java.util.concurrent.Executors;
  *   (PRICES_HOST), and only that one;
  * - opens the camera or the gallery when the page asks for a receipt photo (input type="file");
  * - gives the page a small bridge, window.Android (class Bridge), to choose a backup folder and to
- *   read / write konso.json in it through the Storage Access Framework (works with Google Drive too).
+ *   read / write konso.json in it through the Storage Access Framework (works with Google Drive too);
+ * - colours the status bar and the navigation bar like the page (light or dark theme), so the app
+ *   looks like it fills the whole screen (Bridge.setBars()).
  */
 public class MainActivity extends Activity {
 
@@ -74,6 +82,8 @@ public class MainActivity extends Activity {
      */
     private static final String PRICES_HOST = "data.economie.gouv.fr";
     private static final String PREF_ONLINE = "online";
+    /** Last colours of the system bars sent by the page, applied again at the next launch. */
+    private static final String PREF_BARS = "bars";
     /** Request codes of startActivityForResult(). */
     private static final int REQ_FOLDER = 1;
     private static final int REQ_IMAGE = 2;
@@ -92,6 +102,12 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         prefs = getSharedPreferences("konso", MODE_PRIVATE);
+        // the colours of the last launch, so the bars match the page before it has loaded
+        String bars = prefs.getString(PREF_BARS, null);
+        if (bars != null) {
+            String[] b = bars.split(",");
+            if (b.length == 3) applyBars(b[0], b[1], "1".equals(b[2]));
+        }
 
         int port;
         try {
@@ -434,6 +450,41 @@ public class MainActivity extends Activity {
     }
 
     // ------------------------------------------------------------------
+    // System bars (status bar at the top, navigation bar at the bottom)
+    // ------------------------------------------------------------------
+
+    /**
+     * Colour the status bar with top and the navigation bar with bottom ("#rrggbb", the page's
+     * colours), with dark or light icons: dark = the page uses its dark theme, so the icons
+     * (clock, battery, gesture bar) are drawn light. Must run on the UI thread.
+     */
+    private void applyBars(String top, String bottom, boolean dark) {
+        try {
+            Window w = getWindow();
+            w.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS
+                    | WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION);
+            w.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+            w.setStatusBarColor(Color.parseColor(top));
+            w.setNavigationBarColor(Color.parseColor(bottom));
+            if (Build.VERSION.SDK_INT >= 30) {
+                WindowInsetsController c = w.getInsetsController();
+                if (c != null) {
+                    int light = WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS
+                            | WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS;
+                    c.setSystemBarsAppearance(dark ? 0 : light, light);
+                }
+            } else {
+                View d = w.getDecorView();
+                int light = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR | View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
+                int f = d.getSystemUiVisibility();
+                d.setSystemUiVisibility(dark ? (f & ~light) : (f | light));
+            }
+        } catch (IllegalArgumentException e) {
+            // not a colour: the bars keep their current colours
+        }
+    }
+
+    // ------------------------------------------------------------------
     // Chosen folder (Storage Access Framework) and backup file
     // ------------------------------------------------------------------
 
@@ -571,7 +622,7 @@ public class MainActivity extends Activity {
 
     /**
      * Methods the page can call (app.js, NA): window.Android.folderName(), pickFolder(),
-     * writeFile(text), fileName(), readFile() and setOnline(on).
+     * writeFile(text), fileName(), readFile(), setOnline(on) and setBars(top, bottom, dark).
      */
     public class Bridge {
         @JavascriptInterface
@@ -620,6 +671,23 @@ public class MainActivity extends Activity {
         @JavascriptInterface
         public void setOnline(boolean on) {
             prefs.edit().putBoolean(PREF_ONLINE, on).apply();
+        }
+
+        /**
+         * Colours of the system bars, sent by the page each time its theme changes: top = colour
+         * of the top of the page, bottom = colour of its navigation bar, dark = dark theme. They are
+         * kept for the next launch.
+         */
+        @JavascriptInterface
+        public void setBars(final String top, final String bottom, final boolean dark) {
+            if (top == null || bottom == null) return;
+            prefs.edit().putString(PREF_BARS, top + "," + bottom + "," + (dark ? "1" : "0")).apply();
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    applyBars(top, bottom, dark);
+                }
+            });
         }
     }
 }

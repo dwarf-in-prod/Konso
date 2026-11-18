@@ -1,0 +1,1 @@
+Las barras del teléfono (hora, batería, barra de gestos) toman los colores de la app, en tema claro y oscuro: se acabaron las franjas negras arriba y abajo. En el primer inicio, un 4.º paso propone el tema (automático, claro u oscuro), con Claro seleccionado. En el Resumen, un texto recuerda que las compras se añaden en Mi garaje, con un enlace directo.
