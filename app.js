@@ -578,23 +578,7 @@ function applyI18n() {
     e.setAttribute('aria-label', s);
   });
   document.querySelectorAll('[data-i18n-ph]').forEach(e => (e.placeholder = tx(e.dataset.i18nPh)));
-  const opts = (el, list, label) => {
-    const v = el.value;
-    el.innerHTML = list
-      .map(
-        (x, i) =>
-          '<option value="' +
-          esc(x) +
-          '"' +
-          (x === '' ? ' disabled' : '') +
-          '>' +
-          esc(label(x, i)) +
-          '</option>',
-      )
-      .join('');
-    if (list.includes(v)) el.value = v;
-  };
-  opts($('fc'), ['', ...FUELV], x => (x ? fuelLabel(x) : tx('fuel_choose')));
+  setFormFuel($('fc').value);
   if ($('carFuel').value) setCarFuel($('carFuel').value);
   if ($('carInsPer').value) setInsPer($('carInsPer').value);
   if ($('pInsPer').value) setPlanInsPer($('pInsPer').value);
@@ -1434,7 +1418,7 @@ function initScan() {
       const fuelOk = !!r.carburant && FUELV.includes(r.carburant);
       tried = false;
       if (fuelOk) {
-        $('fc').value = r.carburant;
+        setFormFuel(r.carburant);
         setFuelPending(false);
       } else setFuelPending(true);
       live();
@@ -1466,7 +1450,7 @@ function initScan() {
         esc(tx('ocr_verify')) +
         '</div><details><summary class="note">' +
         esc(tx('ocr_text')) +
-        '</summary><pre style="white-space:pre-wrap;font-size:11px">' +
+        '</summary><pre class="ocrtext">' +
         esc(bestText) +
         '</pre></details>';
       $('fk').focus();
@@ -1477,7 +1461,7 @@ function initScan() {
         esc(tx('ocr_fail', { e: err && err.message ? err.message : String(err) })) +
         '<details><summary class="note">' +
         esc(tx('ocr_tech')) +
-        '</summary><pre style="white-space:pre-wrap;font-size:11px">' +
+        '</summary><pre class="ocrtext">' +
         esc(log.join('\n')) +
         '</pre></details>';
     } finally {
@@ -1492,6 +1476,7 @@ function initScan() {
 // ================================================================================================
 
 // Live results under the fill-up form: consumption, cost per 100 km / mi, price per litre / gallon.
+// The band stays hidden while none of the three can be calculated, so the empty form is shorter.
 function live() {
   const k = +$('fk').value,
     l = +$('fl').value,
@@ -1499,7 +1484,34 @@ function live() {
   $('l1').textContent = k > 0 && l > 0 ? fmtCons(cons(distIn(k), volIn(l))) : '–';
   $('l2').textContent = k > 0 && e > 0 ? fmt((e / k) * 100) : '–';
   $('l3').textContent = l > 0 && e > 0 ? fmt(e / l, 3) : '–';
+  const any = (k > 0 && l > 0) || (k > 0 && e > 0) || (l > 0 && e > 0);
+  $('live').classList.toggle('hide', !any);
 }
+// The two tips of the fill-up card (receipt scan, "fill the tank to the brim") are only shown
+// while the selected car has no fill-up: afterwards they are in Settings > How it works.
+function showTips() {
+  const first = !FU().length;
+  $('scanHint').classList.toggle('hide', !first);
+  $('fillTip').classList.toggle('hide', !first);
+}
+// Fuel field of the fill-up form: a field button that opens the wheel. The value ('' = to choose)
+// is kept in the button's value attribute, so the code reads $('fc').value like a form field.
+function setFormFuel(v) {
+  $('fc').value = v;
+  $('fc').textContent = v ? fuelLabel(v) : tx('fuel_choose');
+}
+$('fc').onclick = () =>
+  picker({
+    icon: 'pump',
+    title: 'fuel',
+    labels: FUELV.map(fuelLabel),
+    sel: Math.max(0, FUELV.indexOf($('fc').value || defaultFuel())),
+    loop: false,
+    onOk: i => {
+      setFormFuel(FUELV[i]);
+      setFuelPending(false);
+    },
+  });
 ['fk', 'fl', 'fe'].forEach(i => $(i).addEventListener('input', live));
 // Preselected fuel: the one of the car's last fill-up, otherwise its usual fuel.
 // After a receipt whose fuel type could not be read, nothing is preselected: the user must choose
@@ -1507,11 +1519,12 @@ function live() {
 let fuelPending = false;
 function setFuelPending(on) {
   fuelPending = on;
-  if (on) $('fc').value = '';
+  if (on) setFormFuel('');
   marks();
 }
-// Colours of the fill-up form fields: green ("todo") = to fill in (the distance; the fuel after an
-// unreadable receipt), red ("need") = missing after a save attempt (tried = true). Never red from the start.
+// Colours of the fill-up form fields: green ("todo") = to fill in (distance, litres and amount while
+// empty; the fuel after an unreadable receipt), red ("need") = missing after a save attempt
+// (tried = true). Never red from the start.
 let tried = false;
 function marks() {
   const set = (id, ok, todo) => {
@@ -1520,8 +1533,8 @@ function marks() {
     f.classList.toggle('todo', !ok && !tried && todo);
   };
   set('fk', +$('fk').value > 0, true);
-  set('fl', +$('fl').value > 0, false);
-  set('fe', +$('fe').value > 0, false);
+  set('fl', +$('fl').value > 0, true);
+  set('fe', +$('fe').value > 0, true);
   set('fc', FUELV.includes($('fc').value), true);
 }
 ['fk', 'fl', 'fe'].forEach(i => $(i).addEventListener('input', marks));
@@ -1531,12 +1544,10 @@ function defaultFuel() {
     c = curCar();
   return last ? last.c : c && FUELV.includes(c.fuel) ? c.fuel : 'SP95-E10';
 }
+// Preselect the fuel of the selected car (unless the user must choose it after a receipt scan).
 function applyCarDefaults() {
-  if (!fuelPending) $('fc').value = defaultFuel();
+  if (!fuelPending) setFormFuel(defaultFuel());
 }
-$('fc').addEventListener('change', () => {
-  if (FUELV.includes($('fc').value)) setFuelPending(false);
-});
 // Save a fill-up. Values are typed in the chosen units and stored in km / litres.
 $('addF').onclick = () => {
   const k = +$('fk').value,
@@ -1650,6 +1661,7 @@ const TRASH =
 function render() {
   renderCars();
   renderLists();
+  showTips();
   renderStats();
   lineChart();
   barChart();
@@ -1663,15 +1675,21 @@ const deleteButton = (kind, id) =>
   `<button class="del" data-k="${kind}" data-i="${esc(id)}" aria-label="${esc(tx('del'))}">${TRASH}</button>`;
 
 // One line of the fill-up history. Left: date and distance, then volume, price per litre, fuel
-// and station. Right: consumption, cost per 100 km (highlighted), amount.
+// and station. Right: consumption (unit in small type), cost per 100 km (highlighted), amount.
 function fuelRow(f) {
-  const details =
-    `${fmt(vol(f.l))} ${VU()} · ${money(f.e / vol(f.l), 3)}/${VU()} · ${esc(fuelLabel(f.c))}` +
-    (f.s ? ' · ' + esc(f.s) : '');
+  // each detail stays on one line (no break inside "SP95-E10"); a long station name may wrap
+  const nw = t => `<span class="nw">${t}</span>`;
+  const parts = [
+    nw(`${fmt(vol(f.l))} ${VU()}`),
+    nw(`${money(f.e / vol(f.l), 3)}/${VU()}`),
+    nw(esc(fuelLabel(f.c))),
+  ];
+  if (f.s) parts.push(esc(f.s));
+  const details = parts.join(' · ');
   return (
     '<div class="row">' +
     `<div class="l"><div class="t">${fdateS(f.d)} · ${fmt(dist(f.k), 0)} ${DU()}</div><div class="m">${details}</div></div>` +
-    `<div class="r"><div class="t">${fmtCons(cons(f.k, f.l))} ${UNIT === 'km' ? 'L/100' : 'mpg'}</div>` +
+    `<div class="r"><div class="t">${fmtCons(cons(f.k, f.l))} <span class="u">${CU()}</span></div>` +
     `<div class="hl">${money((f.e / dist(f.k)) * 100)}/100 ${DU()}</div>` +
     `<div class="m">${money(f.e)}</div></div>` +
     deleteButton('fuel', f.id) +
@@ -1828,6 +1846,20 @@ function tipShow(box, html, x, W, rect) {
   const px = Math.max(60, Math.min(rect.width - 60, (x / W) * rect.width));
   t.style.left = px + 'px';
 }
+// The charts are drawn 600 units wide and scaled to their card. To keep their labels at 12 px on
+// screen (readable on a phone, not huge on a computer), each chart box gets --chart-k = 600 / its
+// width in px, used by the font size of .chart text in app.css. A ResizeObserver updates it when the
+// window is resized and when a hidden tab is shown (its width goes from 0 to its real value).
+function watchChartScale() {
+  if (typeof ResizeObserver !== 'function') return; // the CSS falls back to a phone-sized value
+  const ro = new ResizeObserver(entries =>
+    entries.forEach(en => {
+      const w = en.contentRect.width;
+      if (w > 0) en.target.style.setProperty('--chart-k', (600 / w).toFixed(3));
+    }),
+  );
+  ['c1', 'c2', 'c3'].forEach(id => ro.observe($(id)));
+}
 // Stats > Consumption per fill-up: one point per fill-up, dashed line = average, the last value
 // highlighted. Drawn as SVG (600 x 220 coordinates, scaled to the width of the screen).
 function lineChart() {
@@ -1846,7 +1878,7 @@ function lineChart() {
   );
   const W = 600,
     H = 220,
-    m = { l: 38, r: 12, t: 14, b: 26 },
+    m = { l: 52, r: 12, t: 26, b: 34 },
     iw = W - m.l - m.r,
     ih = H - m.t - m.b;
   const vs = data.map(x => x.v),
@@ -1933,7 +1965,7 @@ function barChart() {
   }
   const W = 600,
     H = 230,
-    m = { l: 44, r: 10, t: 18, b: 26 },
+    m = { l: 56, r: 10, t: 30, b: 34 },
     iw = W - m.l - m.r,
     ih = H - m.t - m.b;
   const mx = Math.max(...keys.map(k => by[k].f + by[k].b)),
@@ -2080,7 +2112,16 @@ function svcUI() {
       '</p><p>' +
       esc(tx('svc_due_hint')) +
       '</p>',
-    [{ t: tx('ok'), fn: () => svcMarkSeen(k) }],
+    [
+      { t: tx('svc_not_yet'), tonal: true, fn: () => svcMarkSeen(k) },
+      {
+        t: tx('svc_done_yes'),
+        fn: () => {
+          svcMarkSeen(k);
+          svcDoneToday();
+        },
+      },
+    ],
   );
 }
 // "Yes, it's done" on the banner: the service is recorded on the car with today's date, tracking
@@ -2654,6 +2695,7 @@ function renderStations() {
   const fuel = defaultFuel(),
     key = FEED_FUEL[fuel];
   $('stOnline').checked = ONLINE;
+  $('stIntro').classList.toggle('hide', ONLINE); // explained in How it works once allowed
   $('stChartT').textContent = tx('st_chart', { fuel: fuelLabel(fuel) });
   $('stTools').classList.toggle('hide', !ONLINE);
   $('stOff').textContent = ONLINE ? '' : tx('st_off');
@@ -2730,7 +2772,7 @@ function stationChart(fuel, key) {
     pad = (hi - lo > 1e-6 ? hi - lo : 0.1) * 0.15;
   const W = 600,
     H = 220,
-    m = { l: 44, r: 12, t: 14, b: 26 },
+    m = { l: 60, r: 12, t: 14, b: 34 },
     iw = W - m.l - m.r,
     ih = H - m.t - m.b;
   const tk = niceTicks(lo - pad, hi + pad, 4),
@@ -2896,3 +2938,4 @@ initWeb();
 initScan();
 applyCarDefaults();
 marks();
+watchChartScale();
