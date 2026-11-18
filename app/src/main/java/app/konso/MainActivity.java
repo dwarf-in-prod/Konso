@@ -12,11 +12,13 @@ import android.database.Cursor;
 import android.graphics.Color;
 import android.graphics.Insets;
 import android.graphics.drawable.ColorDrawable;
+import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
+import android.provider.Settings;
 import android.view.DisplayCutout;
 import android.view.View;
 import android.view.Window;
@@ -780,10 +782,36 @@ public class MainActivity extends Activity {
 
     /**
      * Methods the page can call (app.js, NA): window.Android.folderName(), pickFolder(),
-     * writeFile(text), fileName(), readFile(), setOnline(on), setBars(top, bottom, dark), insets()
-     * and openMap(lat, lon, label).
+     * writeFile(text), fileName(), readFile(), setOnline(on), setBars(top, bottom, dark), insets(),
+     * openMap(lat, lon, label), locationOn() and openLocationSettings().
      */
     public class Bridge {
+        /**
+         * Stations map, "Locate me": true when the phone's location (GPS) is on. When it is off,
+         * Android grants the permission but never gives a position, so the page asks the user to
+         * turn it on first (openLocationSettings()).
+         */
+        @JavascriptInterface
+        public boolean locationOn() {
+            LocationManager lm = (LocationManager) getSystemService(LOCATION_SERVICE);
+            return lm == null || lm.isLocationEnabled();
+        }
+
+        /** Open the phone's location settings, so the user can turn the location on. */
+        @JavascriptInterface
+        public void openLocationSettings() {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS));
+                    } catch (ActivityNotFoundException e) {
+                        // no such settings screen on this phone
+                    }
+                }
+            });
+        }
+
         /**
          * Stations map, "Directions": open the station at lat, lon in the phone's map or navigation
          * app (geo: link), with its name as label. Nothing happens if no such app is installed.
