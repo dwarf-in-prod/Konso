@@ -1,0 +1,1 @@
+Poprawka w poziomie: czarny pas obok aparatu zniknął na dobre. Aplikacja sięga teraz do krawędzi ekranu, a treść trzyma się z dala od aparatu.

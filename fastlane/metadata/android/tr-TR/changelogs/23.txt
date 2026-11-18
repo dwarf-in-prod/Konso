@@ -1,0 +1,1 @@
+Yatay mod düzeltmesi: kameranın yanındaki siyah şerit artık tamamen yok. Uygulama ekranın kenarına kadar uzanıyor ve içerik kameradan uzak duruyor.

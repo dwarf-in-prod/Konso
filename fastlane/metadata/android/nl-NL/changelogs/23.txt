@@ -1,0 +1,1 @@
+Oplossing in liggende stand: de zwarte strook naast de camera is echt weg. De app loopt nu door tot de rand van het scherm, en de inhoud blijft vrij van de camera.

@@ -1,0 +1,1 @@
+Corecție pe orizontală: banda neagră de lângă cameră a dispărut definitiv. Aplicația ajunge acum până la marginea ecranului, iar conținutul rămâne departe de cameră.

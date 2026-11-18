@@ -1,0 +1,1 @@
+Correction du mode paysage : la bande noire à côté de la caméra a disparu pour de bon. L'appli s'affiche maintenant jusqu'au bord de l'écran, et le contenu reste à l'écart de la caméra.

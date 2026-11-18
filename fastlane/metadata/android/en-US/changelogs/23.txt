@@ -1,0 +1,1 @@
+Landscape fix: the black band next to the camera is gone for good. The app now reaches the edge of the screen, and the content stays clear of the camera.

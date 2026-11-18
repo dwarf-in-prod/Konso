@@ -1,0 +1,1 @@
+Correção na horizontal: a faixa preta junto à câmara desapareceu de vez. A app chega agora até à borda do ecrã, e o conteúdo fica afastado da câmara.

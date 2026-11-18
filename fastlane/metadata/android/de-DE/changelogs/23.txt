@@ -1,0 +1,1 @@
+Korrektur im Querformat: Der schwarze Streifen neben der Kamera ist endgültig weg. Die App reicht jetzt bis zum Bildschirmrand, und der Inhalt hält Abstand zur Kamera.
