@@ -1,0 +1,895 @@
+/*
+ * Konso — styles. Material Design 3: tonal surfaces, rounded shapes, navigation bar at the bottom.
+ * Colours are variables (:root), redefined for the dark theme (prefers-color-scheme: dark).
+ * Form field colours: .todo = green (to fill in), .need = red (missing after a save attempt).
+ * .hide hides anything; .kb on <body> means the keyboard is open (the bottom bar is hidden).
+ * Adaptive layout (end of the file): one column with a bottom bar on phones; on wide screens
+ * (tablets, computers, phones in landscape) a navigation rail on the left and two columns.
+ * env(safe-area-inset-*) keeps clear of the notch and rounded corners (viewport-fit=cover).
+ */
+:root {
+  --primary: #415f91;
+  --on-primary: #fff;
+  --primary-c: #d6e3ff;
+  --on-primary-c: #001b3e;
+  --secondary-c: #dbe2f9;
+  --on-secondary-c: #141b2c;
+  --surface: #f9f9ff;
+  --surf: #edeef4;
+  --surf-high: #e7e8ee;
+  --on-surf: #191c20;
+  --on-surf-v: #44474e;
+  --outline: #74777f;
+  --outline-v: #c4c6d0;
+  --error: #ba1a1a;
+  --on-error: #fff;
+  --ok: #386a20;
+  --amber: #7c5800;
+  --amber-c: #ffdf9e;
+  --on-amber-c: #261a00;
+  --inverse: #2e3036;
+  --on-inverse: #f0f0f7;
+  --s1: #2a78d6;
+  --s2: #eb6834;
+  --font: system-ui, Roboto, -apple-system, 'Segoe UI', sans-serif;
+  /* width of the single column (phones, small tablets) */
+  --maxw: 640px;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --primary: #aac7ff;
+    --on-primary: #0a305f;
+    --primary-c: #284777;
+    --on-primary-c: #d6e3ff;
+    --secondary-c: #3e4759;
+    --on-secondary-c: #dbe2f9;
+    --surface: #111318;
+    --surf: #1d2024;
+    --surf-high: #282a2f;
+    --on-surf: #e2e2e9;
+    --on-surf-v: #c4c6d0;
+    --outline: #8e9099;
+    --outline-v: #44474e;
+    --error: #ffb4ab;
+    --on-error: #690005;
+    --ok: #9cd67d;
+    --amber: #f5bf48;
+    --amber-c: #5c4200;
+    --on-amber-c: #ffdf9e;
+    --inverse: #e2e2e9;
+    --on-inverse: #2e3036;
+    --s1: #3987e5;
+    --s2: #d95926;
+  }
+}
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+html {
+  background: var(--surface);
+}
+@keyframes tabin {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+section.tabin {
+  animation: tabin 0.32s cubic-bezier(0.2, 0, 0, 1);
+}
+@media (prefers-reduced-motion: reduce) {
+  section.tabin {
+    animation: none;
+  }
+}
+body {
+  margin: 0;
+  background: var(--surface);
+  color: var(--on-surf);
+  font: 16px/1.5 var(--font);
+  max-width: var(--maxw);
+  margin-inline: auto;
+  padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px));
+  padding-left: env(safe-area-inset-left, 0px);
+  padding-right: env(safe-area-inset-right, 0px);
+}
+svg.i {
+  width: 24px;
+  height: 24px;
+  fill: currentColor;
+  flex: none;
+}
+.hide {
+  display: none !important;
+}
+
+/* top bar: car selector, add and edit buttons */
+.appbar {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: calc(64px + env(safe-area-inset-top, 0px));
+  padding: env(safe-area-inset-top, 0px) 8px 0 16px;
+  background: var(--surface);
+}
+.carsel {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+}
+.carsel select {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 100%;
+  border: 0;
+  background: transparent;
+  color: var(--on-surf);
+  font: 500 22px/1.2 var(--font);
+  padding: 8px 32px 8px 0;
+  text-overflow: ellipsis;
+  outline: none;
+}
+.carsel svg {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  color: var(--on-surf-v);
+}
+.icon {
+  width: 48px;
+  height: 48px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--on-surf-v);
+  display: grid;
+  place-items: center;
+  padding: 0;
+}
+.icon:active {
+  background: var(--surf-high);
+}
+
+main {
+  padding: 0 16px;
+}
+section {
+  display: block;
+}
+h2.sec {
+  font: 500 14px/1.4 var(--font);
+  color: var(--on-surf-v);
+  margin: 24px 4px 8px;
+  letter-spacing: 0.1px;
+}
+.card {
+  background: var(--surf);
+  border-radius: 20px;
+  padding: 16px;
+  margin: 0 0 12px;
+}
+.card h3 {
+  font: 500 16px/1.4 var(--font);
+  margin: 0 0 12px;
+}
+
+/* form fields: M3 outline with a floating label; .fieldbtn = a field that opens a wheel */
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px 12px;
+}
+.full {
+  grid-column: 1/-1;
+}
+.f {
+  position: relative;
+}
+.f input,
+.f select,
+.f .fieldbtn {
+  width: 100%;
+  height: 54px;
+  padding: 0 14px;
+  border: 1px solid var(--outline);
+  border-radius: 12px;
+  background: transparent;
+  color: var(--on-surf);
+  font: inherit;
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+}
+.f input:focus,
+.f select:focus {
+  border: 2px solid var(--primary);
+  padding: 0 13px;
+}
+.f label {
+  position: absolute;
+  left: 12px;
+  top: 15px;
+  padding: 0 4px;
+  background: var(--surf);
+  color: var(--on-surf-v);
+  font-size: 16px;
+  line-height: 22px;
+  pointer-events: none;
+  transition:
+    top 0.12s,
+    font-size 0.12s;
+  max-width: calc(100% - 28px);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.f input:focus + label,
+.f input:not(:placeholder-shown) + label,
+.f.fl label {
+  top: -10px;
+  font-size: 12px;
+  line-height: 18px;
+}
+.f input:focus + label,
+.f select:focus + label {
+  color: var(--primary);
+}
+.f.todo input,
+.f.todo select {
+  border: 2px solid var(--ok);
+  padding: 0 13px;
+}
+.f.todo label,
+.f.todo input:focus + label,
+.f.todo select:focus + label {
+  color: var(--ok);
+}
+.f.need input,
+.f.need select {
+  border: 2px solid var(--error);
+  padding: 0 13px;
+}
+.f.need label,
+.f.need input:focus + label,
+.f.need select:focus + label {
+  color: var(--error);
+}
+.f .fieldbtn {
+  text-align: left;
+  cursor: pointer;
+}
+.f.sel::after {
+  content: '';
+  position: absolute;
+  right: 14px;
+  top: 23px;
+  border: 5px solid transparent;
+  border-top-color: var(--on-surf-v);
+  pointer-events: none;
+}
+textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid var(--outline);
+  border-radius: 12px;
+  background: transparent;
+  color: var(--on-surf);
+  font: 12px/1.4 monospace;
+  outline: none;
+}
+
+/* buttons */
+.btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  height: 48px;
+  border: 0;
+  border-radius: 24px;
+  background: var(--primary);
+  color: var(--on-primary);
+  font: 500 15px/1 var(--font);
+  margin-top: 14px;
+  cursor: pointer;
+}
+.btn:active {
+  filter: brightness(0.92);
+}
+.btn.tonal {
+  background: var(--secondary-c);
+  color: var(--on-secondary-c);
+}
+.btn.danger {
+  background: var(--error);
+  color: var(--on-error);
+}
+.btn.first {
+  margin-top: 0;
+}
+.btns2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.btns2 .btn {
+  margin-top: 14px;
+}
+
+/* live results under the fill-up form */
+.live {
+  background: var(--primary-c);
+  color: var(--on-primary-c);
+  border-radius: 16px;
+  padding: 12px 8px;
+  margin-top: 16px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  text-align: center;
+}
+.live b {
+  display: block;
+  font: 500 20px/1.3 var(--font);
+}
+.live span {
+  font-size: 12px;
+  opacity: 0.8;
+}
+
+/* history lists (.hl = highlighted cost per 100 km) */
+.row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 0;
+  border-top: 1px solid var(--outline-v);
+}
+.row:first-child {
+  border-top: 0;
+}
+.row .l {
+  flex: 1;
+  min-width: 0;
+}
+.row .t {
+  font-weight: 500;
+}
+.row .m {
+  font-size: 13px;
+  color: var(--on-surf-v);
+  overflow-wrap: anywhere;
+}
+.row .r {
+  text-align: right;
+  white-space: nowrap;
+}
+.row .hl {
+  display: inline-block;
+  margin: 3px 0 2px;
+  padding: 1px 8px;
+  border-radius: 8px;
+  background: var(--primary-c);
+  color: var(--on-primary-c);
+  font-size: 13px;
+  font-weight: 600;
+}
+.del {
+  border: 0;
+  background: transparent;
+  color: var(--on-surf-v);
+  width: 40px;
+  height: 40px;
+  border-radius: 20px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  flex: none;
+}
+.del svg {
+  width: 22px;
+  height: 22px;
+}
+.del.armed {
+  width: auto;
+  padding: 0 14px;
+  background: var(--error);
+  color: var(--on-error);
+  font: 500 13px var(--font);
+}
+.empty {
+  color: var(--on-surf-v);
+  text-align: center;
+  padding: 20px 0;
+  font-size: 14px;
+}
+.note {
+  font-size: 13px;
+  color: var(--on-surf-v);
+  margin-top: 12px;
+  line-height: 1.5;
+}
+
+/* Stats tab: figures, totals, charts and their information bubble (.tip) */
+.stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px 12px;
+}
+.stat b {
+  display: block;
+  font: 500 26px/1.2 var(--font);
+  color: var(--primary);
+}
+.stat span {
+  font-size: 13px;
+  color: var(--on-surf-v);
+}
+.kv {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0;
+}
+.kv.tot {
+  border-top: 1px solid var(--outline-v);
+  margin-top: 6px;
+  padding-top: 12px;
+  font-weight: 500;
+}
+.bar {
+  height: 8px;
+  border-radius: 4px;
+  background: var(--primary-c);
+  margin-top: 6px;
+  overflow: hidden;
+}
+.bar i {
+  display: block;
+  height: 100%;
+  background: var(--primary);
+  border-radius: 4px;
+}
+.legend {
+  display: flex;
+  gap: 16px;
+  font-size: 13px;
+  color: var(--on-surf-v);
+  margin-bottom: 8px;
+}
+.legend i {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 5px;
+  margin-right: 6px;
+}
+.chart {
+  position: relative;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+.chart svg {
+  width: 100%;
+  height: auto;
+  display: block;
+  touch-action: pan-y;
+}
+.chart text {
+  fill: var(--on-surf-v);
+  font-size: 11px;
+}
+.chart .grid {
+  stroke: var(--outline-v);
+  stroke-width: 1;
+}
+.tip {
+  position: absolute;
+  top: 0;
+  pointer-events: none;
+  background: var(--inverse);
+  color: var(--on-inverse);
+  font-size: 12px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  white-space: nowrap;
+  transform: translate(-50%, -5vh);
+  display: none;
+  z-index: 2;
+  line-height: 1.4;
+}
+.sum {
+  font-size: 14px;
+  margin-top: 10px;
+  color: var(--on-surf-v);
+}
+.sum b {
+  color: var(--on-surf);
+}
+
+/* receipt scan result */
+.scanres {
+  background: var(--primary-c);
+  color: var(--on-primary-c);
+  border-radius: 16px;
+  padding: 12px 14px;
+  font-size: 14px;
+  margin: 12px 0 0;
+}
+.scanres.warn {
+  outline: 2px solid var(--error);
+}
+.scanres .w {
+  color: var(--error);
+  margin-top: 6px;
+}
+.scanres .note {
+  color: inherit;
+  opacity: 0.8;
+}
+details {
+  margin-top: 12px;
+}
+summary {
+  cursor: pointer;
+  font-weight: 500;
+  padding: 4px 0;
+}
+details .note {
+  margin-top: 8px;
+}
+
+/* bottom navigation bar */
+.nav {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 10;
+  display: flex;
+  justify-content: space-around;
+  max-width: var(--maxw);
+  margin-inline: auto;
+  background: var(--surf);
+  padding: 12px 8px calc(16px + env(safe-area-inset-bottom, 0px));
+}
+.nav button {
+  flex: 1;
+  border: 0;
+  background: transparent;
+  color: var(--on-surf-v);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  font: 500 12px/1.2 var(--font);
+  padding: 0;
+  min-width: 0;
+}
+.nav .pill {
+  width: 64px;
+  height: 32px;
+  border-radius: 16px;
+  display: grid;
+  place-items: center;
+  transition: background 0.15s;
+}
+.nav button.on {
+  color: var(--on-surf);
+}
+.nav button.on .pill {
+  background: var(--secondary-c);
+  color: var(--on-secondary-c);
+}
+.nav span.lbl {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+body.kb .nav {
+  display: none;
+}
+
+/* status message at the bottom (snackbar) */
+#st {
+  position: fixed;
+  left: 16px;
+  right: 16px;
+  bottom: calc(104px + env(safe-area-inset-bottom, 0px));
+  max-width: calc(var(--maxw) - 32px);
+  margin-inline: auto;
+  z-index: 20;
+  background: var(--inverse);
+  color: var(--on-inverse);
+  border-radius: 12px;
+  padding: 14px 16px;
+  font-size: 14px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s;
+}
+#st.show {
+  opacity: 1;
+}
+body.kb #st {
+  bottom: 16px;
+}
+
+/* service reminder: amber banner at the top of the screen, dialog in the middle */
+.svcbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  border: 0;
+  border-radius: 16px;
+  padding: 12px 14px;
+  margin: 0 0 12px;
+  background: var(--amber-c);
+  color: var(--on-amber-c);
+  font: 500 14px/1.35 var(--font);
+  text-align: left;
+  cursor: pointer;
+}
+.svcbar span {
+  flex: 1;
+}
+.svcbar svg.i:first-child {
+  color: var(--amber);
+}
+.scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+.dialog {
+  width: 100%;
+  max-width: 360px;
+  background: var(--surf-high);
+  color: var(--on-surf);
+  border-radius: 28px;
+  padding: 24px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+}
+.dialog > svg.i {
+  width: 28px;
+  height: 28px;
+  color: var(--amber);
+  display: block;
+  margin: 0 auto;
+}
+.dialog h2 {
+  font: 400 22px/1.3 var(--font);
+  text-align: center;
+  margin: 14px 0 12px;
+}
+.dialog p {
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--on-surf-v);
+  margin: 0 0 10px;
+}
+.dbtns {
+  display: flex;
+  gap: 12px;
+  margin-top: 6px;
+}
+.dbtns .btn {
+  margin-top: 8px;
+}
+
+/* full-screen wheel: language at first launch (#lang) and every other choice (#picker) */
+.lang {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  background: var(--surface);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: calc(24px + env(safe-area-inset-top, 0px)) calc(20px + env(safe-area-inset-right, 0px))
+    calc(24px + env(safe-area-inset-bottom, 0px)) calc(20px + env(safe-area-inset-left, 0px));
+}
+.lang .wrap {
+  width: 100%;
+  max-width: 440px;
+  margin: 0 auto;
+  text-align: center;
+}
+.lang h1 {
+  font: 500 28px/1.25 var(--font);
+  margin: 12px 0 20px;
+}
+.wheel {
+  --it: 56px;
+  position: relative;
+  height: calc(var(--it) * 5);
+  margin-bottom: 24px;
+}
+.wheel .band {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(var(--it) * 2);
+  height: var(--it);
+  border-radius: 16px;
+  background: var(--primary-c);
+  pointer-events: none;
+}
+.wl {
+  position: relative;
+  height: 100%;
+  overflow-y: scroll;
+  scroll-snap-type: y mandatory;
+  padding: calc(var(--it) * 2) 0;
+  scrollbar-width: none;
+  overscroll-behavior: contain;
+  -webkit-mask-image: linear-gradient(transparent, #000 28%, #000 72%, transparent);
+  mask-image: linear-gradient(transparent, #000 28%, #000 72%, transparent);
+}
+.wl::-webkit-scrollbar {
+  display: none;
+}
+.wl .it {
+  height: var(--it);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  scroll-snap-align: center;
+  font: 500 22px var(--font);
+  color: var(--on-surf-v);
+  cursor: pointer;
+  user-select: none;
+  will-change: transform, opacity;
+}
+
+/* ================================================================================================
+ * Adaptive layout
+ * - under 600 px (phones): one column, bottom navigation bar (the styles above);
+ * - 600 to 839 px (large phones, small tablets): a wider column, four figures per row in Stats;
+ * - 840 px and more (tablets, computers, phones in landscape): navigation rail on the left;
+ * - 1,024 px and more (tablets in landscape, computers): content up to 1,160 px wide in two columns:
+ *   the form next to its history, charts side by side, the help next to the other settings.
+ * Plus, with a mouse: hover states and a visible focus for keyboard users.
+ * ================================================================================================ */
+@media (min-width: 600px) {
+  :root {
+    --maxw: 760px;
+  }
+  .stats {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+@media (min-width: 840px) {
+  body {
+    max-width: none;
+    padding: 0 env(safe-area-inset-right, 0px) 32px calc(88px + env(safe-area-inset-left, 0px));
+  }
+  .appbar,
+  main {
+    max-width: calc(var(--maxw) + 48px);
+    margin-inline: auto;
+  }
+  .appbar {
+    padding-left: 24px;
+    padding-right: 16px;
+  }
+  .carsel {
+    flex: 0 1 auto;
+    margin-right: auto;
+  }
+  main {
+    padding: 0 24px;
+  }
+  #carForm {
+    max-width: 640px;
+  }
+  /* navigation rail */
+  .nav {
+    top: 0;
+    right: auto;
+    width: calc(88px + env(safe-area-inset-left, 0px));
+    max-width: none;
+    margin: 0;
+    flex-direction: column;
+    justify-content: flex-start;
+    gap: 12px;
+    padding: calc(80px + env(safe-area-inset-top, 0px)) 0 16px env(safe-area-inset-left, 0px);
+  }
+  .nav button {
+    flex: none;
+    padding: 4px 0;
+  }
+  .nav .pill {
+    width: 56px;
+  }
+  body.kb .nav {
+    display: flex;
+  }
+  #st,
+  body.kb #st {
+    left: calc(88px + env(safe-area-inset-left, 0px));
+    right: 0;
+    bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    max-width: 560px;
+  }
+}
+@media (min-width: 1024px) {
+  :root {
+    --maxw: 1112px;
+  }
+  /* Fill-ups and Purchases: the form on the left, the history on the right */
+  #fuel,
+  #buys {
+    display: grid;
+    grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+    column-gap: 24px;
+    align-items: start;
+  }
+  .hist > h2.sec {
+    margin-top: 4px;
+  }
+  /* Stats: figures and spending across, the two charts side by side (same height) */
+  #stats {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    column-gap: 16px;
+  }
+  #stats > .card:first-child,
+  #stats > .card:last-child {
+    grid-column: 1 / -1;
+  }
+  /* Settings: the help on the right of the other cards */
+  #save {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    column-gap: 16px;
+    align-items: start;
+  }
+}
+@media (hover: hover) and (pointer: fine) {
+  .icon,
+  .del,
+  .nav button,
+  .svcbar,
+  summary {
+    cursor: pointer;
+  }
+  .icon:hover,
+  .del:not(.armed):hover {
+    background: var(--surf-high);
+  }
+  .btn:hover,
+  .svcbar:hover {
+    filter: brightness(1.06);
+  }
+  .nav button:not(.on):hover .pill {
+    background: var(--surf-high);
+  }
+  .wl .it:hover {
+    color: var(--on-surf);
+  }
+}
+button:focus-visible,
+summary:focus-visible,
+.btn:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
