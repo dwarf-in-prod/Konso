@@ -1,0 +1,1 @@
+New: Konso is also a web app, installable on iPhone, iPad, computers and any phone (link on the project page). It works offline, receipt scanning included, and keeps a backup file you save and open. On tablets, computers and phones in landscape, the layout adapts to the screen: navigation rail on the left and two columns. The Android app and your data are unchanged.

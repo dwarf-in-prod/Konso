@@ -1,0 +1,1 @@
+Novidade: o Konso também é uma app web, instalável no iPhone, iPad, computadores e qualquer telemóvel (link na página do projeto). Funciona offline, leitura de talões incluída, com um ficheiro de cópia que guardas e abres. Em tablets, computadores e telemóveis na horizontal, o ecrã adapta-se: barra de navegação à esquerda e duas colunas. A app Android e os teus dados não mudam.

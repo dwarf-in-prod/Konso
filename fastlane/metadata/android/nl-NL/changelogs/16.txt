@@ -1,0 +1,1 @@
+Nieuw: Konso is ook een webapp, te installeren op iPhone, iPad, computers en elke telefoon (link op de projectpagina). Hij werkt offline, bonnetjes lezen inbegrepen, met een back-upbestand dat je opslaat en opent. Op tablets, computers en telefoons in liggende stand past de weergave zich aan: navigatiebalk links en twee kolommen. De Android-app en je gegevens blijven ongewijzigd.
