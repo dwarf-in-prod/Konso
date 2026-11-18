@@ -11,7 +11,7 @@
  *   /test/<branch>/ has its own scope, so its caches are never touched, and the other way round);
  * - fetch: the app's own files come from the cache; anything else goes to the network as usual.
  */
-const VERSION = "8bfb5c9c8f6b";
+const VERSION = "17bae3f2f197";
 const FILES = ["app.css","app.js","i18n.js","icons/apple-touch-icon.png","icons/icon-192.png","icons/icon-512.png","icons/icon.svg","icons/maskable-512.png","index.html","manifest.webmanifest","parse.js","vendor/LICENSE","vendor/LICENSE.md","vendor/lang/fra.traineddata.gz","vendor/tesseract-core-simd-lstm.wasm.js","vendor/tesseract.min.js","vendor/worker.min.js"];
 
 const SCOPE = self.registration.scope; // e.g. https://example.github.io/Konso/
