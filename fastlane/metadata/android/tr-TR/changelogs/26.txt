@@ -1,0 +1,1 @@
+Yeni istasyon haritası (İstasyonlar sekmesi, isteğe bağlı bağlantı): çevrendeki istasyonlar yakıt fiyatınla, yeşilden (en ucuz) kırmızıya. Tüm yakıtları görmek, istasyonu izlemek veya yol tarifi için bir fiyata dokun. GPS'i açma hatırlatmalı konum düğmesi. İstasyonlarım artık grafikten önce, en ucuzu başta ve yeşil. Harita: OpenStreetMap.

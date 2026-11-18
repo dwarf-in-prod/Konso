@@ -43,7 +43,7 @@ Written by an AI does not mean unchecked: all the source code is open, so anyone
 ## 🔒 Privacy first
 
 - **No account, no ads, no analytics, no tracking.**
-- **Works offline.** The network permission serves the app's own files on `127.0.0.1`; every request to any other host is blocked in `MainActivity`. The **one optional exception**: if you turn on the switch in the *Stations* tab, the app may reach the official French fuel price site (`data.economie.gouv.fr`), and only that site, to show station prices. It is off by default.
+- **Works offline.** The network permission serves the app's own files on `127.0.0.1`; every request to any other host is blocked in `MainActivity`. The **one optional exception**: if you turn on the switch in the *Stations* tab, the app may reach the official French fuel price site (`data.economie.gouv.fr`) and, for the stations map, the OpenStreetMap tiles (`tile.openstreetmap.org`), and only those, to show station prices. It is off by default. The location permission is only used by the map's *Locate me* button; the position stays on the phone.
 - **Receipts are read on the phone.** The OCR engine (Tesseract) is embedded; photos never leave the device.
 - **Your data stays yours**: inside the app, and in a plain `konso.json` file saved to the folder you choose (on the phone, or on Google Drive through the Android file picker). You can read it, copy it or delete it at any time.
 - **Web version**: the site is made of static files only, with no server code. GitHub, which hosts it, sees the requests for the app's files like for any website, never your data, which stays in your browser.
@@ -54,6 +54,7 @@ Written by an AI does not mean unchecked: all the source code is open, so anyone
 - ⛽ **Fill-ups**: distance, litres, amount → L/100 km, cost per 100 km, price per litre. The fuel of your last fill-up is preselected; the distance field is outlined in green, and any missing field turns red when you save.
 - 📷 **Receipt scanning**: take a photo of a fuel receipt and the form fills itself (tuned for French receipts; always check the values). If the fuel type can't be read, the app asks you to pick it instead of guessing.
 - 🔧 **Purchases** (in *My garage*): oil, parts, tyres, servicing… sorted by category.
+- 🗺️ **Stations map** (France, optional connection): the stations in view with the price of your car's fuel, from green (cheapest) to red, tap one for all its prices, to follow it or for directions; *Locate me* centres the map on you.
 - 📍 **Station prices** (France, optional connection): follow as many stations as you like, found by postcode, with the last official price and its date, and a chart of the fuel price of the selected car (your own fill-ups and the followed stations). Prices come from the government's live feed; the chart builds up as new prices are recorded.
 - 🛠️ **Service reminders**: every year or every 10,000 km, whichever comes first (adjustable from 100 to 100,000 km, per car). A message appears once, then an amber banner stays at the top of the screen; tap it once the service is done and tracking starts again from zero.
 - 📊 **Overview**: averages, consumption chart, monthly spending.
@@ -120,7 +121,7 @@ app/src/main/
 │   ├── app.css         Styles (Material Design 3, light and dark)
 │   ├── i18n.js         Translations (10 languages)
 │   ├── parse.js        Receipt parsing
-│   └── vendor/         Tesseract.js and the French language model
+│   └── vendor/         Tesseract.js and the French language model, Leaflet (map)
 └── java/app/konso/
     └── MainActivity.java   WebView, local server, camera, backup file
 web/                        Web version only (never in the APK)
@@ -139,7 +140,7 @@ fastlane/metadata/android/  Store listing (F-Droid, IzzyOnDroid), 10 languages
 
 Konso is free software under the **GNU GPL v3.0** — see [`LICENSE`](LICENSE).
 
-Third-party components: [Tesseract.js](https://github.com/naptha/tesseract.js) and its language data, under the Apache 2.0 licence (see `app/src/main/assets/www/vendor/`).
+Third-party components: [Tesseract.js](https://github.com/naptha/tesseract.js) and its language data, under the Apache 2.0 licence, and [Leaflet](https://leafletjs.com) 1.9.4, under the BSD 2-Clause licence (see `app/src/main/assets/www/vendor/`). Map data © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors.
 
 ---
 
@@ -165,7 +166,7 @@ Comment elle est faite :
 ## 🔒 La vie privée d'abord
 
 - **Aucun compte, aucune publicité, aucune statistique, aucun pistage.**
-- **Fonctionne hors ligne.** La permission réseau sert à afficher les fichiers de l'appli sur `127.0.0.1` ; toute requête vers un autre hôte est bloquée dans `MainActivity`. **Seule exception, facultative** : si vous activez l'interrupteur de l'onglet *Stations*, l'appli peut joindre le site officiel des prix des carburants (`data.economie.gouv.fr`), et uniquement lui, pour afficher les prix des stations. Il est désactivé par défaut.
+- **Fonctionne hors ligne.** La permission réseau sert à afficher les fichiers de l'appli sur `127.0.0.1` ; toute requête vers un autre hôte est bloquée dans `MainActivity`. **Seule exception, facultative** : si vous activez l'interrupteur de l'onglet *Stations*, l'appli peut joindre le site officiel des prix des carburants (`data.economie.gouv.fr`) et, pour la carte des stations, les images de carte d'OpenStreetMap (`tile.openstreetmap.org`), et uniquement eux, pour afficher les prix des stations. Il est désactivé par défaut. La permission de localisation ne sert qu'au bouton *Me localiser* de la carte ; la position reste sur le téléphone.
 - **Les tickets sont lus sur le téléphone.** Le moteur de lecture (Tesseract) est embarqué ; les photos ne quittent jamais l'appareil.
 - **Vos données restent à vous** : dans l'appli, et dans un simple fichier `konso.json` enregistré dans le dossier de votre choix (téléphone, ou Google Drive via le sélecteur de fichiers Android). Vous pouvez le lire, le copier ou le supprimer à tout moment.
 - **Version web** : le site n'est fait que de fichiers statiques, sans code côté serveur. GitHub, qui l'héberge, voit les demandes des fichiers de l'appli comme pour n'importe quel site, jamais vos données, qui restent dans votre navigateur.
@@ -176,6 +177,7 @@ Comment elle est faite :
 - ⛽ **Pleins** : distance, litres, montant → L/100 km, coût aux 100 km, prix au litre. Le carburant du dernier plein est présélectionné ; le champ distance est entouré en vert, et un champ oublié passe en rouge à l'enregistrement.
 - 📷 **Lecture de ticket** : une photo du ticket remplit le formulaire (prévue pour les tickets français ; valeurs toujours à vérifier). Si le carburant n'est pas lisible, l'appli demande de le choisir au lieu de deviner.
 - 🔧 **Achats** (dans *Mon garage*) : huile, pièces, pneus, entretien… classés par catégorie.
+- 🗺️ **Carte des stations** (France, connexion facultative) : les stations de la zone affichée avec le prix du carburant de votre voiture, du vert (la moins chère) au rouge ; touchez-en une pour voir tous ses prix, la suivre ou lancer l'itinéraire ; *Me localiser* centre la carte sur vous.
 - 📍 **Prix des stations** (France, connexion facultative) : suivez autant de stations que vous voulez, trouvées par code postal, avec le dernier prix officiel et sa date, et un graphique du prix du carburant de la voiture choisie (vos pleins et les stations suivies). Les prix viennent du flux en direct du gouvernement ; la courbe se construit au fil des prix relevés.
 - 🛠️ **Rappels d'entretien** : tous les ans ou tous les 10 000 km, au premier des deux (réglable de 100 à 100 000 km, par voiture). Un message s'affiche une fois, puis un bandeau ambre reste en haut de l'écran ; un appui valide l'entretien et le suivi repart de zéro.
 - 📊 **Bilan** : moyennes, courbe de consommation, dépenses par mois.
@@ -233,4 +235,4 @@ L'APK est signé avec `app/debug.keystore`, une clé de test **publique** inclus
 
 Konso est un logiciel libre sous licence **GNU GPL v3.0** — voir [`LICENSE`](LICENSE).
 
-Composants tiers : [Tesseract.js](https://github.com/naptha/tesseract.js) et ses données de langue, sous licence Apache 2.0 (voir `app/src/main/assets/www/vendor/`).
+Composants tiers : [Tesseract.js](https://github.com/naptha/tesseract.js) et ses données de langue, sous licence Apache 2.0, et [Leaflet](https://leafletjs.com) 1.9.4, sous licence BSD 2-Clause (voir `app/src/main/assets/www/vendor/`). Données de carte © les contributeurs d'[OpenStreetMap](https://www.openstreetmap.org/copyright).

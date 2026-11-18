@@ -6,11 +6,11 @@ Funcionalidades:
 * Compras: óleo, peças, pneus, revisões… organizados por categoria.
 * Lembretes de manutenção: todos os anos ou a cada 10 000 km, o que acontecer primeiro (ajustável para cada carro).
 * Resumo: médias, gráfico de consumo, despesas por mês.
-* Preços dos postos (França, opcional): segue quantos postos quiseres, com o último preço oficial e um gráfico do preço do teu combustível.
+* Preços dos postos (França, opcional): mapa dos postos à tua volta com o preço do teu combustível, do mais barato ao mais caro, e segue quantos postos quiseres, com um gráfico do preço.
 * Vários carros, cada um com o seu histórico e os seus lembretes.
 * Cópia de segurança automática num simples ficheiro konso.json, na pasta à tua escolha.
 * 10 idiomas, tema claro ou escuro, ajuda integrada.
 
-Privacidade: a permissão de rede serve para mostrar os ficheiros da app em 127.0.0.1; qualquer pedido a outro servidor é bloqueado. Única exceção, desativada por predefinição: se a ativares no separador Postos, a app pode contactar o site oficial francês dos preços dos combustíveis (data.economie.gouv.fr), e só esse.
+Privacidade: a permissão de rede serve para mostrar os ficheiros da app em 127.0.0.1; qualquer pedido a outro servidor é bloqueado. Única exceção, desativada por predefinição: se a ativares no separador Postos, a app pode contactar o site oficial francês dos preços dos combustíveis (data.economie.gouv.fr) e, para o fundo do mapa, o OpenStreetMap (tile.openstreetmap.org), e só esses. A localização só é usada pelo botão «Localizar-me» do mapa: a tua posição fica no telemóvel.
 
 O Konso foi criado com IA (Claude Code); cada versão é testada por uma pessoa num telemóvel real. O código-fonte é aberto, sob a licença GPL-3.0.

@@ -1,25 +1,31 @@
 package app.konso;
 
+import android.Manifest;
 import android.app.Activity;
+import android.content.ActivityNotFoundException;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.UriPermission;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.graphics.Insets;
 import android.graphics.drawable.ColorDrawable;
+import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
+import android.provider.Settings;
 import android.view.DisplayCutout;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowInsets;
 import android.view.WindowInsetsController;
 import android.view.WindowManager;
+import android.webkit.GeolocationPermissions;
 import android.webkit.JavascriptInterface;
 import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
@@ -58,7 +64,9 @@ import java.util.concurrent.Executors;
  *   localStorage and for the WebAssembly and web worker of the OCR engine);
  * - refuses every request to any other host, so the app does not use the internet, with one
  *   exception the user turns on in the Stations tab: the official French fuel price site
- *   (PRICES_HOST), and only that one;
+ *   (PRICES_HOST) and the OpenStreetMap map tiles of the stations map (TILES_HOST), and only those;
+ * - gives the page the phone's position for the stations map, when the user taps "Locate me" and
+ *   allows it (onGeolocationPermissionsShowPrompt(), onRequestPermissionsResult());
  * - opens the camera or the gallery when the page asks for a receipt photo (input type="file");
  * - gives the page a small bridge, window.Android (class Bridge), to choose a backup folder and to
  *   read / write konso.json in it through the Storage Access Framework (works with Google Drive too);
@@ -88,14 +96,24 @@ public class MainActivity extends Activity {
      * page through Bridge.setOnline()).
      */
     private static final String PRICES_HOST = "data.economie.gouv.fr";
+    /**
+     * The map images (tiles) of the stations map, from OpenStreetMap: allowed under the same
+     * conditions as PRICES_HOST (https, connection switch on).
+     */
+    private static final String TILES_HOST = "tile.openstreetmap.org";
     private static final String PREF_ONLINE = "online";
     /** Last colours of the system bars sent by the page, applied again at the next launch. */
     private static final String PREF_BARS = "bars";
     /** Request codes of startActivityForResult(). */
     private static final int REQ_FOLDER = 1;
     private static final int REQ_IMAGE = 2;
+    /** Request code of the location permission (stations map, "Locate me"). */
+    private static final int REQ_LOCATION = 3;
 
     private WebView web;
+    /** The page's pending request for the position, answered once the user allowed or refused it. */
+    private String geoOrigin;
+    private GeolocationPermissions.Callback geoCallback;
     /** Holds the WebView; its padding keeps the page clear of the system bars (fitBars()). */
     private FrameLayout root;
     /** Room taken by the camera cutout on the left and right edges, in CSS pixels ("left,right"). */
@@ -157,6 +175,10 @@ public class MainActivity extends Activity {
         s.setDomStorageEnabled(true);
         s.setAllowFileAccess(false);
         s.setAllowContentAccess(true);
+        // the position for the stations map (navigator.geolocation), only after the user's consent
+        s.setGeolocationEnabled(true);
+        // OpenStreetMap asks apps using its map tiles to say who they are
+        s.setUserAgentString(s.getUserAgentString() + " Konso-Android");
 
         web.addJavascriptInterface(new Bridge(), "Android");
 
@@ -170,8 +192,8 @@ public class MainActivity extends Activity {
                 if (HOST.equals(url.getHost())) {
                     return null;
                 }
-                if (PRICES_HOST.equals(url.getHost()) && "https".equals(url.getScheme())
-                        && prefs.getBoolean(PREF_ONLINE, false)) {
+                boolean allowedHost = PRICES_HOST.equals(url.getHost()) || TILES_HOST.equals(url.getHost());
+                if (allowedHost && "https".equals(url.getScheme()) && prefs.getBoolean(PREF_ONLINE, false)) {
                     return null;
                 }
                 return emptyResponse(403, "Forbidden");
@@ -193,6 +215,24 @@ public class MainActivity extends Activity {
                 }
                 chooserCallback = callback;
                 return launchImageChooser();
+            }
+
+            // The page asks for the position ("Locate me" on the stations map): only the app's own
+            // page may have it, and only once Android's location permission is granted.
+            @Override
+            public void onGeolocationPermissionsShowPrompt(String origin, GeolocationPermissions.Callback callback) {
+                Uri o = Uri.parse(origin);
+                if (!HOST.equals(o.getHost())) {
+                    callback.invoke(origin, false, false);
+                } else if (hasLocationPermission()) {
+                    callback.invoke(origin, true, false);
+                } else {
+                    geoOrigin = origin;
+                    geoCallback = callback;
+                    requestPermissions(new String[] {
+                            Manifest.permission.ACCESS_FINE_LOCATION,
+                            Manifest.permission.ACCESS_COARSE_LOCATION }, REQ_LOCATION);
+                }
             }
         });
 
@@ -483,6 +523,26 @@ public class MainActivity extends Activity {
     }
 
     // ------------------------------------------------------------------
+    // Position for the stations map
+    // ------------------------------------------------------------------
+
+    /** True when the user has allowed the app to use the precise or the approximate position. */
+    private boolean hasLocationPermission() {
+        return checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+                || checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED;
+    }
+
+    /** Answer of Android's location permission dialog: passed on to the page's pending request. */
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] results) {
+        super.onRequestPermissionsResult(requestCode, permissions, results);
+        if (requestCode != REQ_LOCATION || geoCallback == null) return;
+        geoCallback.invoke(geoOrigin, hasLocationPermission(), false);
+        geoCallback = null;
+        geoOrigin = null;
+    }
+
+    // ------------------------------------------------------------------
     // System bars (status bar at the top, navigation bar at the bottom)
     // ------------------------------------------------------------------
 
@@ -722,9 +782,55 @@ public class MainActivity extends Activity {
 
     /**
      * Methods the page can call (app.js, NA): window.Android.folderName(), pickFolder(),
-     * writeFile(text), fileName(), readFile(), setOnline(on), setBars(top, bottom, dark) and insets().
+     * writeFile(text), fileName(), readFile(), setOnline(on), setBars(top, bottom, dark), insets(),
+     * openMap(lat, lon, label), locationOn() and openLocationSettings().
      */
     public class Bridge {
+        /**
+         * Stations map, "Locate me": true when the phone's location (GPS) is on. When it is off,
+         * Android grants the permission but never gives a position, so the page asks the user to
+         * turn it on first (openLocationSettings()).
+         */
+        @JavascriptInterface
+        public boolean locationOn() {
+            LocationManager lm = (LocationManager) getSystemService(LOCATION_SERVICE);
+            return lm == null || lm.isLocationEnabled();
+        }
+
+        /** Open the phone's location settings, so the user can turn the location on. */
+        @JavascriptInterface
+        public void openLocationSettings() {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS));
+                    } catch (ActivityNotFoundException e) {
+                        // no such settings screen on this phone
+                    }
+                }
+            });
+        }
+
+        /**
+         * Stations map, "Directions": open the station at lat, lon in the phone's map or navigation
+         * app (geo: link), with its name as label. Nothing happens if no such app is installed.
+         */
+        @JavascriptInterface
+        public void openMap(final double lat, final double lon, final String label) {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    String q = lat + "," + lon + "(" + Uri.encode(label == null ? "" : label) + ")";
+                    try {
+                        startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("geo:" + lat + "," + lon + "?q=" + q)));
+                    } catch (ActivityNotFoundException e) {
+                        // no map app: nothing to open
+                    }
+                }
+            });
+        }
+
         @JavascriptInterface
         public String folderName() {
             return folderDisplayName();

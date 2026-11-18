@@ -3,6 +3,9 @@
 
     <!-- Only used by the app to serve its own files on 127.0.0.1; any other host is refused in MainActivity. -->
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Stations map, "Locate me": asked only when the user taps that button (MainActivity). -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
     <application
         android:allowBackup="false"

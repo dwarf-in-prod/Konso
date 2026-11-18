@@ -1,0 +1,1 @@
+Novo mapa dos postos (separador Postos, ligação opcional): os postos à tua volta com o preço do teu combustível, do verde (o mais barato) ao vermelho. Toca num preço para ver todos os combustíveis, seguir o posto ou abrir o itinerário. Botão de localização, com um aviso para ligar o GPS. Os meus postos vem antes do gráfico, o mais barato primeiro e a verde. Mapa: OpenStreetMap.

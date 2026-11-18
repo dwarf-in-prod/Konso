@@ -1,0 +1,1 @@
+New stations map (Stations tab, optional connection): the stations around you with the price of your fuel, from green (cheapest) to red. Tap a price to see every fuel, follow the station or get directions. Locate button, with a reminder to turn the GPS on. My stations now comes before the chart, the cheapest first and in green. Map background: OpenStreetMap.

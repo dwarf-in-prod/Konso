@@ -6,11 +6,11 @@ Features:
 * Purchases: oil, parts, tyres, servicing… sorted by category.
 * Service reminders: every year or every 10,000 km, whichever comes first (adjustable per car).
 * Overview: averages, consumption chart, monthly spending.
-* Station prices (France, optional): follow as many stations as you like, with the last official price and a chart of your fuel's price.
+* Station prices (France, optional): a map of the stations around you with the price of your fuel, from cheapest to most expensive, and follow as many stations as you like, with a chart of the price.
 * Several cars, each with its own history and reminders.
 * Automatic backup to a plain konso.json file, in the folder of your choice.
 * 10 languages, light and dark themes, built-in help.
 
-Privacy: the network permission serves the app's own files on 127.0.0.1; every request to any other host is blocked. The one exception, off by default: if you turn it on in the Stations tab, the app may reach the official French fuel price site (data.economie.gouv.fr), and only that site.
+Privacy: the network permission serves the app's own files on 127.0.0.1; every request to any other host is blocked. The one exception, off by default: if you turn it on in the Stations tab, the app may reach the official French fuel price site (data.economie.gouv.fr) and, for the map background, OpenStreetMap (tile.openstreetmap.org), and only those. The location permission is only used by the map's "Locate me" button: your position stays on the phone.
 
 Konso was built with AI (Claude Code); every version is tested on a real phone by a human. Its source code is open, under the GPL-3.0 licence.

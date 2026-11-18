@@ -369,8 +369,9 @@ function norm(d) {
     .sort(byDate);
   return { cars, cur: car(d.cur), fuel, buys, plan: normPlan(d.plan), stations: normStations(d.stations) };
 }
-// Clean the followed stations: a positive number id (once), texts cut to a maximum length, and for
-// each fuel the valid [date, price] pairs, oldest first, at most 400.
+// Clean the followed stations: a positive number id (once), texts cut to a maximum length, the
+// position if valid (lat, lon), and for each fuel the valid [date, price] pairs, oldest first, at
+// most 400.
 function normStations(list) {
   const seen = new Set();
   return (Array.isArray(list) ? list : [])
@@ -386,7 +387,13 @@ function normStations(list) {
         if (pts.length) h[f] = pts;
       }
       const t = (v, n) => String(v == null ? '' : v).slice(0, n);
-      return { id: +x.id, adr: t(x.adr, 120), ville: t(x.ville, 80), cp: t(x.cp, 5), h };
+      const st = { id: +x.id, adr: t(x.adr, 120), ville: t(x.ville, 80), cp: t(x.cp, 5), h };
+      // position (stations map), kept when it is a valid latitude / longitude
+      if (typeof x.lat === 'number' && typeof x.lon === 'number' && Math.abs(x.lat) <= 90 && Math.abs(x.lon) <= 180) {
+        st.lat = +x.lat;
+        st.lon = +x.lon;
+      }
+      return st;
     });
 }
 // Clean the "Buying a new car" data (planDefault() if missing): numbers >= 0, km null when not
@@ -683,11 +690,13 @@ function makeWheel(list, labels, sel, loop, onPick) {
   paint();
   return at;
 }
-// Icons of the wheel screen (SVG paths). globe, wrench and pump are copied from icons already in the page.
+// Icons of the wheel screen and the dialogs (SVG paths). globe, wrench, pump and pin are copied from
+// icons already in the page.
 const ICON = {
   globe: document.querySelector('#lang svg path').getAttribute('d'),
   wrench: document.querySelector('#svcBar svg path').getAttribute('d'),
   pump: document.querySelector('.nav [data-t="fuel"] svg path').getAttribute('d'),
+  pin: document.querySelector('.nav [data-t="stations"] svg path').getAttribute('d'),
   theme:
     'M20 15.31L23.31 12 20 8.69V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69zM12 18V6c3.31 0 6 2.69 6 6s-2.69 6-6 6z',
   ruler:
@@ -2558,7 +2567,7 @@ const PRICES_API =
 // Konso fuel types -> name of the fuel in the feed (fields <name>_prix and <name>_maj).
 const FEED_FUEL = { 'SP95-E10': 'e10', SP95: 'sp95', SP98: 'sp98', E85: 'e85', GPL: 'gplc', Gazole: 'gazole' };
 const FEED_FIELDS =
-  'id,adresse,ville,cp,' +
+  'id,adresse,ville,cp,geom,' +
   Object.values(FEED_FUEL)
     .map(f => f + '_prix,' + f + '_maj')
     .join(',');
@@ -2583,12 +2592,18 @@ function setOnline(on) {
 }
 $('stOnline').onchange = () => setOnline($('stOnline').checked);
 
-// Ask the feed for the stations matching an ODSQL condition (where), at most limit records.
-async function feed(where, limit) {
+// Ask the feed for the stations matching an ODSQL condition (where), at most limit records,
+// optionally sorted (orderBy, e.g. "e10_prix"). Returns the feed's answer: { total_count, results }.
+async function feedJson(where, limit, orderBy) {
   const q = new URLSearchParams({ where, limit: String(limit), select: FEED_FIELDS });
+  if (orderBy) q.set('order_by', orderBy);
   const r = await fetch(PRICES_API + '?' + q, { cache: 'no-store' });
   if (!r.ok) throw new Error('HTTP ' + r.status);
-  return (await r.json()).results || [];
+  return r.json();
+}
+// The records only, for the followed stations and the postcode search.
+async function feed(where, limit) {
+  return (await feedJson(where, limit)).results || [];
 }
 // Keep the new prices of a feed record in station st: for each fuel, a price is added when its
 // date of change differs from the last one kept. The feed's dates are French local time although
@@ -2597,6 +2612,11 @@ function keepPrices(st, rec) {
   st.adr = String(rec.adresse || st.adr || '').slice(0, 120);
   st.ville = String(rec.ville || st.ville || '').slice(0, 80);
   st.cp = String(rec.cp || st.cp || '').slice(0, 5);
+  const g = rec.geom;
+  if (g && typeof g.lat === 'number' && typeof g.lon === 'number') {
+    st.lat = g.lat;
+    st.lon = g.lon;
+  }
   for (const f of Object.values(FEED_FUEL)) {
     const p = +rec[f + '_prix'],
       d = String(rec[f + '_maj'] || '').slice(0, 16);
@@ -2679,14 +2699,17 @@ function renderFound() {
 const PLUS_SVG = '<svg class="i" viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>';
 // Follow station id (from the search results): saved with the prices of the search.
 function followStation(id) {
-  const rec = stFound.find(r => +r.id === id);
-  if (!rec || S.stations.some(s => s.id === id)) return;
-  const st = { id, adr: '', ville: '', cp: '', h: {} };
+  followRecord(stFound.find(r => +r.id === id));
+  renderFound();
+}
+// Follow the station of feed record rec (search results or map), with its current prices.
+function followRecord(rec) {
+  if (!rec || S.stations.some(s => s.id === +rec.id)) return;
+  const st = { id: +rec.id, adr: '', ville: '', cp: '', h: {} };
   keepPrices(st, rec);
   S.stations.push(st);
   persist();
   renderStations();
-  renderFound();
 }
 
 // An address of the feed as shown: the ones written in capitals ("65 COURS ALBERT THOMAS") get
@@ -2717,6 +2740,9 @@ function renderStations() {
     key = FEED_FUEL[fuel];
   $('stOnline').checked = ONLINE;
   $('stIntro').classList.toggle('hide', ONLINE); // explained in How it works once allowed
+  $('stMapCard').classList.toggle('hide', !ONLINE);
+  $('stMapT').textContent = tx('map_title', { fuel: fuelLabel(fuel) });
+  if (ONLINE && !$('stations').classList.contains('hide')) mapShow();
   $('stChartT').textContent = tx('st_chart', { fuel: fuelLabel(fuel) });
   $('stTools').classList.toggle('hide', !ONLINE);
   $('stOff').textContent = ONLINE ? '' : tx('st_off');
@@ -2726,22 +2752,33 @@ function renderStations() {
   const prices = S.stations.map(st => stLast(st, key)).filter(Boolean).map(x => x[1]),
     best = prices.length > 1 ? Math.min(...prices) : null;
   $('st-list').innerHTML = S.stations.length
-    ? S.stations.map((st, i) => stationRow(st, i, key, fuel, best)).join('')
+    ? stationsByPrice(key)
+        .map(({ st, i }) => stationRow(st, i, key, fuel, best))
+        .join('')
     : '<div class="empty">' + esc(tx('st_none')) + '</div>';
   $('st-list')
     .querySelectorAll('.del')
     .forEach(b => (b.onclick = () => delClick('stations', +b.dataset.i, b)));
   stationChart(fuel, key);
 }
+// The followed stations in the order shown: cheapest price of the car's fuel first, the ones
+// without that fuel at the end (in the order followed). i = place in S.stations, which gives the
+// colour of the station's line in the chart.
+function stationsByPrice(key) {
+  const price = st => (stLast(st, key) || [0, Infinity])[1];
+  return S.stations.map((st, i) => ({ st, i })).sort((a, b) => price(a.st) - price(b.st) || a.i - b.i);
+}
 // One followed station: colour of its line in the chart, address, postcode and town; on the
-// right the last price of the car's fuel (highlighted when it is the cheapest) and its date.
+// right the last price of the car's fuel and its date. The cheapest station (shown first) is in
+// green: its name and its price.
 function stationRow(st, i, key, fuel, best) {
   const last = stLast(st, key),
+    isBest = !!last && last[1] === best,
     price = last
-      ? `<div class="${last[1] === best ? 'hl' : 't'}">${stPrice(last[1])}</div><div class="m">${stWhen(last[0])}</div>`
+      ? `<div class="${isBest ? 'hl best' : 't'}">${stPrice(last[1])}</div><div class="m">${stWhen(last[0])}</div>`
       : `<div class="m">${esc(tx('st_nofuel', { fuel: fuelLabel(fuel) }))}</div>`;
   return (
-    '<div class="row">' +
+    `<div class="row${isBest ? ' best' : ''}">` +
     `<i class="dot" style="background:${stColor(i)}"></i>` +
     `<div class="l"><div class="t">${esc(prettyAdr(st.adr))}</div><div class="m">${esc(st.cp + ' ' + st.ville)}</div></div>` +
     `<div class="r">${price}</div>` +
@@ -2857,6 +2894,247 @@ function stationChart(fuel, key) {
 }
 
 // ================================================================================================
+// Stations map (OpenStreetMap, prices of the stations in view)
+// ================================================================================================
+// A map in the Stations tab, shown only while the connection is allowed (MainActivity also blocks
+// its tiles otherwise). Leaflet (vendor/leaflet.js, loaded the first time the map is shown) draws
+// the OpenStreetMap tiles. The stations in view come from the same official feed: at most MAP_MAX,
+// the cheapest first, each with a label giving the price of the car's fuel, from green (cheapest
+// of the area) to red. A tap opens its prices, with "Follow" and "Directions".
+
+const MAP_TILES = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
+const MAP_ATTRIB = '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>';
+const MAP_MIN_ZOOM = 11; // further out the area holds too many stations: the user zooms in
+const MAP_MAX = 100; // stations asked for at once
+const MAP_VIEW_KEY = KP + 'mapview'; // last centre and zoom, a preference of the device
+const MAP_HOME = [46.6, 2.4, 6]; // France, when nothing better is known
+let map = null, // the Leaflet map, created the first time it is shown
+  mapPins = null, // layer holding the price labels
+  mapMe = null, // the user's position (blue dot)
+  mapSeq = 0, // number of the last request, to drop late answers
+  mapTimer = 0,
+  mapKey = '', // fuel of the prices shown (feed name)
+  mapRecs = []; // feed records shown
+
+// Load Leaflet (script and style) once; resolves when it is ready.
+let leafletLoading = null;
+function loadLeaflet() {
+  if (window.L) return Promise.resolve();
+  if (!leafletLoading) {
+    leafletLoading = new Promise((ok, ko) => {
+      const css = document.createElement('link');
+      css.rel = 'stylesheet';
+      css.href = 'vendor/leaflet.css';
+      document.head.appendChild(css);
+      const js = document.createElement('script');
+      js.src = 'vendor/leaflet.js';
+      js.onload = ok;
+      js.onerror = () => {
+        leafletLoading = null;
+        ko(new Error('leaflet'));
+      };
+      document.head.appendChild(js);
+    });
+  }
+  return leafletLoading;
+}
+
+// Where the map opens: the last view, else around the followed stations, else all of France.
+function mapStartView() {
+  try {
+    const v = JSON.parse(localStorage.getItem(MAP_VIEW_KEY));
+    if (Array.isArray(v) && v.length === 3 && v.every(x => typeof x === 'number')) return v;
+  } catch (e) {}
+  const pts = S.stations.filter(st => typeof st.lat === 'number');
+  if (!pts.length) return MAP_HOME;
+  const avg = k => pts.reduce((a, st) => a + st[k], 0) / pts.length;
+  return [avg('lat'), avg('lon'), 13];
+}
+// Remember the view, for the next time the map opens.
+function mapSaveView() {
+  const c = map.getCenter();
+  try {
+    localStorage.setItem(MAP_VIEW_KEY, JSON.stringify([+c.lat.toFixed(5), +c.lng.toFixed(5), map.getZoom()]));
+  } catch (e) {}
+}
+// The line under the map: how many stations, or what to do.
+const mapNote = t => ($('stMapNote').textContent = t);
+
+// Create the map: OpenStreetMap tiles, the layer of price labels, and a new search each time the
+// view stops moving.
+function mapCreate() {
+  const v = mapStartView();
+  map = L.map('stMap', { zoomControl: true }).setView([v[0], v[1]], v[2]);
+  map.attributionControl.setPrefix(false);
+  L.tileLayer(MAP_TILES, { maxZoom: 19, attribution: MAP_ATTRIB }).addTo(map);
+  mapPins = L.layerGroup().addTo(map);
+  map.on('moveend', () => {
+    mapSaveView();
+    clearTimeout(mapTimer);
+    mapTimer = setTimeout(mapLoad, 350);
+  });
+}
+// Show the map (Stations tab open, connection allowed): Leaflet is loaded and the map created the
+// first time; afterwards it only takes its size again and, if the car's fuel changed, its prices.
+function mapShow() {
+  if (!ONLINE) return;
+  loadLeaflet()
+    .then(() => {
+      if (!map) mapCreate();
+      map.invalidateSize();
+      if (mapKey !== FEED_FUEL[defaultFuel()]) mapLoad();
+      else mapDraw(mapKey, mapRecs.length);
+    })
+    .catch(() => mapNote(tx('st_err')));
+}
+
+// Ask the feed for the stations in view selling the car's fuel, the cheapest first.
+async function mapLoad() {
+  if (!map || !ONLINE) return;
+  const key = FEED_FUEL[defaultFuel()],
+    seq = ++mapSeq;
+  mapKey = key;
+  if (map.getZoom() < MAP_MIN_ZOOM) {
+    mapRecs = [];
+    mapPins.clearLayers();
+    return mapNote(tx('map_zoom'));
+  }
+  const b = map.getBounds(),
+    c = v => v.toFixed(5);
+  const where =
+    `in_bbox(geom, ${c(b.getNorth())}, ${c(b.getWest())}, ${c(b.getSouth())}, ${c(b.getEast())})` +
+    ` and ${key}_prix is not null`;
+  mapNote(tx('st_busy'));
+  try {
+    const j = await feedJson(where, MAP_MAX, key + '_prix');
+    if (seq !== mapSeq) return; // the view moved meanwhile: a newer answer follows
+    mapRecs = (j.results || []).filter(r => r.geom && typeof r.geom.lat === 'number');
+    mapDraw(key, j.total_count || mapRecs.length);
+  } catch (e) {
+    if (seq === mapSeq) mapNote(tx('st_err'));
+  }
+}
+
+// Level of a price among the ones shown: 'lo' (cheapest third), 'mid' or 'hi'.
+function mapLevel(p, lo, hi) {
+  const t = hi > lo ? (p - lo) / (hi - lo) : 0;
+  return t < 1 / 3 ? 'lo' : t < 2 / 3 ? 'mid' : 'hi';
+}
+// Draw a price label for each record of mapRecs (the cheapest on top; the followed stations get
+// a ring), and say how many there are. total = stations of the area in the feed.
+function mapDraw(key, total) {
+  if (!mapPins) return;
+  mapPins.clearLayers();
+  const prices = mapRecs.map(r => +r[key + '_prix']),
+    lo = Math.min(...prices),
+    hi = Math.max(...prices);
+  mapRecs.forEach((r, i) => {
+    const p = prices[i],
+      cls = 'pin-' + mapLevel(p, lo, hi) + (S.stations.some(st => st.id === +r.id) ? ' pin-f' : '');
+    const icon = L.divIcon({ className: 'pin', iconSize: [0, 0], html: `<span class="${cls}">${fmt(priceOut(p), 3)}</span>` });
+    L.marker([r.geom.lat, r.geom.lon], { icon, keyboard: false, zIndexOffset: (mapRecs.length - i) * 10 })
+      .bindPopup(() => mapPopup(r, key), { maxWidth: 280, minWidth: 220 })
+      .addTo(mapPins);
+  });
+  if (map.getZoom() < MAP_MIN_ZOOM) return;
+  if (!mapRecs.length) mapNote(tx('map_none'));
+  else mapNote(tx(total > mapRecs.length ? 'map_many' : 'map_count', { n: mapRecs.length, t: total }));
+}
+
+// The window of a station on the map: address, the prices of every fuel it sells (the car's in
+// colour), the time of the car's fuel price, and the Follow and Directions buttons.
+function mapPopup(r, key) {
+  const el = document.createElement('div');
+  el.className = 'mappop';
+  const rows = Object.entries(FEED_FUEL)
+    .filter(([, f]) => +r[f + '_prix'] > 0)
+    .map(([fuel, f]) => `<div class="mp-row${f === key ? ' cur' : ''}"><span>${esc(fuelLabel(fuel))}</span><b>${stPrice(+r[f + '_prix'])}</b></div>`)
+    .join('');
+  const maj = String(r[key + '_maj'] || '').slice(0, 16),
+    followed = S.stations.some(st => st.id === +r.id);
+  el.innerHTML =
+    `<div class="mp-t">${esc(prettyAdr(r.adresse))}</div>` +
+    `<div class="mp-m">${esc((r.cp || '') + ' ' + (r.ville || ''))}</div>` +
+    rows +
+    (maj.length === 16 ? `<div class="mp-m">${esc(tx('map_upd', { t: stWhen(maj) }))}</div>` : '') +
+    '<div class="mp-b">' +
+    `<button class="btn tonal" data-a="f"${followed ? ' disabled' : ''}>${esc(tx(followed ? 'st_already' : 'map_follow'))}</button>` +
+    `<button class="btn" data-a="r">${esc(tx('map_route'))}</button></div>`;
+  el.querySelector('[data-a="f"]').onclick = () => {
+    followRecord(r);
+    map.closePopup();
+    mapDraw(key, mapRecs.length);
+    status(tx('map_followed'));
+  };
+  el.querySelector('[data-a="r"]').onclick = () => mapRoute(r);
+  return el;
+}
+// Directions to station r: the phone's map or navigation app in the Android app, OpenStreetMap
+// in a browser.
+function mapRoute(r) {
+  const { lat, lon } = r.geom,
+    label = prettyAdr(r.adresse) + ', ' + (r.ville || '');
+  if (NA && typeof NA.openMap === 'function') return NA.openMap(lat, lon, label);
+  window.open(`https://www.openstreetmap.org/?mlat=${lat}&mlon=${lon}#map=17/${lat}/${lon}`, '_blank', 'noopener');
+}
+
+// "Locate me": centre the map on the user's position (asked to Android, which asks the user the
+// first time) and show it as a blue dot. The position stays on the device: only the map's view
+// is used, to ask the feed and OpenStreetMap for that area.
+function mapLocate() {
+  if (!map) return;
+  if (!navigator.geolocation) return status(tx('map_noloc'));
+  if (!locationIsOn()) return askLocationOn();
+  mapNote(tx('map_locating'));
+  navigator.geolocation.getCurrentPosition(
+    pos => {
+      const ll = [pos.coords.latitude, pos.coords.longitude];
+      if (!mapMe) {
+        mapMe = L.circleMarker(ll, { radius: 8, color: '#fff', weight: 3, fillColor: '#2a78d6', fillOpacity: 1 });
+        mapMe.addTo(map);
+      } else mapMe.setLatLng(ll);
+      map.setView(ll, Math.max(map.getZoom(), 13));
+    },
+    err => {
+      mapLoad();
+      // the location may have been turned off meanwhile: offer to turn it on again
+      if (err && err.code !== 1 && !locationIsOn()) askLocationOn();
+      else status(tx('map_noloc'));
+    },
+    { enableHighAccuracy: false, timeout: 15000, maximumAge: 120000 },
+  );
+}
+$('stLocate').onclick = mapLocate;
+// Android app: is the phone's location (GPS) on? Always true in a browser, which handles it itself.
+const locationIsOn = () => !NA || typeof NA.locationOn !== 'function' || NA.locationOn();
+// The phone's location is off: Android would give no position at all, so offer to open the location
+// settings. Back in the app with the location on, the map is centred on the user at once.
+let mapLocatePending = false;
+function askLocationOn() {
+  mapLoad();
+  dialog(
+    tx('map_gps_t'),
+    '<p>' + esc(tx('map_gps_msg')) + '</p>',
+    [
+      { t: tx('cancel'), tonal: true },
+      {
+        t: tx('map_gps_open'),
+        fn: () => {
+          mapLocatePending = true;
+          NA.openLocationSettings();
+        },
+      },
+    ],
+    'pin',
+  );
+}
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState !== 'visible' || !mapLocatePending) return;
+  mapLocatePending = false;
+  if (locationIsOn()) mapLocate();
+});
+
+// ================================================================================================
 // Navigation and keyboard
 // ================================================================================================
 
@@ -2869,7 +3147,10 @@ function showTab(t) {
   $('setBtn').classList.toggle('on', t === 'save');
   ['fuel', 'stations', 'stats', 'garage', 'save'].forEach(id => $(id).classList.toggle('hide', id !== t));
   if (t !== 'garage') closeCarForm();
-  if (t === 'stations') refreshStations(false);
+  if (t === 'stations') {
+    refreshStations(false);
+    mapShow();
+  }
   const el = $(t);
   el.classList.remove('tabin');
   void el.offsetWidth;
