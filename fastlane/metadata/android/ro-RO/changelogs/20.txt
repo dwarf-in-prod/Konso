@@ -1,0 +1,1 @@
+Barele telefonului (ora, bateria, bara de gesturi) preiau culorile aplicației, în tema luminoasă și în cea întunecată: gata cu benzile negre sus și jos. La prima pornire, un pas 4 propune tema (automată, luminoasă sau întunecată), cu Luminoasă selectată. În Rezumat, un scurt text amintește că achizițiile se adaugă în Garajul meu, cu un link direct.

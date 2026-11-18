@@ -1,0 +1,1 @@
+Paski telefonu (zegar, bateria, pasek gestów) przyjmują kolory aplikacji, w motywie jasnym i ciemnym: koniec z czarnymi pasami u góry i na dole. Przy pierwszym uruchomieniu 4. krok proponuje motyw (automatyczny, jasny lub ciemny), z wybranym Jasnym. W Podsumowaniu krótki tekst przypomina, że zakupy dodaje się w Moim garażu, z bezpośrednim linkiem.

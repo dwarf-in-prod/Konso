@@ -1,0 +1,1 @@
+The phone's bars (clock, battery, gesture bar) now take the app's colours, in the light and dark themes: no more black bands at the top and bottom. At first launch, a 4th step offers the theme (automatic, light or dark), with Light selected. In Stats, a short note reminds you that purchases are added in My garage, with a direct link.

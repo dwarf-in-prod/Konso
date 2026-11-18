@@ -1,0 +1,1 @@
+As barras do telemóvel (hora, bateria, barra de gestos) ficam com as cores da app, no tema claro e no escuro: acabaram as faixas pretas em cima e em baixo. No primeiro arranque, um 4.º passo propõe o tema (automático, claro ou escuro), com Claro selecionado. No Resumo, um texto lembra que as compras se adicionam em A minha garagem, com uma ligação direta.

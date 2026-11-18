@@ -1,0 +1,1 @@
+Le barre del telefono (ora, batteria, barra dei gesti) prendono i colori dell'app, in tema chiaro e scuro: niente più bande nere in alto e in basso. Al primo avvio, un 4º passo propone il tema (automatico, chiaro o scuro), con Chiaro selezionato. Nel Riepilogo, un breve testo ricorda che gli acquisti si aggiungono in Il mio garage, con un link diretto.
