@@ -5,7 +5,8 @@
  * (installable PWA) is the same files, published by tools/build-web.js with web/ (offline cache, icons).
  *
  * Files
- * - index.html: the screens (four tabs: Fill-ups, Purchases, Stats, Settings, plus overlays).
+ * - index.html: the screens (four tabs: Fill-ups, Purchases, Stats, My garage; Settings, opened
+ *               with the gear of the top bar; plus overlays).
  * - app.css:    the styles (Material Design 3, light and dark theme).
  * - app.js:     this file, all the behaviour.
  * - i18n.js:    every text shown, in 10 languages. The code never contains visible text: tx(key).
@@ -197,13 +198,31 @@ const catLabel = c => {
 // ================================================================================================
 
 // The user's data. Format (also the format of konso.json, version 2):
-//   cars: [{id, name, fuel, svcKm, svcDone}]  fuel = usual fuel type, svcKm = service interval in km,
-//                                             svcDone = date of the last service confirmed from the banner
+//   cars: [{id, name, fuel, svcKm, svcDone, price, buyKm, ins, insPer}]
+//         fuel = usual fuel type, svcKm = service interval in km,
+//         svcDone = date of the last service confirmed from the banner,
+//         optional "advanced options" of the garage (0 = not given): price = purchase price,
+//         buyKm = odometer at purchase in km, ins = insurance price, paid per insPer ('y' year, 'm' month)
 //   cur:  id of the selected car
 //   fuel: fill-ups  [{id, car, d: date, k: km since the previous fill-up, l: litres, e: amount, c: fuel type, s: station}]
 //   buys: purchases [{id, car, d: date, e: amount, c: category, n: description, k: odometer in km, s: shop}]
+//   plan: the car the user wants to buy (My garage, "Buying a new car"), see planDefault()
 // Lists are kept sorted from the most recent date. LS is the localStorage key of the copy.
-let S = { cars: [{ id: 'c1', name: '', fuel: 'SP95-E10' }], cur: 'c1', fuel: [], buys: [] },
+// The car the user wants to buy, empty. price, ins (paid per insPer), cons in L/100 km, fuel = price
+// of a litre, withBuys = count the purchases of the current car, resale = resale price of the
+// current car (typed by the user, 0 = none). km (per year, in km) is null while the user keeps the
+// value suggested by the app (from the fill-ups).
+const planDefault = () => ({
+  price: 0,
+  ins: 0,
+  insPer: 'y',
+  cons: 0,
+  fuel: 0,
+  withBuys: false,
+  km: null,
+  resale: 0,
+});
+let S = { cars: [{ id: 'c1', name: '', fuel: 'SP95-E10' }], cur: 'c1', fuel: [], buys: [], plan: planDefault() },
   LS = KP + 'data';
 const carName = c => c.name || tx('car_default'); // the default car has no name: translated label
 // Clean data coming from a file, an import or localStorage: types checked, texts cut to a maximum
@@ -232,6 +251,10 @@ function norm(d) {
       fuel: str(c.fuel, 20),
       svcKm: svcEvery(c),
       svcDone: /^\d{4}-\d{2}-\d{2}$/.test(c.svcDone) ? c.svcDone : '',
+      price: Math.max(0, num(c.price)),
+      buyKm: Math.max(0, num(c.buyKm)),
+      ins: Math.max(0, num(c.ins)),
+      insPer: c.insPer === 'm' ? 'm' : 'y',
     }))
     .filter(c => c.id);
   cars = cars.filter((c, i) => cars.findIndex(x => x.id === c.id) === i);
@@ -265,7 +288,24 @@ function norm(d) {
     }))
     .filter(x => x.e > 0)
     .sort(byDate);
-  return { cars, cur: car(d.cur), fuel, buys };
+  return { cars, cur: car(d.cur), fuel, buys, plan: normPlan(d.plan) };
+}
+// Clean the "Buying a new car" data (planDefault() if missing): numbers >= 0, km null when not
+// typed by the user.
+function normPlan(p) {
+  p = p && typeof p === 'object' ? p : {};
+  const pos = v => (isFinite(+v) && +v > 0 ? +v : 0),
+    opt = v => (v === null || v === undefined || v === '' || !isFinite(+v) || +v < 0 ? null : +v);
+  return {
+    price: pos(p.price),
+    ins: pos(p.ins),
+    insPer: p.insPer === 'm' ? 'm' : 'y',
+    cons: pos(p.cons),
+    fuel: pos(p.fuel),
+    withBuys: p.withBuys === true,
+    km: opt(p.km),
+    resale: pos(p.resale),
+  };
 }
 // The selected car, and its fill-ups (FU) and purchases (BU), most recent first.
 const curCar = () => S.cars.find(c => c.id === S.cur) || S.cars[0];
@@ -308,6 +348,7 @@ function payload() {
       cur: S.cur,
       fuel: S.fuel,
       buys: S.buys,
+      plan: S.plan,
     },
     null,
     2,
@@ -334,19 +375,26 @@ function persist() {
   clearTimeout(wt);
   wt = setTimeout(writeOut, 300);
 }
-// Write konso.json in the chosen folder, through the Android bridge.
-function writeOut() {
+// Save without the "Saved" message (only errors are shown): for fields saved while the user
+// types, like the ones of "Buying a new car".
+function persistQuiet() {
+  cacheSave();
+  clearTimeout(wt);
+  wt = setTimeout(() => writeOut(true), 800);
+}
+// Write konso.json in the chosen folder, through the Android bridge. quiet = no message on success.
+function writeOut(quiet) {
   if (!NA) {
-    status(tx('st_local'));
+    if (!quiet) status(tx('st_local'));
     return;
   }
   if (!folder) {
-    status(tx('st_nofolder'));
+    if (!quiet) status(tx('st_nofolder'));
     return;
   }
   try {
     const r = String(NA.writeFile(payload()));
-    status(r === 'ok' ? tx('st_saved', { f: folder }) : tx('st_wfail', { e: r }));
+    if (r !== 'ok' || !quiet) status(r === 'ok' ? tx('st_saved', { f: folder }) : tx('st_wfail', { e: r }));
   } catch (e) {
     status(tx('st_wfail', { e: '' }));
   }
@@ -468,7 +516,9 @@ function applyI18n() {
     if (list.includes(v)) el.value = v;
   };
   opts($('fc'), ['', ...FUELV], x => (x ? fuelLabel(x) : tx('fuel_choose')));
-  opts($('carFuel'), FUELV, fuelLabel);
+  if ($('carFuel').value) setCarFuel($('carFuel').value);
+  if ($('carInsPer').value) setInsPer($('carInsPer').value);
+  if ($('pInsPer').value) setPlanInsPer($('pInsPer').value);
   setCat($('bc').value || CATSHOW[0]);
   $('langBtn').textContent = (LANGS.find(l => l[0] === LANG) || LANGS[0])[1];
   $('unitBtn').textContent = UNIT_LABEL[UNIT];
@@ -548,10 +598,11 @@ function makeWheel(list, labels, sel, loop, onPick) {
   paint();
   return at;
 }
-// Icons of the wheel screen (SVG paths). globe and wrench are copied from icons already in the page.
+// Icons of the wheel screen (SVG paths). globe, wrench and pump are copied from icons already in the page.
 const ICON = {
   globe: document.querySelector('#lang svg path').getAttribute('d'),
   wrench: document.querySelector('#svcBar svg path').getAttribute('d'),
+  pump: document.querySelector('.nav [data-t="fuel"] svg path').getAttribute('d'),
   ruler:
     'M21 6H3c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm0 10H3V8h2v4h2V8h2v4h2V8h2v4h2V8h2v4h2V8h2v8z',
   money:
@@ -1478,6 +1529,7 @@ function render() {
   lineChart();
   barChart();
   svcUI();
+  renderPlan();
 }
 
 // Bin button of a history line.
@@ -1674,7 +1726,9 @@ function lineChart() {
   const vs = data.map(x => x.v),
     lo = Math.min(...vs, avg),
     hi = Math.max(...vs, avg),
-    pad = (hi - lo || 1) * 0.15;
+    // a range below 1e-6 is rounding noise (all values equal): use 1, or niceTicks() would make
+    // billions of ticks
+    pad = (hi - lo > 1e-6 ? hi - lo : 1) * 0.15;
   const tk = niceTicks(lo - pad, hi + pad, 4),
     y0 = tk[0],
     y1 = tk[tk.length - 1];
@@ -1941,10 +1995,21 @@ $('svcKmBtn').onclick = () => {
 // Cars
 // ================================================================================================
 
-// Cars: selector in the top bar, add / edit / delete form.
+// Cars: selector in the top bar, and the "My garage" tab (list of the cars, add / edit / delete form).
 // carEditing: id of the car being edited (null = new car); carDelArmed: delete needs a second tap.
 let carEditing = null,
   carDelArmed = false;
+// Car icon of the garage list (Material "directions_car").
+const CAR_SVG =
+  '<svg class="i" viewBox="0 0 24 24"><path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM5 11l1.5-4.5h11L19 11H5z"/></svg>';
+// Pencil icon at the end of a garage line: tells that the line opens the edit form.
+const PEN_SVG =
+  '<svg class="i" viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 000-1.41l-2.34-2.34a1 1 0 00-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>';
+// Number of fill-ups and purchases of car id (shown in the garage, and before deleting a car).
+const carCounts = id => ({
+  f: S.fuel.filter(x => x.car === id).length,
+  b: S.buys.filter(x => x.car === id).length,
+});
 // Car selector in the top bar.
 function renderCars() {
   const sel = $('car');
@@ -1960,31 +2025,124 @@ function renderCars() {
         '</option>',
     )
     .join('');
+  renderGarage();
 }
-// Open the car form, empty (new car) or filled with the selected car (edit).
-function openCarForm(edit) {
-  carEditing = edit ? S.cur : null;
+// One line of the garage: car icon, name (with a "Shown" chip for the car selected at the top),
+// usual fuel and number of records, pencil. The whole line is a button that opens the edit form.
+function garageRow(c) {
+  const n = carCounts(c.id),
+    shown = c.id === S.cur ? ` <span class="chip">${esc(tx('g_shown'))}</span>` : '',
+    meta = [c.fuel ? fuelLabel(c.fuel) : '', tx('g_count', n)].filter(Boolean).join(' · ');
+  return (
+    `<button type="button" class="row carrow" data-id="${esc(c.id)}">` +
+    `<span class="carico">${CAR_SVG}</span>` +
+    `<span class="l"><span class="t">${esc(carName(c))}${shown}</span>` +
+    `<span class="m">${esc(meta)}</span></span>` +
+    PEN_SVG +
+    '</button>'
+  );
+}
+// List of the cars in the "My garage" tab; a tap on a line opens the form for that car.
+function renderGarage() {
+  const list = $('cars-list');
+  list.innerHTML = S.cars.map(garageRow).join('');
+  list.querySelectorAll('.carrow').forEach(b => (b.onclick = () => openCarForm(b.dataset.id)));
+}
+// Usual fuel of the car form: a field button that opens the wheel (value kept in its value
+// attribute, like the purchase category).
+function setCarFuel(v) {
+  $('carFuel').value = v;
+  $('carFuel').textContent = fuelLabel(v);
+}
+$('carFuel').onclick = () =>
+  picker({
+    icon: 'pump',
+    title: 'car_fuel',
+    labels: FUELV.map(fuelLabel),
+    sel: Math.max(0, FUELV.indexOf($('carFuel').value)),
+    loop: false,
+    onOk: i => setCarFuel(FUELV[i]),
+  });
+// Advanced options: how often the insurance is paid, 'y' (per year) or 'm' (per month). A field
+// button that opens the wheel, like the usual fuel.
+const INS_PER = ['y', 'm'];
+const insPerLabel = v => tx(v === 'm' ? 'per_month' : 'per_year');
+function setInsPer(v) {
+  $('carInsPer').value = v;
+  $('carInsPer').textContent = insPerLabel(v);
+}
+$('carInsPer').onclick = () =>
+  picker({
+    icon: 'money',
+    title: 'car_ins_per',
+    labels: INS_PER.map(insPerLabel),
+    sel: Math.max(0, INS_PER.indexOf($('carInsPer').value)),
+    loop: false,
+    onOk: i => setInsPer(INS_PER[i]),
+  });
+// Fill the advanced options of the form from car c (empty for a new car). The section is
+// unfolded when the car already has one of them, folded otherwise.
+function fillCarAdvanced(c) {
+  const show = (v, d) => (c && v > 0 ? String(+v.toFixed(d)) : '');
+  $('carPrice').value = show(c && c.price, 2);
+  $('carBuyKm').value = show(c && dist(c.buyKm), 0);
+  $('carIns').value = show(c && c.ins, 2);
+  setInsPer((c && c.insPer) || 'y');
+  $('carAdv').open = !!(c && (c.price > 0 || c.buyKm > 0 || c.ins > 0));
+}
+// Read the advanced options of the form into car c. Empty or invalid fields are stored as 0
+// (= not given); the mileage is typed in the chosen unit and stored in km.
+function readCarAdvanced(c) {
+  const pos = id => {
+    const v = +$(id).value;
+    return v > 0 ? v : 0;
+  };
+  c.price = pos('carPrice');
+  c.buyKm = Math.round(distIn(pos('carBuyKm')));
+  c.ins = pos('carIns');
+  c.insPer = $('carInsPer').value === 'm' ? 'm' : 'y';
+}
+// Open the car form in the garage, in place of the list: empty for a new car (id = null),
+// or filled with car id (edit, with the delete button when there is more than one car).
+function openCarForm(id) {
+  const c = id ? S.cars.find(x => x.id === id) : null;
+  carEditing = c ? c.id : null;
   carDelArmed = false;
-  $('carFormTitle').textContent = edit ? tx('car_edit') : tx('car_new');
-  const c = edit ? curCar() : null;
+  $('carFormTitle').textContent = c ? tx('car_edit') : tx('car_new');
   $('carName').value = c ? carName(c) : '';
-  $('carFuel').value = (c && c.fuel) || 'SP95-E10';
-  $('carDel').classList.toggle('hide', !(edit && S.cars.length > 1));
+  setCarFuel((c && FUELV.includes(c.fuel) && c.fuel) || 'SP95-E10');
+  fillCarAdvanced(c);
+  $('carDel').classList.toggle('hide', !(c && S.cars.length > 1));
   $('carDel').textContent = tx('car_del');
-  $('carNote').textContent = edit ? (S.cars.length > 1 ? tx('car_note_del') : tx('car_note_keep')) : '';
+  $('carNote').textContent = c ? (S.cars.length > 1 ? tx('car_note_del') : tx('car_note_keep')) : '';
+  $('garList').classList.add('hide');
   $('carForm').classList.remove('hide');
-  $('carName').focus();
+  window.scrollTo(0, 0);
+  if (!c) $('carName').focus();
 }
-// Selecting another car, and the buttons of the car form.
+// Close the car form and show the list of the garage again.
+function closeCarForm() {
+  $('carForm').classList.add('hide');
+  $('garList').classList.remove('hide');
+}
+// After a change of the cars: save, redraw, back to the list.
+function carsChanged() {
+  closeCarForm();
+  persist();
+  render();
+  applyCarDefaults();
+}
+// Selecting another car in the top bar.
 $('car').onchange = () => {
   S.cur = $('car').value;
   persist();
   render();
   applyCarDefaults();
 };
-$('carAdd').onclick = () => openCarForm(false);
-$('carEdit').onclick = () => openCarForm(true);
-$('carCancel').onclick = () => $('carForm').classList.add('hide');
+$('carAdd').onclick = () => openCarForm(null);
+$('carCancel').onclick = closeCarForm;
+// Save the form: the name is required and must be unique, the advanced options are optional.
+// A new car becomes the selected one.
 $('carSave').onclick = () => {
   const name = $('carName').value.trim();
   if (!name) {
@@ -1995,46 +2153,218 @@ $('carSave').onclick = () => {
     status(tx('car_dup'));
     return;
   }
-  if (carEditing) {
-    const c = S.cars.find(x => x.id === carEditing);
-    c.name = name;
-    c.fuel = $('carFuel').value;
-  } else {
-    const id = 'c' + Date.now();
-    S.cars.push({ id, name, fuel: $('carFuel').value });
-    S.cur = id;
+  let c = S.cars.find(x => x.id === carEditing);
+  if (!c) {
+    c = { id: 'c' + Date.now() };
+    S.cars.push(c);
+    S.cur = c.id;
   }
-  $('carForm').classList.add('hide');
-  persist();
-  render();
-  applyCarDefaults();
+  c.name = name;
+  c.fuel = $('carFuel').value;
+  readCarAdvanced(c);
+  carsChanged();
 };
+// Delete the car being edited, with its fill-ups and purchases. First tap: ask to confirm with
+// the number of records; second tap: delete.
 $('carDel').onclick = () => {
+  const id = carEditing;
   if (!carDelArmed) {
     carDelArmed = true;
-    const n = FU().length + BU().length;
-    $('carDel').textContent = tx('car_del_confirm', { n });
+    const n = carCounts(id);
+    $('carDel').textContent = tx('car_del_confirm', { n: n.f + n.b });
     return;
   }
-  const id = carEditing;
   S.cars = S.cars.filter(c => c.id !== id);
   S.fuel = S.fuel.filter(f => f.car !== id);
   S.buys = S.buys.filter(b => b.car !== id);
-  S.cur = S.cars[0].id;
-  $('carForm').classList.add('hide');
-  persist();
-  render();
-  applyCarDefaults();
+  if (!S.cars.some(c => c.id === S.cur)) S.cur = S.cars[0].id;
+  carsChanged();
+};
+
+// ================================================================================================
+// Buying a new car (My garage)
+// Compares, over the same distance per year, the yearly cost of the current car (the one selected in
+// the top bar) with the one of the car the user wants to buy, and says when the change pays for
+// itself. Worked out while the user types (no button); the fields are saved in S.plan.
+//   current car: fuel (cost per km of its fill-ups) + insurance (advanced options)
+//                + purchases of the last 12 months if the switch is on
+//   new car:     distance x consumption x fuel price + insurance
+//   payback:     (purchase price - resale price of the current car, typed by the user) / yearly savings
+// ================================================================================================
+
+// Number of days from date a to date b (YYYY-MM-DD). Noon avoids daylight saving surprises.
+const dayDiff = (a, b) => Math.round((new Date(b + 'T12:00:00') - new Date(a + 'T12:00:00')) / 864e5);
+// Date n days before today, as YYYY-MM-DD.
+function daysAgo(n) {
+  const d = new Date();
+  d.setDate(d.getDate() - n);
+  const p = x => String(x).padStart(2, '0');
+  return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate());
+}
+// Consumption: displayed unit <-> L/100 km. The mpg <-> L/100 km formula is its own inverse.
+const consSwap = v => (UNIT === 'km' ? v : (100 * (UNIT === 'us' ? USGAL : IMPGAL)) / (v * MI));
+// Fuel price: per displayed volume (litre or US gallon) <-> per litre.
+const priceIn = v => (UNIT === 'us' ? v / USGAL : v),
+  priceOut = v => (UNIT === 'us' ? v * USGAL : v);
+// Insurance per year, from a price paid per year ('y') or per month ('m').
+const insYear = (ins, per) => (ins > 0 ? ins * (per === 'm' ? 12 : 1) : 0);
+// Value for a number field: '' when not given, else rounded to d decimals.
+const numField = (v, d) => (v > 0 ? String(+v.toFixed(d)) : '');
+
+// Distance driven per year by the selected car, in km, from its fill-ups: distance of the fill-ups
+// after the first one, over the days between the first and the last. null if fewer than 2 fill-ups
+// or less than two weeks of history.
+function kmYearEstimate() {
+  const F = FU();
+  if (F.length < 2) return null;
+  const days = dayDiff(F[F.length - 1].d, F[0].d);
+  if (days < 14) return null;
+  const km = F.slice(0, -1).reduce((a, f) => a + f.k, 0);
+  return (km / days) * 365;
+}
+// Amount of the purchases of the selected car over the last 12 months.
+function buysLastYear() {
+  const from = daysAgo(365);
+  return BU()
+    .filter(b => b.d > from)
+    .reduce((a, b) => a + b.e, 0);
+}
+// A number of months as text: "4 years and 3 months", "8 months"...
+function durTxt(m) {
+  if (m > 600) return tx('dur_long');
+  const y = Math.floor(m / 12),
+    mo = m % 12;
+  return tx(y && mo ? 'dur_ym' : y ? 'dur_y' : 'dur_m', { y, m: mo });
+}
+
+// Insurance period of the new car: a field button that opens the wheel (per year / per month).
+function setPlanInsPer(v) {
+  $('pInsPer').value = v;
+  $('pInsPer').textContent = insPerLabel(v);
+}
+$('pInsPer').onclick = () =>
+  picker({
+    icon: 'money',
+    title: 'car_ins_per',
+    labels: INS_PER.map(insPerLabel),
+    sel: Math.max(0, INS_PER.indexOf($('pInsPer').value)),
+    loop: false,
+    onOk: i => {
+      setPlanInsPer(INS_PER[i]);
+      S.plan.insPer = INS_PER[i];
+      planChanged();
+    },
+  });
+
+// Fill the card from S.plan, in the units chosen by the user. Distance per year shows the suggestion
+// of the app (from the fill-ups) when the user has not typed a value; the note under the field tells
+// where it comes from. Called by render().
+function renderPlan() {
+  const P = S.plan,
+    c = curCar(),
+    kmEst = kmYearEstimate();
+  $('pCurT').textContent = tx('pl_cur', { car: carName(c) });
+  $('pPrice').value = numField(P.price, 2);
+  $('pIns').value = numField(P.ins, 2);
+  setPlanInsPer(P.insPer);
+  $('pCons').value = P.cons > 0 ? numField(consSwap(P.cons), UNIT === 'km' ? 2 : 1) : '';
+  $('pFuel').value = numField(priceOut(P.fuel), 3);
+  const km = P.km !== null ? P.km : kmEst;
+  $('pKm').value = km !== null ? String(Math.round(dist(km))) : '';
+  $('pKmN').textContent =
+    kmEst !== null ? tx('pl_km_est', { v: fmt(dist(kmEst), 0) + ' ' + DU() }) : tx('pl_km_none');
+  $('pResale').value = numField(P.resale, 2);
+  $('pWith').checked = P.withBuys;
+  $('pWithN').textContent = tx('pl_with_note', { v: money(buysLastYear(), 0) });
+  planResult();
+}
+
+// The result under the fields: what is missing, or the yearly costs, the savings, the cost of the
+// change and when it pays for itself.
+function planResult() {
+  const P = S.plan,
+    c = curCar(),
+    F = FU(),
+    box = $('pRes');
+  const say = t => (box.innerHTML = '<div>' + esc(t) + '</div>');
+  if (!F.length) return say(tx('pl_need_fills', { car: carName(c) }));
+  const km = P.km !== null ? P.km : kmYearEstimate();
+  if (!(km > 0)) return say(tx('pl_need_km'));
+  if (!(P.price > 0 && P.cons > 0 && P.fuel > 0)) return say(tx('pl_need_new'));
+  const perKm = F.reduce((a, f) => a + f.e, 0) / F.reduce((a, f) => a + f.k, 0);
+  const curY = km * perKm + insYear(c.ins, c.insPer) + (P.withBuys ? buysLastYear() : 0),
+    newY = ((km * P.cons) / 100) * P.fuel + insYear(P.ins, P.insPer),
+    save = curY - newY;
+  const cost = P.price - P.resale;
+  const row = (k, v) => `<div class="kv"><span>${esc(tx(k))}</span><span>${money(v, 0)}</span></div>`;
+  let big;
+  if (save <= 0) big = tx('pl_never', { v: money(-save, 0) });
+  else if (cost <= 0) big = tx('pl_now');
+  else {
+    const months = Math.ceil((cost / save) * 12);
+    big = tx('pl_ok', { t: durTxt(months), d: fmt(dist((km * months) / 12), 0) + ' ' + DU() });
+  }
+  box.innerHTML =
+    row('pl_cost_cur', curY) +
+    row('pl_cost_new', newY) +
+    row('pl_save', save) +
+    row('pl_save_m', save / 12) +
+    row('pl_change', cost) +
+    `<div class="big">${esc(big)}</div>`;
+}
+
+// After a change of a field: save without message, and update the result only (the fields are
+// left alone while the user types).
+function planChanged() {
+  persistQuiet();
+  planResult();
+}
+// Each field writes its value into S.plan, converted to km, L/100 km and price per litre.
+// Distance per year: an empty field goes back to the suggestion (null).
+function planInputs() {
+  const pos = id => {
+      const v = +$(id).value;
+      return v > 0 ? v : 0;
+    },
+    opt = id => ($(id).value === '' || !(+$(id).value >= 0) ? null : +$(id).value);
+  const fields = {
+    pPrice: () => (S.plan.price = pos('pPrice')),
+    pIns: () => (S.plan.ins = pos('pIns')),
+    pCons: () => (S.plan.cons = pos('pCons') ? consSwap(pos('pCons')) : 0),
+    pFuel: () => (S.plan.fuel = priceIn(pos('pFuel'))),
+    pKm: () => (S.plan.km = opt('pKm') === null ? null : distIn(opt('pKm'))),
+    pResale: () => (S.plan.resale = pos('pResale')),
+  };
+  for (const id in fields)
+    $(id).addEventListener('input', () => {
+      fields[id]();
+      planChanged();
+    });
+  $('pWith').onchange = () => {
+    S.plan.withBuys = $('pWith').checked;
+    planChanged();
+  };
+}
+planInputs();
+// Reset: empties the fields of the car the user wants to buy (the current car's values stay).
+$('pReset').onclick = () => {
+  Object.assign(S.plan, { price: 0, ins: 0, insPer: 'y', cons: 0, fuel: 0 });
+  persistQuiet();
+  renderPlan();
 };
 
 // ================================================================================================
 // Navigation and keyboard
 // ================================================================================================
 
-// Show tab t (fuel, buys, stats or save) with a short animation.
+// Show tab t (fuel, buys, stats, garage, or save = the settings) with a short animation.
+// The settings are not in the bottom bar: they open with the gear of the top bar, which is then
+// highlighted. Leaving the garage closes its car form.
 function showTab(t) {
   document.querySelectorAll('.nav button').forEach(x => x.classList.toggle('on', x.dataset.t === t));
-  ['fuel', 'buys', 'stats', 'save'].forEach(id => $(id).classList.toggle('hide', id !== t));
+  $('setBtn').classList.toggle('on', t === 'save');
+  ['fuel', 'buys', 'stats', 'garage', 'save'].forEach(id => $(id).classList.toggle('hide', id !== t));
+  if (t !== 'garage') closeCarForm();
   const el = $(t);
   el.classList.remove('tabin');
   void el.offsetWidth;
@@ -2042,6 +2372,7 @@ function showTab(t) {
   window.scrollTo(0, 0);
 }
 document.querySelectorAll('.nav button').forEach(b => (b.onclick = () => showTab(b.dataset.t)));
+$('setBtn').onclick = () => showTab('save');
 document.addEventListener('focusin', e => {
   if (/^(INPUT|TEXTAREA)$/.test(e.target.tagName) && e.target.type !== 'date')
     document.body.classList.add('kb');
