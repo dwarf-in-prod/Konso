@@ -1,0 +1,1 @@
+Ważna poprawka: wersja 2.12 zamykała się przy uruchomieniu na nowszych wersjach Androida. Nowa ikona: kropla paliwa ze wskaźnikiem. Nazwa Konso jest widoczna obok logo u góry ekranu.

@@ -1,0 +1,1 @@
+Important fix: version 2.12 closed at startup on recent Android versions. New icon: a fuel drop with a gauge. The name Konso is shown next to the logo at the top of the screen.
