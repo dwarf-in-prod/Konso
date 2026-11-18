@@ -1,0 +1,1 @@
+Pe orizontală pe telefon, aplicația ajunge acum până la marginea ecranului: gata cu banda neagră de lângă cameră, iar conținutul rămâne departe de ea. Bara de navigare a telefonului preia culoarea paginii când meniul este pe lateral.

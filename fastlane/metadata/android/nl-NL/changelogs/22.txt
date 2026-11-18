@@ -1,0 +1,1 @@
+Liggend op een telefoon loopt de app nu door tot de rand van het scherm: geen zwarte strook meer naast de camera, en de inhoud blijft er vrij van. De navigatiebalk van de telefoon krijgt de kleur van de pagina als het menu aan de zijkant staat.

@@ -1,0 +1,1 @@
+Im Querformat auf dem Handy reicht die App jetzt bis zum Bildschirmrand: kein schwarzer Streifen mehr neben der Kamera, und der Inhalt hält Abstand zu ihr. Die Navigationsleiste des Handys übernimmt die Farbe der Seite, wenn das Menü seitlich ist.

@@ -1,0 +1,1 @@
+En horizontal en un teléfono, la app llega ahora hasta el borde de la pantalla: se acabó la franja negra junto a la cámara, y el contenido queda apartado de ella. La barra de navegación del teléfono toma el color de la página cuando el menú está al lado.
