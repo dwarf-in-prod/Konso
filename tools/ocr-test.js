@@ -1,5 +1,5 @@
 // Checks that the OCR engine in a vendor folder really reads text, in Chromium, with the same
-// Tesseract.createWorker() options as index.html. Used by the "Tesseract from source" workflow
+// Tesseract.createWorker() options as app.js (getWorker()). Used by the "Tesseract from source" workflow
 // on the rebuilt files. Usage, from the repository root:
 //   npm install --no-save playwright && npx playwright install chromium   (once)
 //   node tools/ocr-test.js [vendor-folder]      (default: app/src/main/assets/www/vendor)
@@ -35,7 +35,7 @@ window.run = async lines => {
     const u = decodeURIComponent(q.url.split('?')[0]);
     if (u === '/') { r.writeHead(200, { 'Content-Type': 'text/html' }); r.end(PAGE); return; }
     let f = null;
-    // index.html loads the model from vendor/lang; the file is stored as .gz.bin (see MainActivity)
+    // app.js loads the model from vendor/lang; the file is stored as .gz.bin (see MainActivity)
     if (u.startsWith('/vendor/')) f = path.join(VENDOR, u.slice(8));
     if (u.startsWith('/lang/')) f = path.join(LANG, u.slice(6) + (u.endsWith('.gz') ? '.bin' : ''));
     if (!f || !(f.startsWith(VENDOR) || f.startsWith(LANG))) { r.writeHead(404); r.end(); return; }

@@ -39,19 +39,32 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 /**
- * Appli autonome : une WebView qui affiche l'interface embarquée dans assets/www,
- * plus un petit pont natif ("Android") pour écrire / lire le fichier de sauvegarde (konso.json)
- * dans un dossier choisi par l'utilisateur (Storage Access Framework).
+ * The whole Android side of Konso.
+ *
+ * The app itself is a web page (assets/www: index.html, app.js, app.css, i18n.js, parse.js) shown in a
+ * WebView. This activity:
+ * - serves those files from a tiny HTTP server on 127.0.0.1 (a real http:// origin is needed for
+ *   localStorage and for the WebAssembly and web worker of the OCR engine);
+ * - refuses every request to any other host: the app never uses the internet;
+ * - opens the camera or the gallery when the page asks for a receipt photo (input type="file");
+ * - gives the page a small bridge, window.Android (class Bridge), to choose a backup folder and to
+ *   read / write konso.json in it through the Storage Access Framework (works with Google Drive too).
  */
 public class MainActivity extends Activity {
 
     private static final String HOST = "127.0.0.1";
-    private static final int PREFERRED_PORT = 38917; // port fixe : garde le même "origine" donc le même stockage local
+    /**
+     * Fixed port: the page's origin (http://127.0.0.1:38917) stays the same between launches, and so
+     * does its localStorage. If the port is taken, any free port is used.
+     */
+    private static final int PREFERRED_PORT = 38917;
     private static final String FILE_NAME = "konso.json";
-    /** Version de test (APK des branches) : port et fichier distincts, pour ne jamais toucher aux données de la vraie appli. */
+    /** Test build (APK of a branch, app id app.konso.test): its own port and file, so it never touches the real app's data. */
     private static final int TEST_PORT = 38918;
     private static final String TEST_FILE_NAME = "konso-test.json";
+    /** Preference holding the chosen backup folder (a content:// tree URI). */
     private static final String PREF_TREE = "tree_uri";
+    /** Request codes of startActivityForResult(). */
     private static final int REQ_FOLDER = 1;
     private static final int REQ_IMAGE = 2;
 
@@ -60,7 +73,9 @@ public class MainActivity extends Activity {
     private ServerSocket server;
     private final ExecutorService pool = Executors.newFixedThreadPool(4);
 
+    /** Pending answer to the page's file input (receipt photo). */
     private ValueCallback<Uri[]> chooserCallback;
+    /** Where the camera writes the photo, when the user chooses the camera. */
     private Uri cameraUri;
 
     @Override
@@ -89,7 +104,8 @@ public class MainActivity extends Activity {
         web.setWebViewClient(new WebViewClient() {
             @Override
             public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
-                // Tout ce qui n'est pas l'appli elle-même (serveur local) est bloqué : aucun accès internet.
+                // Only the app itself (the local server) may be loaded: any other host is refused,
+                // so the app has no internet access at all.
                 if (HOST.equals(request.getUrl().getHost())) {
                     return null;
                 }
@@ -98,6 +114,7 @@ public class MainActivity extends Activity {
 
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
+                // Links to other sites are not opened.
                 return !HOST.equals(request.getUrl().getHost());
             }
         });
@@ -141,18 +158,24 @@ public class MainActivity extends Activity {
     }
 
     // ------------------------------------------------------------------
-    // Fichiers de l'interface (assets/www) servis par un petit serveur local (127.0.0.1)
+    // Interface files (assets/www) served by a small local HTTP server on 127.0.0.1
     // ------------------------------------------------------------------
 
-    /** Les APK compilés depuis une branche ont l'identifiant "app.konso.test" (voir app/build.gradle). */
+    /** APKs built from a branch have the id "app.konso.test" (see app/build.gradle). */
     private boolean isTestBuild() {
         return getPackageName().endsWith(".test");
     }
 
+    /**
+     * Name of the backup file: konso.json, or konso-test.json for a test build.
+     */
     private String saveFileName() {
         return isTestBuild() ? TEST_FILE_NAME : FILE_NAME;
     }
 
+    /**
+     * Start the server on a background thread and return its port. Each connection is handled by the pool.
+     */
     private int startServer() throws IOException {
         InetAddress lo = InetAddress.getByName(HOST);
         try {
@@ -184,6 +207,9 @@ public class MainActivity extends Activity {
         return ss.getLocalPort();
     }
 
+    /**
+     * Answer one HTTP request: GET or HEAD of a file of assets/www, nothing else.
+     */
     private void handle(Socket client) {
         try {
             client.setSoTimeout(10000);
@@ -193,7 +219,7 @@ public class MainActivity extends Activity {
             if (line == null) return;
             String h;
             while ((h = r.readLine()) != null && !h.isEmpty()) {
-                // en-têtes ignorés
+                // headers are not needed
             }
             String[] parts = line.split(" ");
             String method = parts[0];
@@ -209,8 +235,9 @@ public class MainActivity extends Activity {
                 return;
             }
             if (target.isEmpty() || target.equals("/")) target = "/index.html";
-            // Les fichiers .gz sont stockés sous le nom « .gz.bin » : l'outil de compilation Android
-            // retire sinon l'extension .gz des assets et décompresse le fichier.
+            // .gz files are stored as ".gz.bin": otherwise the Android build tools strip the .gz
+            // extension from assets and unpack the file (used by the French OCR model).
+            // A path containing ".." is refused, so only files under www/ can be read.
             String assetName = "www" + target + (target.endsWith(".gz") ? ".bin" : "");
             byte[] body = target.contains("..") ? null : readAsset(assetName);
             if (body == null) {
@@ -227,6 +254,9 @@ public class MainActivity extends Activity {
         }
     }
 
+    /**
+     * Content of a file of the APK assets, or null if it does not exist.
+     */
     private byte[] readAsset(String name) {
         try {
             InputStream in = getAssets().open(name);
@@ -244,6 +274,9 @@ public class MainActivity extends Activity {
         }
     }
 
+    /**
+     * Write an HTTP response. head = headers only (HEAD request).
+     */
     private static void respond(OutputStream out, int code, String reason, String mime, byte[] body,
                                 boolean head) throws IOException {
         boolean text = mime.startsWith("text/") || mime.equals("application/json");
@@ -257,11 +290,17 @@ public class MainActivity extends Activity {
         out.flush();
     }
 
+    /**
+     * Empty answer, used to refuse requests to other hosts.
+     */
     private static WebResourceResponse emptyResponse(int code, String reason) {
         return new WebResourceResponse("text/plain", "utf-8", code, reason,
                 new HashMap<String, String>(), new ByteArrayInputStream(new byte[0]));
     }
 
+    /**
+     * Content type from the file extension.
+     */
     private static String mimeFor(String path) {
         String p = path.toLowerCase();
         if (p.endsWith(".html")) return "text/html";
@@ -275,9 +314,13 @@ public class MainActivity extends Activity {
     }
 
     // ------------------------------------------------------------------
-    // Photo du ticket : appareil photo ou galerie
+    // Receipt photo: camera or gallery
     // ------------------------------------------------------------------
 
+    /**
+     * Ask the user for a picture: a chooser offering the gallery and, when possible, the camera.
+     * With the camera, the photo is written to a new entry of the phone's pictures (cameraUri).
+     */
     private boolean launchImageChooser() {
         Intent pick = new Intent(Intent.ACTION_GET_CONTENT);
         pick.addCategory(Intent.CATEGORY_OPENABLE);
@@ -297,7 +340,7 @@ public class MainActivity extends Activity {
                 chooser.putExtra(Intent.EXTRA_INITIAL_INTENTS, new Intent[]{cam});
             }
         } catch (Exception e) {
-            cameraUri = null; // appareil photo indisponible : galerie seulement
+            cameraUri = null; // camera not available: gallery only
         }
 
         try {
@@ -313,6 +356,9 @@ public class MainActivity extends Activity {
         }
     }
 
+    /**
+     * Remove the empty picture entry prepared for the camera when it was not used.
+     */
     private void deleteCameraEntry() {
         if (cameraUri != null) {
             try {
@@ -323,6 +369,7 @@ public class MainActivity extends Activity {
         }
     }
 
+    /** Results of the photo chooser (REQ_IMAGE) and of the folder picker (REQ_FOLDER). */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -333,7 +380,7 @@ public class MainActivity extends Activity {
             if (resultCode == RESULT_OK) {
                 if (data != null && data.getData() != null) {
                     result = new Uri[]{data.getData()};
-                    deleteCameraEntry(); // image choisie dans la galerie : l'entrée appareil photo est inutile
+                    deleteCameraEntry(); // picture chosen in the gallery: the camera entry is not needed
                 } else if (cameraUri != null) {
                     result = new Uri[]{cameraUri};
                     cameraUri = null;
@@ -355,10 +402,11 @@ public class MainActivity extends Activity {
                             Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
                     prefs.edit().putString(PREF_TREE, tree.toString()).apply();
                 } catch (Exception e) {
-                    // permission non persistée : le dossier ne sera pas utilisable
+                    // the permission could not be kept: the folder cannot be used
                     prefs.edit().remove(PREF_TREE).apply();
                 }
             }
+            // Tell the page (app.js: window.onFolderPicked) which folder is now used ('' if none).
             final String name = JSONObject.quote(folderDisplayName());
             web.post(new Runnable() {
                 @Override
@@ -370,10 +418,10 @@ public class MainActivity extends Activity {
     }
 
     // ------------------------------------------------------------------
-    // Dossier choisi (Storage Access Framework) + fichier JSON
+    // Chosen folder (Storage Access Framework) and backup file
     // ------------------------------------------------------------------
 
-    /** Retourne le dossier choisi, seulement si l'autorisation d'écriture est toujours valide. */
+    /** The chosen folder, only if the app may still read and write it. */
     private Uri treeUri() {
         String s = prefs.getString(PREF_TREE, null);
         if (s == null) return null;
@@ -387,6 +435,9 @@ public class MainActivity extends Activity {
         return null;
     }
 
+    /**
+     * Name of the chosen folder as shown to the user ('' if none).
+     */
     private String folderDisplayName() {
         Uri tree = treeUri();
         if (tree == null) return "";
@@ -407,7 +458,7 @@ public class MainActivity extends Activity {
         return last == null ? "?" : last;
     }
 
-    /** Cherche le fichier de sauvegarde directement dans le dossier choisi. */
+    /** The backup file directly inside the chosen folder, or null. */
     private Uri findJsonFile(Uri tree) {
         Uri children = DocumentsContract.buildChildDocumentsUriUsingTree(tree,
                 DocumentsContract.getTreeDocumentId(tree));
@@ -429,7 +480,7 @@ public class MainActivity extends Activity {
         return null;
     }
 
-    /** Nom du fichier réellement utilisé dans le dossier (pour l'affichage). */
+    /** Name of the backup file actually used in the folder (shown in Settings). */
     private String currentFileName() {
         Uri tree = treeUri();
         if (tree == null) return saveFileName();
@@ -447,6 +498,10 @@ public class MainActivity extends Activity {
         return saveFileName();
     }
 
+    /**
+     * Write the backup file (created if needed, otherwise overwritten).
+     * Returns "ok", or the reason of the failure, which the page shows to the user.
+     */
     private String writeJson(String text) {
         Uri tree = treeUri();
         if (tree == null) return "no folder access";
@@ -473,6 +528,9 @@ public class MainActivity extends Activity {
         }
     }
 
+    /**
+     * Content of the backup file, or '' if there is none.
+     */
     private String readJson() {
         Uri tree = treeUri();
         if (tree == null) return "";
@@ -495,7 +553,10 @@ public class MainActivity extends Activity {
         }
     }
 
-    /** Méthodes appelables depuis la page : window.Android.xxx(...) */
+    /**
+     * Methods the page can call (app.js, NA): window.Android.folderName(), pickFolder(),
+     * writeFile(text), fileName() and readFile().
+     */
     public class Bridge {
         @JavascriptInterface
         public String folderName() {

@@ -1,5 +1,14 @@
-/* Textes de l'interface en 10 langues. Le français est la langue de référence :
-   une clé absente dans une autre langue retombe sur le français. */
+/*
+ * Konso — every text of the interface, in 10 languages.
+ *
+ * LANGS: [code, name shown in the language wheel, locale for numbers and dates].
+ * D.<code>: the texts of a language, by key. French is the reference: a key missing in another
+ * language falls back to French (tx() in app.js).
+ * In a text, {name} is replaced by a value given by the code, and {du} {vu} {cu} {cs} by the chosen
+ * distance, volume and consumption units and the currency symbol. Texts used with data-i18n-html
+ * may contain simple HTML (<b>, <br>).
+ * catN is the label of category N of CATV in app.js; fuel_X the label of fuel type X.
+ */
 (function (root) {
   const LANGS = [
     ['fr', 'Français', 'fr-FR'], ['en', 'English', 'en-GB'], ['es', 'Español', 'es-ES'],

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <!-- L'appli sert ses propres fichiers sur 127.0.0.1 ; toute requête vers autre chose est bloquée dans MainActivity. -->
+    <!-- Only used by the app to serve its own files on 127.0.0.1; any other host is refused in MainActivity. -->
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application

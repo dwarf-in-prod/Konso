@@ -1,10 +1,10 @@
-name: Tesseract depuis les sources
+name: Tesseract from source
 
-# Recompile le moteur OCR embarqué (vendor/) depuis ses sources avec tools/build-tesseract.sh,
-# puis vérifie avec tools/ocr-test.js que les fichiers recompilés lisent bien du texte.
-# Sert à prouver que l'appli peut être compilée sans code précompilé (exigence de F-Droid).
-# Les fichiers recompilés sont joints au lancement (artefact « tesseract-rebuilt ») ;
-# ceux du dépôt ne sont pas modifiés.
+# Rebuilds the bundled OCR engine (vendor/) from its sources with tools/build-tesseract.sh, then
+# checks with tools/ocr-test.js that the rebuilt files read text correctly.
+# This proves the app can be built without pre-built code (an F-Droid requirement).
+# The rebuilt files are attached to the run (artifact "tesseract-rebuilt"); the files in the
+# repository are not changed.
 
 on:
   push:
@@ -27,7 +27,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
-      - name: Outils de compilation
+      - name: Build tools
         run: |
           sudo apt-get update
           sudo apt-get install -y autoconf automake libtool pkg-config cmake make
@@ -36,20 +36,20 @@ jobs:
           git clone --depth 1 https://github.com/emscripten-core/emsdk.git "$RUNNER_TEMP/emsdk"
           "$RUNNER_TEMP/emsdk/emsdk" install 4.0.15
           "$RUNNER_TEMP/emsdk/emsdk" activate 4.0.15
-      - name: Recompiler Tesseract
+      - name: Rebuild Tesseract
         run: |
           source "$RUNNER_TEMP/emsdk/emsdk_env.sh"
           tools/build-tesseract.sh --work "$RUNNER_TEMP/tesseract" --out build/rebuilt
-      - name: Comparer avec les fichiers du dépôt
+      - name: Compare with the files in the repository
         run: |
           for f in tesseract-core-simd-lstm.wasm.js tesseract.min.js worker.min.js; do
             if cmp -s "build/rebuilt/$f" "app/src/main/assets/www/vendor/$f"; then
-              echo "$f : identique au fichier du dépôt"
+              echo "$f: identical to the file in the repository"
             else
-              echo "$f : différent du fichier du dépôt ($(stat -c %s "build/rebuilt/$f") octets contre $(stat -c %s "app/src/main/assets/www/vendor/$f"))"
+              echo "$f: differs from the file in the repository ($(stat -c %s "build/rebuilt/$f") bytes vs $(stat -c %s "app/src/main/assets/www/vendor/$f"))"
             fi
           done
-      - name: Tester l'OCR avec les fichiers recompilés
+      - name: Test the OCR with the rebuilt files
         run: |
           npm install --no-save --no-audit --no-fund playwright
           npx playwright install --with-deps chromium

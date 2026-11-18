@@ -95,7 +95,9 @@ The APK is signed with `app/debug.keystore`, a **public** test key included in t
 ```
 app/src/main/
 ├── assets/www/
-│   ├── index.html      User interface
+│   ├── index.html      Screens (the four tabs and the overlays)
+│   ├── app.js          Behaviour, organised in commented sections (start here)
+│   ├── app.css         Styles (Material Design 3, light and dark)
 │   ├── i18n.js         Translations (10 languages)
 │   ├── parse.js        Receipt parsing
 │   └── vendor/         Tesseract.js and the French language model
