@@ -133,10 +133,21 @@
             <input type="checkbox" id="stOnline" /><span class="trk"></span><span data-i18n="st_switch"></span>
           </label>
         </div>
-        <div class="card">
-          <h3 id="stChartT"></h3>
-          <div class="legend" id="stLegend"></div>
-          <div class="chart" id="c3"></div>
+        <!-- Map of the stations in view with the price of the car's fuel (mapShow() and the "Stations map"
+             section of app.js), shown while the connection is allowed. The map tiles come from OpenStreetMap. -->
+        <div class="card hide" id="stMapCard">
+          <h3 id="stMapT"></h3>
+          <div class="stmapwrap">
+            <div id="stMap"></div>
+            <button class="maploc" id="stLocate" data-i18n-title="map_locate">
+              <svg class="i" viewBox="0 0 24 24">
+                <path
+                  d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3A8.994 8.994 0 0013 3.06V1h-2v2.06A8.994 8.994 0 003.06 11H1v2h2.06A8.994 8.994 0 0011 20.94V23h2v-2.06A8.994 8.994 0 0020.94 13H23v-2h-2.06zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z"
+                />
+              </svg>
+            </button>
+          </div>
+          <div class="note" id="stMapNote"></div>
         </div>
         <div class="hist">
           <h2 class="sec" data-i18n="st_list"></h2>
@@ -159,6 +170,12 @@
               <div id="stRes"></div>
             </div>
           </div>
+        </div>
+        <!-- price of the car's fuel over time: the user's fill-ups and the followed stations -->
+        <div class="card" style="margin-top: 12px">
+          <h3 id="stChartT"></h3>
+          <div class="legend" id="stLegend"></div>
+          <div class="chart" id="c3"></div>
         </div>
       </section>
 
