@@ -32,6 +32,11 @@
   --on-inverse: #f0f0f7;
   --s1: #2a78d6;
   --s2: #eb6834;
+  /* more series colours, for the followed stations (Stations chart) */
+  --s3: #1e9e63;
+  --s4: #9b4dca;
+  --s5: #c99400;
+  --s6: #d63c8c;
   --font: system-ui, Roboto, -apple-system, 'Segoe UI', sans-serif;
   /* width of the single column (phones, small tablets) */
   --maxw: 640px;
@@ -64,6 +69,10 @@
     --on-inverse: #2e3036;
     --s1: #3987e5;
     --s2: #d95926;
+    --s3: #3bb57c;
+    --s4: #b07ae0;
+    --s5: #e0b020;
+    --s6: #e8609f;
   }
 }
 :root[data-theme='dark'] {
@@ -90,6 +99,10 @@
   --on-inverse: #2e3036;
   --s1: #3987e5;
   --s2: #d95926;
+  --s3: #3bb57c;
+  --s4: #b07ae0;
+  --s5: #e0b020;
+  --s6: #e8609f;
 }
 * {
   box-sizing: border-box;
@@ -441,6 +454,71 @@ textarea {
   font-size: 13px;
   font-weight: 600;
 }
+/* My garage: the two buttons at the top (cars / purchases), M3 segmented buttons */
+.seg {
+  display: flex;
+  border: 1px solid var(--outline);
+  border-radius: 20px;
+  overflow: hidden;
+  margin: 4px 0 16px;
+}
+.seg button {
+  flex: 1;
+  min-width: 0;
+  height: 40px;
+  border: 0;
+  background: transparent;
+  color: var(--on-surf);
+  font: 500 14px/1.2 var(--font);
+  cursor: pointer;
+}
+.seg button + button {
+  border-left: 1px solid var(--outline);
+}
+.seg button.on {
+  background: var(--secondary-c);
+  color: var(--on-secondary-c);
+}
+/* Stations: postcode field and its Search button on one line */
+.stsearch {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+.stsearch .f {
+  flex: 1;
+}
+.stsearch .btn {
+  width: auto;
+  margin: 0;
+  padding: 0 24px;
+}
+/* colour of a followed station's line in the chart, at the start of its row */
+.row .dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 5px;
+  flex: none;
+}
+/* a search result already followed, or the + button to follow it */
+.st-add {
+  border: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: 20px;
+  background: var(--primary);
+  color: var(--on-primary);
+  display: grid;
+  place-items: center;
+  padding: 0;
+  flex: none;
+  cursor: pointer;
+}
+.st-done {
+  font-size: 13px;
+  color: var(--on-surf-v);
+  flex: none;
+}
 /* My garage: one line per car, the whole line is a button that opens the edit form */
 .carrow {
   width: 100%;
@@ -679,10 +757,18 @@ details.fold {
 }
 .legend {
   display: flex;
-  gap: 16px;
+  flex-wrap: wrap;
+  gap: 4px 16px;
   font-size: 13px;
   color: var(--on-surf-v);
   margin-bottom: 8px;
+}
+/* each item on one line, cut with "…" when too long (station addresses) */
+.legend > span {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .legend i {
   display: inline-block;
@@ -1082,7 +1168,8 @@ body.kb #st {
   main {
     padding: 0 24px;
   }
-  #garage {
+  #garCars,
+  #garage > .seg {
     max-width: 640px;
   }
   /* navigation rail */
@@ -1139,6 +1226,17 @@ body.kb #st {
   #stats > .card:first-child,
   #stats > .card:last-child {
     grid-column: 1 / -1;
+  }
+  /* Stations: the switch and the chart on the left, the followed stations on the right */
+  #stations {
+    display: grid;
+    grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+    column-gap: 24px;
+    align-items: start;
+  }
+  #stations > .hist {
+    grid-column: 2;
+    grid-row: 1 / span 2;
   }
   /* Settings: the help on the right of the other cards */
   #save {
