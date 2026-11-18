@@ -1,0 +1,1 @@
+Corecție importantă: versiunea 2.12 se închidea la pornire pe versiunile recente de Android. Pictogramă nouă: o picătură de carburant cu un indicator. Numele Konso apare lângă logo, în partea de sus a ecranului.

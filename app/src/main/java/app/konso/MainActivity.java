@@ -113,12 +113,6 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         prefs = getSharedPreferences("konso", MODE_PRIVATE);
-        // the colours of the last launch, so the bars match the page before it has loaded
-        String bars = prefs.getString(PREF_BARS, null);
-        if (bars != null) {
-            String[] b = bars.split(",");
-            if (b.length == 3) applyBars(b[0], b[1], "1".equals(b[2]));
-        }
 
         int port;
         try {
@@ -142,6 +136,14 @@ public class MainActivity extends Activity {
         root.addView(web, new FrameLayout.LayoutParams(
                 FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
         setContentView(root);
+        // the colours of the last launch, so the bars match the page before it has loaded. Only
+        // once the content is set: before that the window has no decor view yet, and on recent
+        // Android versions asking for its insets controller then crashes the app.
+        String bars = prefs.getString(PREF_BARS, null);
+        if (bars != null) {
+            String[] b = bars.split(",");
+            if (b.length == 3) applyBars(b[0], b[1], "1".equals(b[2]));
+        }
         root.setOnApplyWindowInsetsListener(new View.OnApplyWindowInsetsListener() {
             @Override
             public WindowInsets onApplyWindowInsets(View v, WindowInsets insets) {
@@ -492,6 +494,7 @@ public class MainActivity extends Activity {
     private void applyBars(String top, String bottom, boolean dark) {
         try {
             Window w = getWindow();
+            w.getDecorView(); // makes sure the decor view exists (getInsetsController() needs it)
             w.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS
                     | WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION);
             w.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
@@ -515,6 +518,8 @@ public class MainActivity extends Activity {
             }
         } catch (IllegalArgumentException e) {
             // not a colour: the bars keep their current colours
+        } catch (RuntimeException e) {
+            // the colours of the bars are only cosmetic: never let them stop the app
         }
     }
 

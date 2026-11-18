@@ -1,0 +1,1 @@
+Wichtige Korrektur: Version 2.12 schloss sich auf neueren Android-Versionen beim Start. Neues Symbol: ein Kraftstofftropfen mit Anzeige. Der Name Konso steht oben neben dem Logo.

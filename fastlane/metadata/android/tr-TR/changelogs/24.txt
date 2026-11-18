@@ -1,0 +1,1 @@
+Önemli düzeltme: 2.12 sürümü yeni Android sürümlerinde açılışta kapanıyordu. Yeni simge: göstergeli bir yakıt damlası. Konso adı ekranın üstünde logonun yanında görünüyor.

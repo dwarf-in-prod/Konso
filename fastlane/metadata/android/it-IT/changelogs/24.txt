@@ -1,0 +1,1 @@
+Correzione importante: la versione 2.12 si chiudeva all'avvio sulle versioni recenti di Android. Nuova icona: una goccia di carburante con un indicatore. Il nome Konso compare accanto al logo in alto.
