@@ -45,7 +45,9 @@ import java.util.concurrent.Executors;
  * WebView. This activity:
  * - serves those files from a tiny HTTP server on 127.0.0.1 (a real http:// origin is needed for
  *   localStorage and for the WebAssembly and web worker of the OCR engine);
- * - refuses every request to any other host: the app never uses the internet;
+ * - refuses every request to any other host, so the app does not use the internet, with one
+ *   exception the user turns on in the Stations tab: the official French fuel price site
+ *   (PRICES_HOST), and only that one;
  * - opens the camera or the gallery when the page asks for a receipt photo (input type="file");
  * - gives the page a small bridge, window.Android (class Bridge), to choose a backup folder and to
  *   read / write konso.json in it through the Storage Access Framework (works with Google Drive too).
@@ -64,6 +66,14 @@ public class MainActivity extends Activity {
     private static final String TEST_FILE_NAME = "konso-test.json";
     /** Preference holding the chosen backup folder (a content:// tree URI). */
     private static final String PREF_TREE = "tree_uri";
+    /**
+     * The only internet host the page may reach: the official French fuel price feed
+     * (data.economie.gouv.fr), used by the Stations tab. Allowed only over https and only while the
+     * user has turned on "Allow the connection for stations" (preference PREF_ONLINE, set by the
+     * page through Bridge.setOnline()).
+     */
+    private static final String PRICES_HOST = "data.economie.gouv.fr";
+    private static final String PREF_ONLINE = "online";
     /** Request codes of startActivityForResult(). */
     private static final int REQ_FOLDER = 1;
     private static final int REQ_IMAGE = 2;
@@ -105,8 +115,14 @@ public class MainActivity extends Activity {
             @Override
             public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
                 // Only the app itself (the local server) may be loaded: any other host is refused,
-                // so the app has no internet access at all.
-                if (HOST.equals(request.getUrl().getHost())) {
+                // so the app has no internet access, except the official fuel price site when the
+                // user has allowed it in the Stations tab.
+                Uri url = request.getUrl();
+                if (HOST.equals(url.getHost())) {
+                    return null;
+                }
+                if (PRICES_HOST.equals(url.getHost()) && "https".equals(url.getScheme())
+                        && prefs.getBoolean(PREF_ONLINE, false)) {
                     return null;
                 }
                 return emptyResponse(403, "Forbidden");
@@ -555,7 +571,7 @@ public class MainActivity extends Activity {
 
     /**
      * Methods the page can call (app.js, NA): window.Android.folderName(), pickFolder(),
-     * writeFile(text), fileName() and readFile().
+     * writeFile(text), fileName(), readFile() and setOnline(on).
      */
     public class Bridge {
         @JavascriptInterface
@@ -595,6 +611,15 @@ public class MainActivity extends Activity {
         @JavascriptInterface
         public String readFile() {
             return readJson();
+        }
+
+        /**
+         * The switch "Allow the connection for stations" of the Stations tab: while it is on, the
+         * page may reach PRICES_HOST (see shouldInterceptRequest); off, nothing leaves the phone.
+         */
+        @JavascriptInterface
+        public void setOnline(boolean on) {
+            prefs.edit().putBoolean(PREF_ONLINE, on).apply();
         }
     }
 }

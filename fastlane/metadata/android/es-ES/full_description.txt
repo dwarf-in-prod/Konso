@@ -6,10 +6,11 @@ Funciones:
 * Compras: aceite, piezas, neumáticos, mantenimiento… ordenados por categoría.
 * Recordatorios de mantenimiento: cada año o cada 10 000 km, lo que llegue antes (ajustable para cada coche).
 * Resumen: medias, gráfica de consumo, gastos por mes.
+* Precios de gasolineras (Francia, opcional): sigue tantas gasolineras como quieras, con el último precio oficial y un gráfico del precio de tu combustible.
 * Varios coches, cada uno con su historial y sus recordatorios.
 * Copia de seguridad automática en un simple archivo konso.json, en la carpeta que elijas.
 * 10 idiomas, tema claro u oscuro, ayuda integrada.
 
-Privacidad: el único permiso de red sirve para mostrar los archivos de la propia app en 127.0.0.1. Cualquier petición a otro servidor se bloquea.
+Privacidad: el permiso de red sirve para mostrar los archivos de la app en 127.0.0.1; cualquier petición a otro servidor se bloquea. Única excepción, desactivada por defecto: si la activas en la pestaña Gasolineras, la app puede contactar con la web oficial de precios de carburantes de Francia (data.economie.gouv.fr), y solo con ella.
 
 Konso se creó con IA (Claude Code); cada versión la prueba una persona en un teléfono real. Su código fuente es abierto, bajo licencia GPL-3.0.

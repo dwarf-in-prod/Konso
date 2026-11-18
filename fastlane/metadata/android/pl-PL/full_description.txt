@@ -6,10 +6,11 @@ Funkcje:
 * Zakupy: olej, części, opony, serwis… posortowane według kategorii.
 * Przypomnienia o serwisie: co roku lub co 10 000 km, zależnie od tego, co nastąpi pierwsze (do ustawienia dla każdego auta).
 * Podsumowanie: średnie, wykres spalania, wydatki miesięczne.
+* Ceny na stacjach (Francja, opcjonalnie): śledź dowolnie wiele stacji, z ostatnią oficjalną ceną i wykresem ceny twojego paliwa.
 * Kilka samochodów, każdy z własną historią i przypomnieniami.
 * Automatyczna kopia zapasowa w zwykłym pliku konso.json, w wybranym przez ciebie folderze.
 * 10 języków, jasny i ciemny motyw, wbudowana pomoc.
 
-Prywatność: jedyne uprawnienie sieciowe służy do udostępniania własnych plików aplikacji pod adresem 127.0.0.1. Każde żądanie do innego serwera jest blokowane.
+Prywatność: uprawnienie sieciowe służy do wyświetlania plików aplikacji pod adresem 127.0.0.1; każde żądanie do innego hosta jest blokowane. Jedyny wyjątek, domyślnie wyłączony: jeśli włączysz go w zakładce Stacje, aplikacja może łączyć się z oficjalną francuską stroną cen paliw (data.economie.gouv.fr) i tylko z nią.
 
 Konso powstało z pomocą AI (Claude Code); każdą wersję człowiek testuje na prawdziwym telefonie. Kod źródłowy jest otwarty, na licencji GPL-3.0.

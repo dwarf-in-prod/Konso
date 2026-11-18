@@ -6,10 +6,11 @@ Funzioni:
 * Acquisti: olio, ricambi, pneumatici, tagliandi… ordinati per categoria.
 * Promemoria di manutenzione: ogni anno o ogni 10.000 km, a seconda di cosa arriva prima (regolabile per ogni auto).
 * Riepilogo: medie, grafico dei consumi, spese mensili.
+* Prezzi dei distributori (Francia, facoltativo): segui tutti i distributori che vuoi, con l'ultimo prezzo ufficiale e un grafico del prezzo del tuo carburante.
 * Più auto, ognuna con la sua cronologia e i suoi promemoria.
 * Backup automatico in un semplice file konso.json, nella cartella che scegli.
 * 10 lingue, tema chiaro o scuro, guida integrata.
 
-Privacy: l'unico permesso di rete serve a fornire i file dell'app stessa su 127.0.0.1. Ogni richiesta verso un altro server viene bloccata.
+Privacy: il permesso di rete serve a mostrare i file dell'app su 127.0.0.1; ogni richiesta verso un altro host è bloccata. Unica eccezione, disattivata di default: se la attivi nella scheda Distributori, l'app può contattare il sito ufficiale francese dei prezzi dei carburanti (data.economie.gouv.fr), e solo quello.
 
 Konso è stata creata con l'IA (Claude Code); ogni versione viene provata da una persona su un telefono vero. Il codice sorgente è aperto, con licenza GPL-3.0.

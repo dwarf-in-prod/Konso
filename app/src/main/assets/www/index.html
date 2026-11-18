@@ -112,38 +112,43 @@
         </div>
       </section>
 
-      <!-- Tab 2: purchases (form, history) -->
-      <section id="buys" class="hide">
+      <!-- Tab 2: stations. Official prices of French stations (data.economie.gouv.fr), only when the user
+           turns the switch on: Konso does not use the internet otherwise. Chart of the fuel price of the
+           selected car, followed stations, search by postcode (renderStations() in app.js). -->
+      <section id="stations" class="hide">
         <div class="card">
-          <div class="grid" style="margin-top: 6px">
-            <div class="f fl"><input type="date" id="bd" /><label for="bd" data-i18n="date"></label></div>
-            <div class="f">
-              <input type="number" id="be" inputmode="decimal" step="0.01" placeholder=" " /><label
-                for="be"
-                data-i18n="amount"
-              ></label>
-            </div>
-            <div class="f fl sel full">
-              <button type="button" class="fieldbtn" id="bc"></button><label data-i18n="category"></label>
-            </div>
-            <div class="f full">
-              <input type="text" id="bn" placeholder=" " /><label for="bn" data-i18n="description"></label>
-            </div>
-            <div class="f">
-              <input type="number" id="bk" inputmode="numeric" placeholder=" " /><label
-                for="bk"
-                data-i18n="odometer"
-              ></label>
-            </div>
-            <div class="f">
-              <input type="text" id="bs" placeholder=" " /><label for="bs" data-i18n="shop"></label>
-            </div>
-          </div>
-          <button class="btn" id="addB" data-i18n="add_buy"></button>
+          <h3 data-i18n="st_title"></h3>
+          <div class="note" style="margin-top: 0" data-i18n="st_intro"></div>
+          <label class="switch">
+            <input type="checkbox" id="stOnline" /><span class="trk"></span><span data-i18n="st_switch"></span>
+          </label>
+        </div>
+        <div class="card">
+          <h3 id="stChartT"></h3>
+          <div class="legend" id="stLegend"></div>
+          <div class="chart" id="c3"></div>
         </div>
         <div class="hist">
-          <h2 class="sec" data-i18n="hist_buys"></h2>
-          <div class="card" id="bl-list"></div>
+          <h2 class="sec" data-i18n="st_list"></h2>
+          <div class="card" id="st-list"></div>
+          <div class="note" id="stOff"></div>
+          <div id="stTools">
+            <div class="note" id="stUpd"></div>
+            <button class="btn tonal" id="stRefresh" data-i18n="st_refresh"></button>
+            <div class="card" id="stAdd" style="margin-top: 16px">
+              <h3 data-i18n="st_add"></h3>
+              <div class="stsearch">
+                <div class="f">
+                  <input type="text" id="stCp" inputmode="numeric" maxlength="5" placeholder=" " /><label
+                    for="stCp"
+                    data-i18n="st_cp"
+                  ></label>
+                </div>
+                <button class="btn" id="stSearch" data-i18n="st_search"></button>
+              </div>
+              <div id="stRes"></div>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -173,136 +178,176 @@
         </div>
       </section>
 
-      <!-- Tab 4: my garage (the cars: list, add, edit / delete form) -->
+      <!-- Tab 4: my garage, in two parts chosen with the buttons at the top: the cars (list, add, edit /
+           delete form, car purchase & payback) and the purchases -->
       <section id="garage" class="hide">
-        <div id="garList">
-          <h2 class="sec" data-i18n="g_cars"></h2>
-          <div class="card" id="cars-list"></div>
-          <button class="btn" id="carAdd" data-i18n="car_add"></button>
-          <div class="note" data-i18n="g_hint"></div>
-          <!-- "Car purchase & payback": folded under a button, so the garage stays simple; other
-               tools can be added inside later. -->
-          <details class="card fold" id="planFold">
-            <summary>
-              <span class="carico"
-                ><svg class="i" viewBox="0 0 24 24">
-                  <path
-                    d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5.97 4.06L14.09 6l1.41 1.41L16.91 6l1.06 1.06-1.41 1.41 1.41 1.41-1.06 1.06-1.41-1.4-1.41 1.41-1.06-1.06 1.41-1.41-1.41-1.42zm-6.78.66h5v1.5h-5v-1.5zM11.5 16h-2v2H8v-2H6v-1.5h2v-2h1.5v2h2V16zm6.5 1.25h-5v-1.5h5v1.5zm0-2.5h-5v-1.5h5v1.5z"
-                  /></svg></span
-              ><span class="lbl" data-i18n="pl_fold"></span
-              ><svg class="i chev" viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6z" /></svg>
-            </summary>
-            <!-- Buying a new car: what the change costs and when it pays for itself, worked out while
-                 the user types (renderPlan() and planResult() in app.js). Everything is saved. -->
-            <div id="plan">
-              <div class="note" style="margin-top: 0" data-i18n="pl_intro"></div>
-              <h4 class="sub" data-i18n="pl_new"></h4>
-              <div class="grid">
-                <div class="f full">
-                  <input type="number" id="pPrice" inputmode="decimal" step="0.01" min="0" placeholder=" " /><label
-                    for="pPrice"
-                    data-i18n="car_price"
-                  ></label>
-                </div>
-                <div class="f">
-                  <input type="number" id="pIns" inputmode="decimal" step="0.01" min="0" placeholder=" " /><label
-                    for="pIns"
-                    data-i18n="car_ins"
-                  ></label>
-                </div>
-                <div class="f fl sel">
-                  <button type="button" class="fieldbtn" id="pInsPer"></button
-                  ><label data-i18n="car_ins_per"></label>
-                </div>
-                <div class="f full">
-                  <input type="number" id="pCons" inputmode="decimal" step="0.1" min="0" placeholder=" " /><label
-                    for="pCons"
-                    data-i18n="pl_cons"
-                  ></label>
-                </div>
-                <div class="f full">
-                  <input type="number" id="pFuel" inputmode="decimal" step="0.001" min="0" placeholder=" " /><label
-                    for="pFuel"
-                    data-i18n="pl_fuel"
-                  ></label>
-                </div>
-              </div>
-              <h4 class="sub" id="pCurT"></h4>
-              <div class="grid">
-                <div class="f full">
-                  <input type="number" id="pKm" inputmode="numeric" step="1" min="0" placeholder=" " /><label
-                    for="pKm"
-                    data-i18n="pl_km"
-                  ></label>
-                </div>
-                <div class="note full fnote" id="pKmN"></div>
-                <div class="f full">
-                  <input type="number" id="pResale" inputmode="decimal" step="1" min="0" placeholder=" " /><label
-                    for="pResale"
-                    data-i18n="pl_resale"
-                  ></label>
-                </div>
-              </div>
-              <label class="switch">
-                <input type="checkbox" id="pWith" /><span class="trk"></span><span data-i18n="pl_with"></span>
-              </label>
-              <div class="note" id="pWithN"></div>
-              <div class="planres" id="pRes"></div>
-              <button class="btn tonal" id="pReset" data-i18n="pl_reset"></button>
-            </div>
-          </details>
+        <div class="seg" role="tablist">
+          <button data-g="cars" class="on" data-i18n="g_cars"></button
+          ><button data-g="buys" data-i18n="buys"></button>
         </div>
-        <!-- Add / edit car form (hides the list while open) -->
-        <div class="card hide" id="carForm">
-          <h3 id="carFormTitle"></h3>
-          <div class="grid">
-            <div class="f full">
-              <input type="text" id="carName" maxlength="40" placeholder=" " /><label
-                for="carName"
-                data-i18n="car_name"
-              ></label>
-            </div>
-            <div class="f full fl sel">
-              <button type="button" class="fieldbtn" id="carFuel"></button
-              ><label data-i18n="car_fuel"></label>
-            </div>
+        <div id="garCars">
+          <div id="garList">
+            <div class="card" id="cars-list"></div>
+            <button class="btn" id="carAdd" data-i18n="car_add"></button>
+            <div class="note" data-i18n="g_hint"></div>
+            <!-- "Car purchase & payback": folded under a button, so the garage stays simple; other
+                 tools can be added inside later. -->
+            <details class="card fold" id="planFold">
+              <summary>
+                <span class="carico"
+                  ><svg class="i" viewBox="0 0 24 24">
+                    <path
+                      d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5.97 4.06L14.09 6l1.41 1.41L16.91 6l1.06 1.06-1.41 1.41 1.41 1.41-1.06 1.06-1.41-1.4-1.41 1.41-1.06-1.06 1.41-1.41-1.41-1.42zm-6.78.66h5v1.5h-5v-1.5zM11.5 16h-2v2H8v-2H6v-1.5h2v-2h1.5v2h2V16zm6.5 1.25h-5v-1.5h5v1.5zm0-2.5h-5v-1.5h5v1.5z"
+                    /></svg></span
+                ><span class="lbl" data-i18n="pl_fold"></span
+                ><svg class="i chev" viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6z" /></svg>
+              </summary>
+              <!-- Buying a new car: what the change costs and when it pays for itself, worked out while
+                   the user types (renderPlan() and planResult() in app.js). Everything is saved. -->
+              <div id="plan">
+                <div class="note" style="margin-top: 0" data-i18n="pl_intro"></div>
+                <h4 class="sub" data-i18n="pl_new"></h4>
+                <div class="grid">
+                  <div class="f full">
+                    <input type="number" id="pPrice" inputmode="decimal" step="0.01" min="0" placeholder=" " /><label
+                      for="pPrice"
+                      data-i18n="car_price"
+                    ></label>
+                  </div>
+                  <div class="f">
+                    <input type="number" id="pIns" inputmode="decimal" step="0.01" min="0" placeholder=" " /><label
+                      for="pIns"
+                      data-i18n="car_ins"
+                    ></label>
+                  </div>
+                  <div class="f fl sel">
+                    <button type="button" class="fieldbtn" id="pInsPer"></button
+                    ><label data-i18n="car_ins_per"></label>
+                  </div>
+                  <div class="f full">
+                    <input type="number" id="pCons" inputmode="decimal" step="0.1" min="0" placeholder=" " /><label
+                      for="pCons"
+                      data-i18n="pl_cons"
+                    ></label>
+                  </div>
+                  <div class="f full">
+                    <input type="number" id="pFuel" inputmode="decimal" step="0.001" min="0" placeholder=" " /><label
+                      for="pFuel"
+                      data-i18n="pl_fuel"
+                    ></label>
+                  </div>
+                </div>
+                <h4 class="sub" id="pCurT"></h4>
+                <div class="grid">
+                  <div class="f full">
+                    <input type="number" id="pKm" inputmode="numeric" step="1" min="0" placeholder=" " /><label
+                      for="pKm"
+                      data-i18n="pl_km"
+                    ></label>
+                  </div>
+                  <div class="note full fnote" id="pKmN"></div>
+                  <div class="f full">
+                    <input type="number" id="pResale" inputmode="decimal" step="1" min="0" placeholder=" " /><label
+                      for="pResale"
+                      data-i18n="pl_resale"
+                    ></label>
+                  </div>
+                </div>
+                <label class="switch">
+                  <input type="checkbox" id="pWith" /><span class="trk"></span><span data-i18n="pl_with"></span>
+                </label>
+                <div class="note" id="pWithN"></div>
+                <div class="planres" id="pRes"></div>
+                <button class="btn tonal" id="pReset" data-i18n="pl_reset"></button>
+              </div>
+            </details>
           </div>
-          <!-- Optional details of the car, folded: purchase price, mileage at purchase, insurance -->
-          <details id="carAdv">
-            <summary data-i18n="car_adv"></summary>
-            <div class="note" data-i18n="car_adv_note"></div>
-            <div class="grid" style="margin-top: 12px">
+          <!-- Add / edit car form (hides the list while open) -->
+          <div class="card hide" id="carForm">
+            <h3 id="carFormTitle"></h3>
+            <div class="grid">
               <div class="f full">
-                <input type="number" id="carPrice" inputmode="decimal" step="0.01" min="0" placeholder=" " /><label
-                  for="carPrice"
-                  data-i18n="car_price"
-                ></label>
-              </div>
-              <div class="f full">
-                <input type="number" id="carBuyKm" inputmode="numeric" step="1" min="0" placeholder=" " /><label
-                  for="carBuyKm"
-                  data-i18n="car_buykm"
-                ></label>
-              </div>
-              <div class="f full">
-                <input type="number" id="carIns" inputmode="decimal" step="0.01" min="0" placeholder=" " /><label
-                  for="carIns"
-                  data-i18n="car_ins"
+                <input type="text" id="carName" maxlength="40" placeholder=" " /><label
+                  for="carName"
+                  data-i18n="car_name"
                 ></label>
               </div>
               <div class="f full fl sel">
-                <button type="button" class="fieldbtn" id="carInsPer"></button
-                ><label data-i18n="car_ins_per"></label>
+                <button type="button" class="fieldbtn" id="carFuel"></button
+                ><label data-i18n="car_fuel"></label>
               </div>
             </div>
-          </details>
-          <div class="btns2">
-            <button class="btn tonal" id="carCancel" data-i18n="cancel"></button>
-            <button class="btn" id="carSave" data-i18n="save"></button>
+            <!-- Optional details of the car, folded: purchase price, mileage at purchase, insurance -->
+            <details id="carAdv">
+              <summary data-i18n="car_adv"></summary>
+              <div class="note" data-i18n="car_adv_note"></div>
+              <div class="grid" style="margin-top: 12px">
+                <div class="f full">
+                  <input type="number" id="carPrice" inputmode="decimal" step="0.01" min="0" placeholder=" " /><label
+                    for="carPrice"
+                    data-i18n="car_price"
+                  ></label>
+                </div>
+                <div class="f full">
+                  <input type="number" id="carBuyKm" inputmode="numeric" step="1" min="0" placeholder=" " /><label
+                    for="carBuyKm"
+                    data-i18n="car_buykm"
+                  ></label>
+                </div>
+                <div class="f full">
+                  <input type="number" id="carIns" inputmode="decimal" step="0.01" min="0" placeholder=" " /><label
+                    for="carIns"
+                    data-i18n="car_ins"
+                  ></label>
+                </div>
+                <div class="f full fl sel">
+                  <button type="button" class="fieldbtn" id="carInsPer"></button
+                  ><label data-i18n="car_ins_per"></label>
+                </div>
+              </div>
+            </details>
+            <div class="btns2">
+              <button class="btn tonal" id="carCancel" data-i18n="cancel"></button>
+              <button class="btn" id="carSave" data-i18n="save"></button>
+            </div>
+            <button class="btn danger hide" id="carDel"></button>
+            <div class="note" id="carNote"></div>
           </div>
-          <button class="btn danger hide" id="carDel"></button>
-          <div class="note" id="carNote"></div>
         </div>
+        <!-- Purchases (form, history), the second part of the garage -->
+        <div id="buys" class="hide">
+          <div class="card">
+            <div class="grid" style="margin-top: 6px">
+              <div class="f fl"><input type="date" id="bd" /><label for="bd" data-i18n="date"></label></div>
+              <div class="f">
+                <input type="number" id="be" inputmode="decimal" step="0.01" placeholder=" " /><label
+                  for="be"
+                  data-i18n="amount"
+                ></label>
+              </div>
+              <div class="f fl sel full">
+                <button type="button" class="fieldbtn" id="bc"></button><label data-i18n="category"></label>
+              </div>
+              <div class="f full">
+                <input type="text" id="bn" placeholder=" " /><label for="bn" data-i18n="description"></label>
+              </div>
+              <div class="f">
+                <input type="number" id="bk" inputmode="numeric" placeholder=" " /><label
+                  for="bk"
+                  data-i18n="odometer"
+                ></label>
+              </div>
+              <div class="f">
+                <input type="text" id="bs" placeholder=" " /><label for="bs" data-i18n="shop"></label>
+              </div>
+            </div>
+            <button class="btn" id="addB" data-i18n="add_buy"></button>
+          </div>
+          <div class="hist">
+            <h2 class="sec" data-i18n="hist_buys"></h2>
+            <div class="card" id="bl-list"></div>
+          </div>
+      </div>
       </section>
 
       <!-- Settings, opened with the gear of the top bar (install, language, units, currency, theme, servicing, backup, help) -->
@@ -424,6 +469,10 @@
             <summary data-i18n="help_q12"></summary>
             <div class="note" data-i18n-html="help_a12"></div>
           </details>
+          <details>
+            <summary data-i18n="help_q13"></summary>
+            <div class="note" data-i18n-html="help_a13"></div>
+          </details>
         </div>
       </section>
     </main>
@@ -438,13 +487,13 @@
             /></svg></span
         ><span class="lbl" data-i18n="nav_fuel"></span>
       </button>
-      <button data-t="buys">
+      <button data-t="stations">
         <span class="pill"
           ><svg class="i" viewBox="0 0 24 24">
             <path
-              d="M22.7 19l-9.1-9.1c.9-2.3.4-5-1.5-6.9-2-2-5-2.4-7.4-1.3L9 6 6 9 1.6 4.7C.4 7.1.9 10.1 2.9 12.1c1.9 1.9 4.6 2.4 6.9 1.5l9.1 9.1c.4.4 1 .4 1.4 0l2.3-2.3c.5-.4.5-1.1.1-1.4z"
+              d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"
             /></svg></span
-        ><span class="lbl" data-i18n="buys"></span>
+        ><span class="lbl" data-i18n="nav_stations"></span>
       </button>
       <button data-t="stats">
         <span class="pill"
