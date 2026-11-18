@@ -1,0 +1,1 @@
+Correzione della visualizzazione su Android: la barra in alto (logo, nome Konso e auto) è di nuovo subito sotto la barra di stato, senza un grande spazio vuoto sopra, sui telefoni con la fotocamera in alto.

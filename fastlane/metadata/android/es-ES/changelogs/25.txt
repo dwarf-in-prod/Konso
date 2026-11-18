@@ -1,0 +1,1 @@
+Corrección de pantalla en Android: la barra superior (logo, nombre Konso y coche) vuelve a estar justo debajo de la barra de estado, sin un gran espacio vacío encima, en los teléfonos con la cámara arriba de la pantalla.

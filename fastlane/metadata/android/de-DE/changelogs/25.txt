@@ -1,0 +1,1 @@
+Anzeigekorrektur unter Android: Die obere Leiste (Logo, Name Konso und Auto) sitzt wieder direkt unter der Statusleiste, ohne großen leeren Raum darüber, auf Handys mit Kamera oben im Bildschirm.

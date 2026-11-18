@@ -1,0 +1,1 @@
+Correção de apresentação no Android: a barra superior (logótipo, nome Konso e carro) volta a ficar logo abaixo da barra de estado, sem um grande espaço vazio por cima, nos telemóveis com a câmara no topo do ecrã.

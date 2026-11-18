@@ -1,0 +1,1 @@
+Correction de l'affichage sur Android : l'en-tête (logo, nom Konso et voiture) est de nouveau juste sous la barre d'état, sans grand espace vide au-dessus, sur les téléphones dont la caméra est en haut de l'écran.

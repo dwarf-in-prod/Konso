@@ -176,7 +176,10 @@ RAIL.addEventListener('change', () => syncBars(THEME));
 // it with the room the cutout takes on the left and right (--cut-l, --cut-r, used by --sa-l and
 // --sa-r in app.css). MainActivity calls window.onInsets when it changes (phone turned).
 function syncInsets() {
-  if (!NA || typeof NA.insets !== 'function') return;
+  if (!NA) return;
+  // the Android app keeps the page clear of the bars at the top and bottom itself (app.css: .native)
+  document.documentElement.classList.add('native');
+  if (typeof NA.insets !== 'function') return;
   const [l, r] = String(NA.insets()).split(',').map(Number),
     px = v => (v > 0 ? v : 0) + 'px';
   document.documentElement.style.setProperty('--cut-l', px(l));

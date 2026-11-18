@@ -1,0 +1,1 @@
+Weergaveoplossing op Android: de bovenbalk (logo, naam Konso en auto) staat weer direct onder de statusbalk, zonder grote lege ruimte erboven, op telefoons met de camera bovenaan het scherm.

@@ -1,0 +1,1 @@
+Android'de görüntü düzeltmesi: üst çubuk (logo, Konso adı ve araç), kamerası ekranın üstünde olan telefonlarda yine durum çubuğunun hemen altında, üstünde büyük boşluk yok.
