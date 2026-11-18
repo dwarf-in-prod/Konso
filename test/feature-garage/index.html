@@ -187,6 +187,35 @@
               ><label data-i18n="car_fuel"></label>
             </div>
           </div>
+          <!-- Optional details of the car, folded: purchase price, mileage at purchase, insurance -->
+          <details id="carAdv">
+            <summary data-i18n="car_adv"></summary>
+            <div class="note" data-i18n="car_adv_note"></div>
+            <div class="grid" style="margin-top: 12px">
+              <div class="f full">
+                <input type="number" id="carPrice" inputmode="decimal" step="0.01" min="0" placeholder=" " /><label
+                  for="carPrice"
+                  data-i18n="car_price"
+                ></label>
+              </div>
+              <div class="f full">
+                <input type="number" id="carBuyKm" inputmode="numeric" step="1" min="0" placeholder=" " /><label
+                  for="carBuyKm"
+                  data-i18n="car_buykm"
+                ></label>
+              </div>
+              <div class="f full">
+                <input type="number" id="carIns" inputmode="decimal" step="0.01" min="0" placeholder=" " /><label
+                  for="carIns"
+                  data-i18n="car_ins"
+                ></label>
+              </div>
+              <div class="f full fl sel">
+                <button type="button" class="fieldbtn" id="carInsPer"></button
+                ><label data-i18n="car_ins_per"></label>
+              </div>
+            </div>
+          </details>
           <div class="btns2">
             <button class="btn tonal" id="carCancel" data-i18n="cancel"></button>
             <button class="btn" id="carSave" data-i18n="save"></button>

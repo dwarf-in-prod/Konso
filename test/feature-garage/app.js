@@ -198,8 +198,11 @@ const catLabel = c => {
 // ================================================================================================
 
 // The user's data. Format (also the format of konso.json, version 2):
-//   cars: [{id, name, fuel, svcKm, svcDone}]  fuel = usual fuel type, svcKm = service interval in km,
-//                                             svcDone = date of the last service confirmed from the banner
+//   cars: [{id, name, fuel, svcKm, svcDone, price, buyKm, ins, insPer}]
+//         fuel = usual fuel type, svcKm = service interval in km,
+//         svcDone = date of the last service confirmed from the banner,
+//         optional "advanced options" of the garage (0 = not given): price = purchase price,
+//         buyKm = odometer at purchase in km, ins = insurance price, paid per insPer ('y' year, 'm' month)
 //   cur:  id of the selected car
 //   fuel: fill-ups  [{id, car, d: date, k: km since the previous fill-up, l: litres, e: amount, c: fuel type, s: station}]
 //   buys: purchases [{id, car, d: date, e: amount, c: category, n: description, k: odometer in km, s: shop}]
@@ -233,6 +236,10 @@ function norm(d) {
       fuel: str(c.fuel, 20),
       svcKm: svcEvery(c),
       svcDone: /^\d{4}-\d{2}-\d{2}$/.test(c.svcDone) ? c.svcDone : '',
+      price: Math.max(0, num(c.price)),
+      buyKm: Math.max(0, num(c.buyKm)),
+      ins: Math.max(0, num(c.ins)),
+      insPer: c.insPer === 'm' ? 'm' : 'y',
     }))
     .filter(c => c.id);
   cars = cars.filter((c, i) => cars.findIndex(x => x.id === c.id) === i);
@@ -470,6 +477,7 @@ function applyI18n() {
   };
   opts($('fc'), ['', ...FUELV], x => (x ? fuelLabel(x) : tx('fuel_choose')));
   if ($('carFuel').value) setCarFuel($('carFuel').value);
+  if ($('carInsPer').value) setInsPer($('carInsPer').value);
   setCat($('bc').value || CATSHOW[0]);
   $('langBtn').textContent = (LANGS.find(l => l[0] === LANG) || LANGS[0])[1];
   $('unitBtn').textContent = UNIT_LABEL[UNIT];
@@ -2011,6 +2019,45 @@ $('carFuel').onclick = () =>
     loop: false,
     onOk: i => setCarFuel(FUELV[i]),
   });
+// Advanced options: how often the insurance is paid, 'y' (per year) or 'm' (per month). A field
+// button that opens the wheel, like the usual fuel.
+const INS_PER = ['y', 'm'];
+const insPerLabel = v => tx(v === 'm' ? 'per_month' : 'per_year');
+function setInsPer(v) {
+  $('carInsPer').value = v;
+  $('carInsPer').textContent = insPerLabel(v);
+}
+$('carInsPer').onclick = () =>
+  picker({
+    icon: 'money',
+    title: 'car_ins_per',
+    labels: INS_PER.map(insPerLabel),
+    sel: Math.max(0, INS_PER.indexOf($('carInsPer').value)),
+    loop: false,
+    onOk: i => setInsPer(INS_PER[i]),
+  });
+// Fill the advanced options of the form from car c (empty for a new car). The section is
+// unfolded when the car already has one of them, folded otherwise.
+function fillCarAdvanced(c) {
+  const show = (v, d) => (c && v > 0 ? String(+v.toFixed(d)) : '');
+  $('carPrice').value = show(c && c.price, 2);
+  $('carBuyKm').value = show(c && dist(c.buyKm), 0);
+  $('carIns').value = show(c && c.ins, 2);
+  setInsPer((c && c.insPer) || 'y');
+  $('carAdv').open = !!(c && (c.price > 0 || c.buyKm > 0 || c.ins > 0));
+}
+// Read the advanced options of the form into car c. Empty or invalid fields are stored as 0
+// (= not given); the mileage is typed in the chosen unit and stored in km.
+function readCarAdvanced(c) {
+  const pos = id => {
+    const v = +$(id).value;
+    return v > 0 ? v : 0;
+  };
+  c.price = pos('carPrice');
+  c.buyKm = Math.round(distIn(pos('carBuyKm')));
+  c.ins = pos('carIns');
+  c.insPer = $('carInsPer').value === 'm' ? 'm' : 'y';
+}
 // Open the car form in the garage, in place of the list: empty for a new car (id = null),
 // or filled with car id (edit, with the delete button when there is more than one car).
 function openCarForm(id) {
@@ -2020,6 +2067,7 @@ function openCarForm(id) {
   $('carFormTitle').textContent = c ? tx('car_edit') : tx('car_new');
   $('carName').value = c ? carName(c) : '';
   setCarFuel((c && FUELV.includes(c.fuel) && c.fuel) || 'SP95-E10');
+  fillCarAdvanced(c);
   $('carDel').classList.toggle('hide', !(c && S.cars.length > 1));
   $('carDel').textContent = tx('car_del');
   $('carNote').textContent = c ? (S.cars.length > 1 ? tx('car_note_del') : tx('car_note_keep')) : '';
@@ -2049,7 +2097,8 @@ $('car').onchange = () => {
 };
 $('carAdd').onclick = () => openCarForm(null);
 $('carCancel').onclick = closeCarForm;
-// Save the form: the name is required and must be unique. A new car becomes the selected one.
+// Save the form: the name is required and must be unique, the advanced options are optional.
+// A new car becomes the selected one.
 $('carSave').onclick = () => {
   const name = $('carName').value.trim();
   if (!name) {
@@ -2060,15 +2109,15 @@ $('carSave').onclick = () => {
     status(tx('car_dup'));
     return;
   }
-  if (carEditing) {
-    const c = S.cars.find(x => x.id === carEditing);
-    c.name = name;
-    c.fuel = $('carFuel').value;
-  } else {
-    const id = 'c' + Date.now();
-    S.cars.push({ id, name, fuel: $('carFuel').value });
-    S.cur = id;
+  let c = S.cars.find(x => x.id === carEditing);
+  if (!c) {
+    c = { id: 'c' + Date.now() };
+    S.cars.push(c);
+    S.cur = c.id;
   }
+  c.name = name;
+  c.fuel = $('carFuel').value;
+  readCarAdvanced(c);
   carsChanged();
 };
 // Delete the car being edited, with its fill-ups and purchases. First tap: ask to confirm with
