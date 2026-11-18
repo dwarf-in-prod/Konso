@@ -2812,6 +2812,11 @@ function showGarage(part) {
   closeCarForm();
 }
 document.querySelectorAll('.seg button').forEach(b => (b.onclick = () => showGarage(b.dataset.g)));
+// Stats > Spending: the link under the reminder opens My garage -> Purchases.
+$('sxGo').onclick = () => {
+  showTab('garage');
+  showGarage('buys');
+};
 // Keyboard open (body.kb hides the bottom bar): while a field that is typed into has the focus.
 // Date fields, switches (checkboxes) and file inputs open no keyboard.
 const typesIn = e => !!e && /^(INPUT|TEXTAREA)$/.test(e.tagName) && !/^(date|checkbox|radio|file)$/.test(e.type);
