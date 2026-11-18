@@ -67,10 +67,10 @@
               ><span data-i18n="scan_btn"></span
             ></label>
             <input type="file" id="sc1" accept="image/*" hidden />
-            <div class="note" style="margin: 8px 0 16px" data-i18n="scan_hint"></div>
+            <div class="note" id="scanHint" style="margin: 8px 0 0" data-i18n="scan_hint"></div>
             <div id="scanres" class="scanres hide"></div>
           </div>
-          <div class="grid" style="margin-top: 6px">
+          <div class="grid" style="margin-top: 20px">
             <div class="f fl"><input type="date" id="fd" /><label for="fd" data-i18n="date"></label></div>
             <div class="f">
               <input type="number" id="fk" inputmode="decimal" step="0.1" placeholder=" " /><label
@@ -91,20 +91,22 @@
               ></label>
             </div>
             <div class="f fl sel">
-              <select id="fc"></select
-              ><label for="fc" data-i18n="fuel"></label>
+              <button type="button" class="fieldbtn" id="fc"></button
+              ><label data-i18n="fuel"></label>
             </div>
             <div class="f">
               <input type="text" id="fs" placeholder=" " /><label for="fs" data-i18n="station"></label>
             </div>
           </div>
-          <div class="live" id="live">
+          <!-- live results: hidden until there is something to show (live() in app.js) -->
+          <div class="live hide" id="live">
             <div><b id="l1">–</b><span data-i18n="k_l100"></span></div>
             <div><b id="l2">–</b><span data-i18n="k_e100"></span></div>
             <div><b id="l3">–</b><span data-i18n="k_el"></span></div>
           </div>
           <button class="btn" id="addF" data-i18n="add_fill"></button>
-          <div class="note" data-i18n="fill_tip"></div>
+          <!-- first-use tip, hidden once the car has fill-ups (showTips() in app.js) -->
+          <div class="note" id="fillTip" data-i18n="fill_tip"></div>
         </div>
         <div class="hist">
           <h2 class="sec" data-i18n="hist_fuel"></h2>
@@ -118,7 +120,8 @@
       <section id="stations" class="hide">
         <div class="card">
           <h3 data-i18n="st_title"></h3>
-          <div class="note" style="margin-top: 0" data-i18n="st_intro"></div>
+          <!-- explanation hidden once the connection is allowed (setOnline() in app.js) -->
+          <div class="note" id="stIntro" style="margin-top: 0" data-i18n="st_intro"></div>
           <label class="switch">
             <input type="checkbox" id="stOnline" /><span class="trk"></span><span data-i18n="st_switch"></span>
           </label>
