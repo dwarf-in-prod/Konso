@@ -166,14 +166,23 @@
     inst_title: "Installer l'appli",
     inst_txt: "Installée, Konso garde tes données en sécurité sur cet appareil, a sa propre icône et fonctionne sans internet.",
     inst_btn: "Installer Konso",
-    inst_ios: "Dans Safari, touche le bouton Partager, puis « Sur l'écran d'accueil ».",
-    inst_other: "Dans le menu de ton navigateur, choisis « Installer l'application » ou « Ajouter à l'écran d'accueil » (Safari sur Mac : Fichier → « Ajouter au Dock »).",
     st_update: "Konso a été mis à jour : la nouvelle version sera utilisée à la prochaine ouverture.",
     help_q11: "Version web et installation",
     help_a11: "Konso fonctionne aussi dans un navigateur, sur n'importe quel téléphone, tablette ou ordinateur. L'installer ajoute une icône et permet de l'utiliser sans internet : sur <b>iPhone / iPad</b>, dans Safari, Partager → « Sur l'écran d'accueil » ; sur <b>Android</b>, <b>Windows</b>, <b>Linux</b> ou <b>Mac</b>, dans Chrome ou Edge, l'icône d'installation de la barre d'adresse ou le menu → « Installer l'application » ; sur <b>Mac</b> avec Safari, Fichier → « Ajouter au Dock ». Les données restent dans le navigateur de chaque appareil : « Enregistrer un fichier de sauvegarde » (Réglages) en garde une copie, et « Ouvrir un fichier de sauvegarde » la reprend, sur le même appareil ou un autre.",
     inst_adv_title: "Installe Konso",
     inst_later: "Plus tard",
-    inst_adv_msg: "Pour que tes données restent bien enregistrées, installe l'appli sur cet appareil. Le navigateur peut effacer les données d'un site web (Safari les efface après 7 jours sans visite), mais jamais celles d'une appli installée. Pense aussi à enregistrer de temps en temps un fichier de sauvegarde (Réglages)."
+    adv_lead: "Ajoute Konso à ton écran d'accueil : tes données y restent bien enregistrées.",
+    adv_p1: "Tes données restent sur ton appareil. Rien n'est envoyé.",
+    adv_p2: "Pas de compte, pas de pub, aucun pistage.",
+    adv_p3: "Appli libre (open source) : son code est public, chacun peut le vérifier.",
+    adv_how: "Comment faire ?",
+    adv_ios1: "Touche le bouton Partager de Safari",
+    adv_ios2: "Choisis « Sur l'écran d'accueil »",
+    adv_mac1: "Dans Safari, ouvre le menu Fichier",
+    adv_mac2: "Choisis « Ajouter au Dock »",
+    adv_oth1: "Ouvre le menu de ton navigateur (⋮ ou ⋯)",
+    adv_oth2: "Choisis « Installer l'application » ou « Ajouter à l'écran d'accueil »",
+    adv_ok: "Compris"
   };
 
   D.en = {
@@ -323,14 +332,23 @@
     inst_title: "Install the app",
     inst_txt: "Installed, Konso keeps your data safe on this device, has its own icon and works without internet.",
     inst_btn: "Install Konso",
-    inst_ios: "In Safari, tap the Share button, then “Add to Home Screen”.",
-    inst_other: "In your browser's menu, choose “Install app” or “Add to Home screen” (Safari on Mac: File → “Add to Dock”).",
     st_update: "Konso has been updated: the new version will be used next time it opens.",
     help_q11: "Web version and installing",
     help_a11: "Konso also works in a web browser, on any phone, tablet or computer. Installing it adds an icon and lets it work without internet: on <b>iPhone / iPad</b>, in Safari, Share → “Add to Home Screen”; on <b>Android</b>, <b>Windows</b>, <b>Linux</b> or <b>Mac</b>, in Chrome or Edge, the install icon in the address bar or the menu → “Install app”; on <b>Mac</b> with Safari, File → “Add to Dock”. Data stays in the browser of each device: “Save a backup file” (Settings) keeps a copy, and “Open a backup file” brings it back, on the same device or another one.",
     inst_adv_title: "Install Konso",
     inst_later: "Later",
-    inst_adv_msg: "To make sure your data stays saved, install the app on this device. The browser may erase the data of a website (Safari erases it after 7 days without a visit), but never that of an installed app. Also remember to save a backup file from time to time (Settings)."
+    adv_lead: "Add Konso to your home screen: your data stays safely saved there.",
+    adv_p1: "Your data stays on your device. Nothing is sent.",
+    adv_p2: "No account, no ads, no tracking.",
+    adv_p3: "Free and open source: its code is public, anyone can check it.",
+    adv_how: "How to do it?",
+    adv_ios1: "Tap Safari's Share button",
+    adv_ios2: "Choose “Add to Home Screen”",
+    adv_mac1: "In Safari, open the File menu",
+    adv_mac2: "Choose “Add to Dock”",
+    adv_oth1: "Open your browser's menu (⋮ or ⋯)",
+    adv_oth2: "Choose “Install app” or “Add to Home screen”",
+    adv_ok: "Got it"
   };
 
   D.es = {
@@ -480,14 +498,23 @@
     inst_title: "Instalar la app",
     inst_txt: "Instalado, Konso guarda tus datos de forma segura en este dispositivo, tiene su propio icono y funciona sin internet.",
     inst_btn: "Instalar Konso",
-    inst_ios: "En Safari, toca el botón Compartir y luego «Añadir a pantalla de inicio».",
-    inst_other: "En el menú de tu navegador, elige «Instalar aplicación» o «Añadir a pantalla de inicio» (Safari en Mac: Archivo → «Añadir al Dock»).",
     st_update: "Konso se ha actualizado: la nueva versión se usará la próxima vez que lo abras.",
     help_q11: "Versión web e instalación",
     help_a11: "Konso también funciona en un navegador, en cualquier móvil, tableta u ordenador. Instalarlo añade un icono y permite usarlo sin internet: en <b>iPhone / iPad</b>, en Safari, Compartir → «Añadir a pantalla de inicio»; en <b>Android</b>, <b>Windows</b>, <b>Linux</b> o <b>Mac</b>, en Chrome o Edge, el icono de instalación de la barra de direcciones o el menú → «Instalar aplicación»; en <b>Mac</b> con Safari, Archivo → «Añadir al Dock». Los datos se quedan en el navegador de cada dispositivo: «Guardar un archivo de copia» (Ajustes) guarda una copia y «Abrir un archivo de copia» la recupera, en el mismo dispositivo o en otro.",
     inst_adv_title: "Instala Konso",
     inst_later: "Más tarde",
-    inst_adv_msg: "Para que tus datos se queden guardados, instala la app en este dispositivo. El navegador puede borrar los datos de un sitio web (Safari los borra tras 7 días sin visitarlo), pero nunca los de una app instalada. Acuérdate también de guardar de vez en cuando un archivo de copia (Ajustes)."
+    adv_lead: "Añade Konso a tu pantalla de inicio: tus datos se quedan bien guardados.",
+    adv_p1: "Tus datos se quedan en tu dispositivo. No se envía nada.",
+    adv_p2: "Sin cuenta, sin anuncios, sin rastreo.",
+    adv_p3: "App libre (código abierto): su código es público, cualquiera puede revisarlo.",
+    adv_how: "¿Cómo se hace?",
+    adv_ios1: "Toca el botón Compartir de Safari",
+    adv_ios2: "Elige «Añadir a pantalla de inicio»",
+    adv_mac1: "En Safari, abre el menú Archivo",
+    adv_mac2: "Elige «Añadir al Dock»",
+    adv_oth1: "Abre el menú de tu navegador (⋮ o ⋯)",
+    adv_oth2: "Elige «Instalar aplicación» o «Añadir a pantalla de inicio»",
+    adv_ok: "Entendido"
   };
 
   D.de = {
@@ -637,14 +664,23 @@
     inst_title: "App installieren",
     inst_txt: "Installiert bewahrt Konso deine Daten sicher auf diesem Gerät auf, hat ein eigenes Symbol und funktioniert ohne Internet.",
     inst_btn: "Konso installieren",
-    inst_ios: "Tippe in Safari auf „Teilen“ und dann auf „Zum Home-Bildschirm“.",
-    inst_other: "Wähle im Menü deines Browsers „App installieren“ oder „Zum Startbildschirm hinzufügen“ (Safari auf dem Mac: Ablage → „Zum Dock hinzufügen“).",
     st_update: "Konso wurde aktualisiert: Die neue Version wird beim nächsten Öffnen verwendet.",
     help_q11: "Web-Version und Installation",
     help_a11: "Konso funktioniert auch im Browser, auf jedem Handy, Tablet oder Computer. Durch die Installation erhält es ein Symbol und funktioniert ohne Internet: auf <b>iPhone / iPad</b> in Safari „Teilen“ → „Zum Home-Bildschirm“; auf <b>Android</b>, <b>Windows</b>, <b>Linux</b> oder <b>Mac</b> in Chrome oder Edge das Installationssymbol in der Adressleiste oder das Menü → „App installieren“; auf dem <b>Mac</b> mit Safari Ablage → „Zum Dock hinzufügen“. Die Daten bleiben im Browser des jeweiligen Geräts: „Sicherungsdatei speichern“ (Einstellungen) legt eine Kopie an, „Sicherungsdatei öffnen“ holt sie zurück, auf demselben oder einem anderen Gerät.",
     inst_adv_title: "Konso installieren",
     inst_later: "Später",
-    inst_adv_msg: "Damit deine Daten sicher gespeichert bleiben, installiere die App auf diesem Gerät. Der Browser kann die Daten einer Website löschen (Safari löscht sie nach 7 Tagen ohne Besuch), aber nie die einer installierten App. Speichere außerdem ab und zu eine Sicherungsdatei (Einstellungen)."
+    adv_lead: "Lege Konso auf deinen Startbildschirm: So bleiben deine Daten sicher gespeichert.",
+    adv_p1: "Deine Daten bleiben auf deinem Gerät. Nichts wird gesendet.",
+    adv_p2: "Kein Konto, keine Werbung, kein Tracking.",
+    adv_p3: "Freie App (Open Source): Ihr Code ist öffentlich, jeder kann ihn prüfen.",
+    adv_how: "So geht's",
+    adv_ios1: "Tippe in Safari auf „Teilen“",
+    adv_ios2: "Wähle „Zum Home-Bildschirm“",
+    adv_mac1: "Öffne in Safari das Menü „Ablage“",
+    adv_mac2: "Wähle „Zum Dock hinzufügen“",
+    adv_oth1: "Öffne das Menü deines Browsers (⋮ oder ⋯)",
+    adv_oth2: "Wähle „App installieren“ oder „Zum Startbildschirm hinzufügen“",
+    adv_ok: "Verstanden"
   };
 
   D.it = {
@@ -794,14 +830,23 @@
     inst_title: "Installa l'app",
     inst_txt: "Installato, Konso conserva i tuoi dati al sicuro su questo dispositivo, ha la sua icona e funziona senza internet.",
     inst_btn: "Installa Konso",
-    inst_ios: "In Safari, tocca il pulsante Condividi, poi «Aggiungi alla schermata Home».",
-    inst_other: "Nel menu del tuo browser, scegli «Installa app» o «Aggiungi a schermata Home» (Safari su Mac: File → «Aggiungi al Dock»).",
     st_update: "Konso è stato aggiornato: la nuova versione sarà usata alla prossima apertura.",
     help_q11: "Versione web e installazione",
     help_a11: "Konso funziona anche in un browser, su qualsiasi telefono, tablet o computer. Installarlo aggiunge un'icona e permette di usarlo senza internet: su <b>iPhone / iPad</b>, in Safari, Condividi → «Aggiungi alla schermata Home»; su <b>Android</b>, <b>Windows</b>, <b>Linux</b> o <b>Mac</b>, in Chrome o Edge, l'icona di installazione nella barra degli indirizzi o il menu → «Installa app»; su <b>Mac</b> con Safari, File → «Aggiungi al Dock». I dati restano nel browser di ogni dispositivo: «Salva un file di backup» (Impostazioni) ne conserva una copia e «Apri un file di backup» la ripristina, sullo stesso dispositivo o su un altro.",
     inst_adv_title: "Installa Konso",
     inst_later: "Più tardi",
-    inst_adv_msg: "Perché i tuoi dati restino salvati, installa l'app su questo dispositivo. Il browser può cancellare i dati di un sito web (Safari li cancella dopo 7 giorni senza visite), ma mai quelli di un'app installata. Ricordati anche di salvare ogni tanto un file di backup (Impostazioni)."
+    adv_lead: "Aggiungi Konso alla schermata Home: i tuoi dati restano salvati al sicuro.",
+    adv_p1: "I tuoi dati restano sul tuo dispositivo. Non viene inviato nulla.",
+    adv_p2: "Nessun account, nessuna pubblicità, nessun tracciamento.",
+    adv_p3: "App libera (open source): il suo codice è pubblico, chiunque può verificarlo.",
+    adv_how: "Come fare?",
+    adv_ios1: "Tocca il pulsante Condividi di Safari",
+    adv_ios2: "Scegli «Aggiungi alla schermata Home»",
+    adv_mac1: "In Safari, apri il menu File",
+    adv_mac2: "Scegli «Aggiungi al Dock»",
+    adv_oth1: "Apri il menu del browser (⋮ o ⋯)",
+    adv_oth2: "Scegli «Installa app» o «Aggiungi a schermata Home»",
+    adv_ok: "Ho capito"
   };
 
   D.pt = {
@@ -951,14 +996,23 @@
     inst_title: "Instalar a app",
     inst_txt: "Instalado, o Konso guarda os teus dados em segurança neste dispositivo, tem o seu próprio ícone e funciona sem internet.",
     inst_btn: "Instalar o Konso",
-    inst_ios: "No Safari, toca no botão Partilhar e depois em «Adicionar ao ecrã principal».",
-    inst_other: "No menu do teu navegador, escolhe «Instalar aplicação» ou «Adicionar ao ecrã principal» (Safari no Mac: Ficheiro → «Adicionar à Dock»).",
     st_update: "O Konso foi atualizado: a nova versão será usada da próxima vez que o abrires.",
     help_q11: "Versão web e instalação",
     help_a11: "O Konso também funciona num navegador, em qualquer telemóvel, tablet ou computador. Instalá-lo adiciona um ícone e permite usá-lo sem internet: no <b>iPhone / iPad</b>, no Safari, Partilhar → «Adicionar ao ecrã principal»; no <b>Android</b>, <b>Windows</b>, <b>Linux</b> ou <b>Mac</b>, no Chrome ou Edge, o ícone de instalação da barra de endereço ou o menu → «Instalar aplicação»; no <b>Mac</b> com o Safari, Ficheiro → «Adicionar à Dock». Os dados ficam no navegador de cada dispositivo: «Guardar um ficheiro de cópia» (Definições) guarda uma cópia e «Abrir um ficheiro de cópia» recupera-a, no mesmo dispositivo ou noutro.",
     inst_adv_title: "Instala o Konso",
     inst_later: "Mais tarde",
-    inst_adv_msg: "Para que os teus dados fiquem guardados, instala a app neste dispositivo. O navegador pode apagar os dados de um site (o Safari apaga-os após 7 dias sem visitas), mas nunca os de uma app instalada. Lembra-te também de guardar de vez em quando um ficheiro de cópia (Definições)."
+    adv_lead: "Adiciona o Konso ao ecrã principal: os teus dados ficam bem guardados.",
+    adv_p1: "Os teus dados ficam no teu dispositivo. Nada é enviado.",
+    adv_p2: "Sem conta, sem anúncios, sem rastreio.",
+    adv_p3: "App livre (código aberto): o código é público, qualquer pessoa pode verificá-lo.",
+    adv_how: "Como fazer?",
+    adv_ios1: "Toca no botão Partilhar do Safari",
+    adv_ios2: "Escolhe «Adicionar ao ecrã principal»",
+    adv_mac1: "No Safari, abre o menu Ficheiro",
+    adv_mac2: "Escolhe «Adicionar à Dock»",
+    adv_oth1: "Abre o menu do navegador (⋮ ou ⋯)",
+    adv_oth2: "Escolhe «Instalar aplicação» ou «Adicionar ao ecrã principal»",
+    adv_ok: "Percebi"
   };
 
   D.nl = {
@@ -1108,14 +1162,23 @@
     inst_title: "De app installeren",
     inst_txt: "Geïnstalleerd bewaart Konso je gegevens veilig op dit apparaat, heeft het een eigen pictogram en werkt het zonder internet.",
     inst_btn: "Konso installeren",
-    inst_ios: "Tik in Safari op de knop Deel en dan op ‘Zet op beginscherm’.",
-    inst_other: "Kies in het menu van je browser ‘App installeren’ of ‘Toevoegen aan startscherm’ (Safari op de Mac: Archief → ‘Voeg toe aan Dock’).",
     st_update: "Konso is bijgewerkt: de nieuwe versie wordt gebruikt de volgende keer dat je het opent.",
     help_q11: "Webversie en installeren",
     help_a11: "Konso werkt ook in een browser, op elke telefoon, tablet of computer. Installeren voegt een pictogram toe en laat het zonder internet werken: op <b>iPhone / iPad</b> in Safari Deel → ‘Zet op beginscherm’; op <b>Android</b>, <b>Windows</b>, <b>Linux</b> of <b>Mac</b> in Chrome of Edge het installatiepictogram in de adresbalk of het menu → ‘App installeren’; op de <b>Mac</b> met Safari Archief → ‘Voeg toe aan Dock’. De gegevens blijven in de browser van elk apparaat: ‘Back-upbestand opslaan’ (Instellingen) bewaart een kopie en ‘Back-upbestand openen’ zet die terug, op hetzelfde of een ander apparaat.",
     inst_adv_title: "Installeer Konso",
     inst_later: "Later",
-    inst_adv_msg: "Installeer de app op dit apparaat, zodat je gegevens bewaard blijven. De browser kan de gegevens van een website wissen (Safari doet dat na 7 dagen zonder bezoek), maar nooit die van een geïnstalleerde app. Sla ook af en toe een back-upbestand op (Instellingen)."
+    adv_lead: "Zet Konso op je beginscherm: zo blijven je gegevens goed bewaard.",
+    adv_p1: "Je gegevens blijven op je apparaat. Er wordt niets verstuurd.",
+    adv_p2: "Geen account, geen reclame, geen tracking.",
+    adv_p3: "Vrije app (open source): de code is openbaar, iedereen kan hem controleren.",
+    adv_how: "Hoe doe je dat?",
+    adv_ios1: "Tik op de Deel-knop van Safari",
+    adv_ios2: "Kies ‘Zet op beginscherm’",
+    adv_mac1: "Open in Safari het menu Archief",
+    adv_mac2: "Kies ‘Voeg toe aan Dock’",
+    adv_oth1: "Open het menu van je browser (⋮ of ⋯)",
+    adv_oth2: "Kies ‘App installeren’ of ‘Toevoegen aan startscherm’",
+    adv_ok: "Begrepen"
   };
 
   D.pl = {
@@ -1265,14 +1328,23 @@
     inst_title: "Zainstaluj aplikację",
     inst_txt: "Po instalacji Konso bezpiecznie przechowuje dane na tym urządzeniu, ma własną ikonę i działa bez internetu.",
     inst_btn: "Zainstaluj Konso",
-    inst_ios: "W Safari dotknij przycisku Udostępnij, a potem „Do ekranu początkowego”.",
-    inst_other: "W menu przeglądarki wybierz „Zainstaluj aplikację” lub „Dodaj do ekranu głównego” (Safari na Macu: Plik → „Dodaj do Docka”).",
     st_update: "Konso zostało zaktualizowane: nowa wersja zadziała przy następnym otwarciu.",
     help_q11: "Wersja internetowa i instalacja",
     help_a11: "Konso działa też w przeglądarce, na każdym telefonie, tablecie i komputerze. Instalacja dodaje ikonę i pozwala używać go bez internetu: na <b>iPhonie / iPadzie</b> w Safari Udostępnij → „Do ekranu początkowego”; na <b>Androidzie</b>, <b>Windowsie</b>, <b>Linuksie</b> lub <b>Macu</b> w Chrome lub Edge ikona instalacji na pasku adresu albo menu → „Zainstaluj aplikację”; na <b>Macu</b> w Safari Plik → „Dodaj do Docka”. Dane zostają w przeglądarce każdego urządzenia: „Zapisz plik kopii zapasowej” (Ustawienia) tworzy kopię, a „Otwórz plik kopii zapasowej” ją przywraca, na tym samym lub innym urządzeniu.",
     inst_adv_title: "Zainstaluj Konso",
     inst_later: "Później",
-    inst_adv_msg: "Aby Twoje dane na pewno zostały zapisane, zainstaluj aplikację na tym urządzeniu. Przeglądarka może usunąć dane strony internetowej (Safari usuwa je po 7 dniach bez wizyty), ale nigdy danych zainstalowanej aplikacji. Pamiętaj też, by co jakiś czas zapisać plik kopii zapasowej (Ustawienia)."
+    adv_lead: "Dodaj Konso do ekranu początkowego: Twoje dane pozostaną bezpiecznie zapisane.",
+    adv_p1: "Twoje dane zostają na urządzeniu. Nic nie jest wysyłane.",
+    adv_p2: "Bez konta, bez reklam, bez śledzenia.",
+    adv_p3: "Wolna aplikacja (open source): jej kod jest publiczny, każdy może go sprawdzić.",
+    adv_how: "Jak to zrobić?",
+    adv_ios1: "Dotknij przycisku Udostępnij w Safari",
+    adv_ios2: "Wybierz „Do ekranu początkowego”",
+    adv_mac1: "W Safari otwórz menu Plik",
+    adv_mac2: "Wybierz „Dodaj do Docka”",
+    adv_oth1: "Otwórz menu przeglądarki (⋮ lub ⋯)",
+    adv_oth2: "Wybierz „Zainstaluj aplikację” lub „Dodaj do ekranu głównego”",
+    adv_ok: "Rozumiem"
   };
 
   D.tr = {
@@ -1422,14 +1494,23 @@
     inst_title: "Uygulamayı yükle",
     inst_txt: "Yüklendiğinde Konso verilerini bu cihazda güvenle saklar, kendi simgesi olur ve internetsiz çalışır.",
     inst_btn: "Konso'yu yükle",
-    inst_ios: "Safari'de Paylaş düğmesine, ardından “Ana Ekrana Ekle”ye dokun.",
-    inst_other: "Tarayıcının menüsünde “Uygulamayı yükle” veya “Ana ekrana ekle”yi seç (Mac'te Safari: Dosya → “Dock'a Ekle”).",
     st_update: "Konso güncellendi: yeni sürüm bir sonraki açılışta kullanılacak.",
     help_q11: "Web sürümü ve yükleme",
     help_a11: "Konso bir tarayıcıda da, her telefon, tablet veya bilgisayarda çalışır. Yüklemek bir simge ekler ve internetsiz kullanmayı sağlar: <b>iPhone / iPad</b>'de Safari'de Paylaş → “Ana Ekrana Ekle”; <b>Android</b>, <b>Windows</b>, <b>Linux</b> veya <b>Mac</b>'te Chrome ya da Edge'de adres çubuğundaki yükleme simgesi veya menü → “Uygulamayı yükle”; <b>Mac</b>'te Safari ile Dosya → “Dock'a Ekle”. Veriler her cihazın tarayıcısında kalır: “Yedek dosyası kaydet” (Ayarlar) bir kopya saklar, “Yedek dosyası aç” onu aynı veya başka bir cihazda geri getirir.",
     inst_adv_title: "Konso'yu yükle",
     inst_later: "Sonra",
-    inst_adv_msg: "Verilerinin kayıtlı kalması için uygulamayı bu cihaza yükle. Tarayıcı bir web sitesinin verilerini silebilir (Safari 7 gün ziyaret edilmeyince siler), ama yüklü bir uygulamanınkini asla. Ara sıra bir yedek dosyası kaydetmeyi de unutma (Ayarlar)."
+    adv_lead: "Konso'yu ana ekranına ekle: verilerin orada güvenle kayıtlı kalır.",
+    adv_p1: "Verilerin cihazında kalır. Hiçbir şey gönderilmez.",
+    adv_p2: "Hesap yok, reklam yok, takip yok.",
+    adv_p3: "Özgür uygulama (açık kaynak): kodu herkese açıktır, herkes kontrol edebilir.",
+    adv_how: "Nasıl yapılır?",
+    adv_ios1: "Safari'de Paylaş düğmesine dokun",
+    adv_ios2: "“Ana Ekrana Ekle”yi seç",
+    adv_mac1: "Safari'de Dosya menüsünü aç",
+    adv_mac2: "“Dock'a Ekle”yi seç",
+    adv_oth1: "Tarayıcının menüsünü aç (⋮ veya ⋯)",
+    adv_oth2: "“Uygulamayı yükle” veya “Ana ekrana ekle”yi seç",
+    adv_ok: "Anladım"
   };
 
   D.ro = {
@@ -1579,14 +1660,23 @@
     inst_title: "Instalează aplicația",
     inst_txt: "Instalat, Konso îți păstrează datele în siguranță pe acest dispozitiv, are propria pictogramă și funcționează fără internet.",
     inst_btn: "Instalează Konso",
-    inst_ios: "În Safari, atinge butonul Partajează, apoi „Adaugă pe ecranul principal”.",
-    inst_other: "În meniul browserului, alege „Instalează aplicația” sau „Adaugă pe ecranul de pornire” (Safari pe Mac: Fișier → „Adaugă în Dock”).",
     st_update: "Konso a fost actualizat: noua versiune va fi folosită la următoarea deschidere.",
     help_q11: "Versiunea web și instalarea",
     help_a11: "Konso funcționează și într-un browser, pe orice telefon, tabletă sau computer. Instalarea adaugă o pictogramă și permite folosirea fără internet: pe <b>iPhone / iPad</b>, în Safari, Partajează → „Adaugă pe ecranul principal”; pe <b>Android</b>, <b>Windows</b>, <b>Linux</b> sau <b>Mac</b>, în Chrome sau Edge, pictograma de instalare din bara de adrese sau meniul → „Instalează aplicația”; pe <b>Mac</b> cu Safari, Fișier → „Adaugă în Dock”. Datele rămân în browserul fiecărui dispozitiv: „Salvează un fișier de rezervă” (Setări) păstrează o copie, iar „Deschide un fișier de rezervă” o readuce, pe același dispozitiv sau pe altul.",
     inst_adv_title: "Instalează Konso",
     inst_later: "Mai târziu",
-    inst_adv_msg: "Ca datele tale să rămână salvate, instalează aplicația pe acest dispozitiv. Browserul poate șterge datele unui site web (Safari le șterge după 7 zile fără vizită), dar niciodată pe cele ale unei aplicații instalate. Amintește-ți și să salvezi din când în când un fișier de rezervă (Setări)."
+    adv_lead: "Adaugă Konso pe ecranul principal: datele tale rămân salvate în siguranță.",
+    adv_p1: "Datele tale rămân pe dispozitivul tău. Nu se trimite nimic.",
+    adv_p2: "Fără cont, fără reclame, fără urmărire.",
+    adv_p3: "Aplicație liberă (open source): codul ei este public, oricine îl poate verifica.",
+    adv_how: "Cum se face?",
+    adv_ios1: "Atinge butonul Partajează din Safari",
+    adv_ios2: "Alege „Adaugă pe ecranul principal”",
+    adv_mac1: "În Safari, deschide meniul Fișier",
+    adv_mac2: "Alege „Adaugă în Dock”",
+    adv_oth1: "Deschide meniul browserului (⋮ sau ⋯)",
+    adv_oth2: "Alege „Instalează aplicația” sau „Adaugă pe ecranul de pornire”",
+    adv_ok: "Am înțeles"
   };
 
   const api = { LANGS, D };
