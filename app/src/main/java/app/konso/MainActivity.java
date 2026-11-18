@@ -706,17 +706,17 @@ public class MainActivity extends Activity {
             prefs.edit().putBoolean(PREF_ONLINE, on).apply();
         }
 
-        /**
-         * Colours of the system bars, sent by the page each time its theme changes: top = colour
-         * of the top of the page, bottom = colour of its navigation bar, dark = dark theme. They are
-         * kept for the next launch.
-         */
         /** Room taken by the camera cutout on the left and right edges, in CSS pixels: "left,right". */
         @JavascriptInterface
         public String insets() {
             return cutout;
         }
 
+        /**
+         * Colours of the system bars, sent by the page each time its theme changes: top = colour
+         * of the top of the page, bottom = colour of its navigation bar, dark = dark theme. They are
+         * kept for the next launch.
+         */
         @JavascriptInterface
         public void setBars(final String top, final String bottom, final boolean dark) {
             if (top == null || bottom == null) return;
