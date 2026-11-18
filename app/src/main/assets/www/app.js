@@ -201,17 +201,17 @@ const catLabel = c => {
 //   cars: [{id, name, fuel, svcKm, svcDone, price, buyKm, ins, insPer}]
 //         fuel = usual fuel type, svcKm = service interval in km,
 //         svcDone = date of the last service confirmed from the banner,
-//         optional "advanced options" of the garage (0 or '' = not given): price = purchase price,
-//         buyDate = purchase date, buyKm = odometer at purchase in km, ins = insurance price,
-//         paid per insPer ('y' year, 'm' month)
+//         optional "advanced options" of the garage (0 = not given): price = purchase price,
+//         buyKm = odometer at purchase in km, ins = insurance price, paid per insPer ('y' year, 'm' month)
 //   cur:  id of the selected car
 //   fuel: fill-ups  [{id, car, d: date, k: km since the previous fill-up, l: litres, e: amount, c: fuel type, s: station}]
 //   buys: purchases [{id, car, d: date, e: amount, c: category, n: description, k: odometer in km, s: shop}]
 //   plan: the car the user wants to buy (My garage, "Buying a new car"), see planDefault()
 // Lists are kept sorted from the most recent date. LS is the localStorage key of the copy.
 // The car the user wants to buy, empty. price, ins (paid per insPer), cons in L/100 km, fuel = price
-// of a litre, withBuys = count the purchases of the current car. km (per year, in km) and resale
-// (resale price of the current car) are null while the user keeps the value suggested by the app.
+// of a litre, withBuys = count the purchases of the current car, resale = resale price of the
+// current car (typed by the user, 0 = none). km (per year, in km) is null while the user keeps the
+// value suggested by the app (from the fill-ups).
 const planDefault = () => ({
   price: 0,
   ins: 0,
@@ -220,7 +220,7 @@ const planDefault = () => ({
   fuel: 0,
   withBuys: false,
   km: null,
-  resale: null,
+  resale: 0,
 });
 let S = { cars: [{ id: 'c1', name: '', fuel: 'SP95-E10' }], cur: 'c1', fuel: [], buys: [], plan: planDefault() },
   LS = KP + 'data';
@@ -252,7 +252,6 @@ function norm(d) {
       svcKm: svcEvery(c),
       svcDone: /^\d{4}-\d{2}-\d{2}$/.test(c.svcDone) ? c.svcDone : '',
       price: Math.max(0, num(c.price)),
-      buyDate: /^\d{4}-\d{2}-\d{2}$/.test(c.buyDate) ? c.buyDate : '',
       buyKm: Math.max(0, num(c.buyKm)),
       ins: Math.max(0, num(c.ins)),
       insPer: c.insPer === 'm' ? 'm' : 'y',
@@ -291,8 +290,8 @@ function norm(d) {
     .sort(byDate);
   return { cars, cur: car(d.cur), fuel, buys, plan: normPlan(d.plan) };
 }
-// Clean the "Buying a new car" data (planDefault() if missing): numbers >= 0, km and resale null
-// when not typed by the user.
+// Clean the "Buying a new car" data (planDefault() if missing): numbers >= 0, km null when not
+// typed by the user.
 function normPlan(p) {
   p = p && typeof p === 'object' ? p : {};
   const pos = v => (isFinite(+v) && +v > 0 ? +v : 0),
@@ -305,7 +304,7 @@ function normPlan(p) {
     fuel: pos(p.fuel),
     withBuys: p.withBuys === true,
     km: opt(p.km),
-    resale: opt(p.resale),
+    resale: pos(p.resale),
   };
 }
 // The selected car, and its fill-ups (FU) and purchases (BU), most recent first.
@@ -2086,22 +2085,19 @@ $('carInsPer').onclick = () =>
 function fillCarAdvanced(c) {
   const show = (v, d) => (c && v > 0 ? String(+v.toFixed(d)) : '');
   $('carPrice').value = show(c && c.price, 2);
-  $('carBuyDate').value = (c && c.buyDate) || '';
   $('carBuyKm').value = show(c && dist(c.buyKm), 0);
   $('carIns').value = show(c && c.ins, 2);
   setInsPer((c && c.insPer) || 'y');
-  $('carAdv').open = !!(c && (c.price > 0 || c.buyDate || c.buyKm > 0 || c.ins > 0));
+  $('carAdv').open = !!(c && (c.price > 0 || c.buyKm > 0 || c.ins > 0));
 }
-// Read the advanced options of the form into car c. Empty or invalid fields are stored as 0 or ''
-// (= not given), a purchase date in the future is ignored; the mileage is typed in the chosen unit and stored in km.
+// Read the advanced options of the form into car c. Empty or invalid fields are stored as 0
+// (= not given); the mileage is typed in the chosen unit and stored in km.
 function readCarAdvanced(c) {
   const pos = id => {
     const v = +$(id).value;
     return v > 0 ? v : 0;
   };
   c.price = pos('carPrice');
-  const d = $('carBuyDate').value;
-  c.buyDate = /^\d{4}-\d{2}-\d{2}$/.test(d) && d <= today() ? d : '';
   c.buyKm = Math.round(distIn(pos('carBuyKm')));
   c.ins = pos('carIns');
   c.insPer = $('carInsPer').value === 'm' ? 'm' : 'y';
@@ -2193,7 +2189,7 @@ $('carDel').onclick = () => {
 //   current car: fuel (cost per km of its fill-ups) + insurance (advanced options)
 //                + purchases of the last 12 months if the switch is on
 //   new car:     distance x consumption x fuel price + insurance
-//   payback:     (purchase price - resale price of the current car) / yearly savings
+//   payback:     (purchase price - resale price of the current car, typed by the user) / yearly savings
 // ================================================================================================
 
 // Number of days from date a to date b (YYYY-MM-DD). Noon avoids daylight saving surprises.
@@ -2225,13 +2221,6 @@ function kmYearEstimate() {
   if (days < 14) return null;
   const km = F.slice(0, -1).reduce((a, f) => a + f.k, 0);
   return (km / days) * 365;
-}
-// Resale price of car c: its purchase price minus 15 % per year since its purchase date.
-// null without purchase price and date (advanced options). Rounded to 10.
-function resaleEstimate(c) {
-  if (!(c && c.price > 0 && c.buyDate)) return null;
-  const years = Math.max(0, dayDiff(c.buyDate, today()) / 365.25);
-  return Math.round((c.price * Math.pow(0.85, years)) / 10) * 10;
 }
 // Amount of the purchases of the selected car over the last 12 months.
 function buysLastYear() {
@@ -2267,14 +2256,13 @@ $('pInsPer').onclick = () =>
     },
   });
 
-// Fill the card from S.plan, in the units chosen by the user. Distance per year and resale price
-// show the suggestion of the app when the user has not typed a value; the note under each field
-// tells where the suggestion comes from. Called by render().
+// Fill the card from S.plan, in the units chosen by the user. Distance per year shows the suggestion
+// of the app (from the fill-ups) when the user has not typed a value; the note under the field tells
+// where it comes from. Called by render().
 function renderPlan() {
   const P = S.plan,
     c = curCar(),
-    kmEst = kmYearEstimate(),
-    rsEst = resaleEstimate(c);
+    kmEst = kmYearEstimate();
   $('pCurT').textContent = tx('pl_cur', { car: carName(c) });
   $('pPrice').value = numField(P.price, 2);
   $('pIns').value = numField(P.ins, 2);
@@ -2285,9 +2273,7 @@ function renderPlan() {
   $('pKm').value = km !== null ? String(Math.round(dist(km))) : '';
   $('pKmN').textContent =
     kmEst !== null ? tx('pl_km_est', { v: fmt(dist(kmEst), 0) + ' ' + DU() }) : tx('pl_km_none');
-  const rs = P.resale !== null ? P.resale : rsEst;
-  $('pResale').value = rs !== null ? String(+rs.toFixed(2)) : '';
-  $('pResaleN').textContent = rsEst !== null ? tx('pl_resale_est', { v: money(rsEst, 0) }) : tx('pl_resale_none');
+  $('pResale').value = numField(P.resale, 2);
   $('pWith').checked = P.withBuys;
   $('pWithN').textContent = tx('pl_with_note', { v: money(buysLastYear(), 0) });
   planResult();
@@ -2309,8 +2295,7 @@ function planResult() {
   const curY = km * perKm + insYear(c.ins, c.insPer) + (P.withBuys ? buysLastYear() : 0),
     newY = ((km * P.cons) / 100) * P.fuel + insYear(P.ins, P.insPer),
     save = curY - newY;
-  const resale = P.resale !== null ? P.resale : resaleEstimate(c) || 0,
-    cost = P.price - resale;
+  const cost = P.price - P.resale;
   const row = (k, v) => `<div class="kv"><span>${esc(tx(k))}</span><span>${money(v, 0)}</span></div>`;
   let big;
   if (save <= 0) big = tx('pl_never', { v: money(-save, 0) });
@@ -2335,7 +2320,7 @@ function planChanged() {
   planResult();
 }
 // Each field writes its value into S.plan, converted to km, L/100 km and price per litre.
-// Distance per year and resale price: an empty field goes back to the suggestion (null).
+// Distance per year: an empty field goes back to the suggestion (null).
 function planInputs() {
   const pos = id => {
       const v = +$(id).value;
@@ -2348,7 +2333,7 @@ function planInputs() {
     pCons: () => (S.plan.cons = pos('pCons') ? consSwap(pos('pCons')) : 0),
     pFuel: () => (S.plan.fuel = priceIn(pos('pFuel'))),
     pKm: () => (S.plan.km = opt('pKm') === null ? null : distIn(opt('pKm'))),
-    pResale: () => (S.plan.resale = opt('pResale')),
+    pResale: () => (S.plan.resale = pos('pResale')),
   };
   for (const id in fields)
     $(id).addEventListener('input', () => {
