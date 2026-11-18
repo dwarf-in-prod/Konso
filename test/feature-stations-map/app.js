@@ -690,11 +690,13 @@ function makeWheel(list, labels, sel, loop, onPick) {
   paint();
   return at;
 }
-// Icons of the wheel screen (SVG paths). globe, wrench and pump are copied from icons already in the page.
+// Icons of the wheel screen and the dialogs (SVG paths). globe, wrench, pump and pin are copied from
+// icons already in the page.
 const ICON = {
   globe: document.querySelector('#lang svg path').getAttribute('d'),
   wrench: document.querySelector('#svcBar svg path').getAttribute('d'),
   pump: document.querySelector('.nav [data-t="fuel"] svg path').getAttribute('d'),
+  pin: document.querySelector('.nav [data-t="stations"] svg path').getAttribute('d'),
   theme:
     'M20 15.31L23.31 12 20 8.69V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69zM12 18V6c3.31 0 6 2.69 6 6s-2.69 6-6 6z',
   ruler:
@@ -3071,6 +3073,7 @@ function mapRoute(r) {
 function mapLocate() {
   if (!map) return;
   if (!navigator.geolocation) return status(tx('map_noloc'));
+  if (!locationIsOn()) return askLocationOn();
   mapNote(tx('map_locating'));
   navigator.geolocation.getCurrentPosition(
     pos => {
@@ -3081,14 +3084,44 @@ function mapLocate() {
       } else mapMe.setLatLng(ll);
       map.setView(ll, Math.max(map.getZoom(), 13));
     },
-    () => {
-      status(tx('map_noloc'));
+    err => {
       mapLoad();
+      // the location may have been turned off meanwhile: offer to turn it on again
+      if (err && err.code !== 1 && !locationIsOn()) askLocationOn();
+      else status(tx('map_noloc'));
     },
     { enableHighAccuracy: false, timeout: 15000, maximumAge: 120000 },
   );
 }
 $('stLocate').onclick = mapLocate;
+// Android app: is the phone's location (GPS) on? Always true in a browser, which handles it itself.
+const locationIsOn = () => !NA || typeof NA.locationOn !== 'function' || NA.locationOn();
+// The phone's location is off: Android would give no position at all, so offer to open the location
+// settings. Back in the app with the location on, the map is centred on the user at once.
+let mapLocatePending = false;
+function askLocationOn() {
+  mapLoad();
+  dialog(
+    tx('map_gps_t'),
+    '<p>' + esc(tx('map_gps_msg')) + '</p>',
+    [
+      { t: tx('cancel'), tonal: true },
+      {
+        t: tx('map_gps_open'),
+        fn: () => {
+          mapLocatePending = true;
+          NA.openLocationSettings();
+        },
+      },
+    ],
+    'pin',
+  );
+}
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState !== 'visible' || !mapLocatePending) return;
+  mapLocatePending = false;
+  if (locationIsOn()) mapLocate();
+});
 
 // ================================================================================================
 // Navigation and keyboard
