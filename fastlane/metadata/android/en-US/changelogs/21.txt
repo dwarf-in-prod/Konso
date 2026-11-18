@@ -1,0 +1,1 @@
+Clearer interface. The fuel of a fill-up is chosen with the wheel, like the other lists. Distance, litres and amount are green while empty. The form is shorter: calculations and tips only appear when useful. The service message lets you answer "Yes, it's done" right away. More readable charts (larger text, stronger colours) and an easier-to-tap bin button.
