@@ -7,6 +7,8 @@ import android.content.SharedPreferences;
 import android.content.UriPermission;
 import android.database.Cursor;
 import android.graphics.Color;
+import android.graphics.Insets;
+import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -26,6 +28,7 @@ import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.FrameLayout;
 
 import org.json.JSONObject;
 
@@ -61,7 +64,8 @@ import java.util.concurrent.Executors;
  *   read / write konso.json in it through the Storage Access Framework (works with Google Drive too);
  * - colours the status bar and the navigation bar like the page (light or dark theme), so the app
  *   looks like it fills the whole screen (Bridge.setBars()), and in landscape lets the page draw
- *   next to the camera cutout instead of leaving a black band (Bridge.insets()).
+ *   next to the camera cutout instead of leaving a black band (drawBehindBars(), fitBars(),
+ *   Bridge.insets()).
  */
 public class MainActivity extends Activity {
 
@@ -92,6 +96,8 @@ public class MainActivity extends Activity {
     private static final int REQ_IMAGE = 2;
 
     private WebView web;
+    /** Holds the WebView; its padding keeps the page clear of the system bars (fitBars()). */
+    private FrameLayout root;
     /** Room taken by the camera cutout on the left and right edges, in CSS pixels ("left,right"). */
     private volatile String cutout = "0,0";
     private SharedPreferences prefs;
@@ -122,18 +128,25 @@ public class MainActivity extends Activity {
         }
 
         // In landscape the camera cutout is on a short edge: draw the page there too (the page keeps
-        // its content clear of the cutout, see Bridge.insets()) instead of a black band.
+        // its content clear of the cutout, see Bridge.insets()) instead of a black band. Letting
+        // the window reach the cutout is not enough: Android would still pad the content by the
+        // cutout, showing the (black) window background. So the app lays itself out behind the
+        // system bars and keeps clear of the bars only (fitBars()), not of the cutout.
         WindowManager.LayoutParams lp = getWindow().getAttributes();
         lp.layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
         getWindow().setAttributes(lp);
+        drawBehindBars();
 
         web = new WebView(this);
-        setContentView(web);
-        web.setOnApplyWindowInsetsListener(new View.OnApplyWindowInsetsListener() {
+        root = new FrameLayout(this);
+        root.addView(web, new FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
+        setContentView(root);
+        root.setOnApplyWindowInsetsListener(new View.OnApplyWindowInsetsListener() {
             @Override
             public WindowInsets onApplyWindowInsets(View v, WindowInsets insets) {
                 readCutout(insets);
-                return v.onApplyWindowInsets(insets);
+                return fitBars(v, insets);
             }
         });
 
@@ -484,6 +497,9 @@ public class MainActivity extends Activity {
             w.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
             w.setStatusBarColor(Color.parseColor(top));
             w.setNavigationBarColor(Color.parseColor(bottom));
+            // the window background shows wherever the page does not reach (it is black in the
+            // device theme): give it the page's colour, so no black band can appear
+            w.setBackgroundDrawable(new ColorDrawable(Color.parseColor(top)));
             if (Build.VERSION.SDK_INT >= 30) {
                 WindowInsetsController c = w.getInsetsController();
                 if (c != null) {
@@ -500,6 +516,47 @@ public class MainActivity extends Activity {
         } catch (IllegalArgumentException e) {
             // not a colour: the bars keep their current colours
         }
+    }
+
+    /**
+     * Lay the window out behind the status bar and the navigation bar: the app then decides itself
+     * how much room to leave them (fitBars()), and Android no longer pads the content by the camera
+     * cutout. The bars keep their colours (applyBars()), drawn over the room left for them.
+     */
+    private void drawBehindBars() {
+        Window w = getWindow();
+        if (Build.VERSION.SDK_INT >= 30) {
+            w.setDecorFitsSystemWindows(false);
+        } else {
+            View d = w.getDecorView();
+            d.setSystemUiVisibility(d.getSystemUiVisibility() | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                    | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);
+        }
+    }
+
+    /**
+     * Pad v (the WebView's frame) by the room the status bar, the navigation bar and the keyboard
+     * take, but not by the camera cutout: the page itself keeps clear of the cutout (Bridge.insets()).
+     * The keyboard is counted too, as adjustResize no longer shrinks a window laid out behind the
+     * bars. Returns the insets left for the WebView, without the bars and the keyboard, so the page
+     * does not keep clear of them a second time.
+     */
+    private WindowInsets fitBars(View v, WindowInsets insets) {
+        if (Build.VERSION.SDK_INT >= 30) {
+            Insets bars = insets.getInsets(WindowInsets.Type.systemBars() | WindowInsets.Type.ime());
+            v.setPadding(bars.left, bars.top, bars.right, bars.bottom);
+            return new WindowInsets.Builder(insets)
+                    .setInsets(WindowInsets.Type.systemBars(), Insets.NONE)
+                    .setInsets(WindowInsets.Type.ime(), Insets.NONE)
+                    .build();
+        }
+        // Android 10: the system window insets may also count the cutout; leave that part out
+        DisplayCutout c = insets.getDisplayCutout();
+        int cl = c == null ? 0 : c.getSafeInsetLeft(),
+                cr = c == null ? 0 : c.getSafeInsetRight();
+        v.setPadding(Math.max(0, insets.getSystemWindowInsetLeft() - cl), insets.getSystemWindowInsetTop(),
+                Math.max(0, insets.getSystemWindowInsetRight() - cr), insets.getSystemWindowInsetBottom());
+        return insets.replaceSystemWindowInsets(0, 0, 0, 0);
     }
 
     /**
