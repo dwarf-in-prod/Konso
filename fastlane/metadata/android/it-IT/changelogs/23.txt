@@ -1,0 +1,1 @@
+Correzione in orizzontale: la banda nera accanto alla fotocamera è sparita davvero. L'app arriva ora fino al bordo dello schermo, e il contenuto resta lontano dalla fotocamera.

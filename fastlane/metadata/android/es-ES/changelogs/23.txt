@@ -1,0 +1,1 @@
+Corrección en horizontal: la franja negra junto a la cámara ha desaparecido por fin. La app llega ahora hasta el borde de la pantalla, y el contenido queda apartado de la cámara.
