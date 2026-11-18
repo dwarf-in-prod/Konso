@@ -171,6 +171,66 @@
           <div class="card" id="cars-list"></div>
           <button class="btn" id="carAdd" data-i18n="car_add"></button>
           <div class="note" data-i18n="g_hint"></div>
+          <!-- Buying a new car: what the change costs and when it pays for itself, worked out while
+               the user types (renderPlan() and planResult() in app.js). Everything is saved. -->
+          <div class="card" id="plan">
+            <h3 data-i18n="pl_title"></h3>
+            <div class="note" style="margin-top: 0" data-i18n="pl_intro"></div>
+            <h4 class="sub" data-i18n="pl_new"></h4>
+            <div class="grid">
+              <div class="f full">
+                <input type="number" id="pPrice" inputmode="decimal" step="0.01" min="0" placeholder=" " /><label
+                  for="pPrice"
+                  data-i18n="car_price"
+                ></label>
+              </div>
+              <div class="f">
+                <input type="number" id="pIns" inputmode="decimal" step="0.01" min="0" placeholder=" " /><label
+                  for="pIns"
+                  data-i18n="car_ins"
+                ></label>
+              </div>
+              <div class="f fl sel">
+                <button type="button" class="fieldbtn" id="pInsPer"></button
+                ><label data-i18n="car_ins_per"></label>
+              </div>
+              <div class="f full">
+                <input type="number" id="pCons" inputmode="decimal" step="0.1" min="0" placeholder=" " /><label
+                  for="pCons"
+                  data-i18n="pl_cons"
+                ></label>
+              </div>
+              <div class="f full">
+                <input type="number" id="pFuel" inputmode="decimal" step="0.001" min="0" placeholder=" " /><label
+                  for="pFuel"
+                  data-i18n="pl_fuel"
+                ></label>
+              </div>
+            </div>
+            <h4 class="sub" id="pCurT"></h4>
+            <div class="grid">
+              <div class="f full">
+                <input type="number" id="pKm" inputmode="numeric" step="1" min="0" placeholder=" " /><label
+                  for="pKm"
+                  data-i18n="pl_km"
+                ></label>
+              </div>
+              <div class="note full fnote" id="pKmN"></div>
+              <div class="f full">
+                <input type="number" id="pResale" inputmode="decimal" step="1" min="0" placeholder=" " /><label
+                  for="pResale"
+                  data-i18n="pl_resale"
+                ></label>
+              </div>
+              <div class="note full fnote" id="pResaleN"></div>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="pWith" /><span class="trk"></span><span data-i18n="pl_with"></span>
+            </label>
+            <div class="note" id="pWithN"></div>
+            <div class="planres" id="pRes"></div>
+            <button class="btn tonal" id="pReset" data-i18n="pl_reset"></button>
+          </div>
         </div>
         <!-- Add / edit car form (hides the list while open) -->
         <div class="card hide" id="carForm">
@@ -197,6 +257,9 @@
                   for="carPrice"
                   data-i18n="car_price"
                 ></label>
+              </div>
+              <div class="f full fl">
+                <input type="date" id="carBuyDate" /><label for="carBuyDate" data-i18n="car_buydate"></label>
               </div>
               <div class="f full">
                 <input type="number" id="carBuyKm" inputmode="numeric" step="1" min="0" placeholder=" " /><label
@@ -335,6 +398,10 @@
           <details>
             <summary data-i18n="help_q11"></summary>
             <div class="note" data-i18n-html="help_a11"></div>
+          </details>
+          <details>
+            <summary data-i18n="help_q12"></summary>
+            <div class="note" data-i18n-html="help_a12"></div>
           </details>
         </div>
       </section>

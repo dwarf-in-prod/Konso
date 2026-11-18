@@ -57,7 +57,8 @@ Written by an AI does not mean unchecked: all the source code is open, so anyone
 - 🛠️ **Service reminders**: every year or every 10,000 km, whichever comes first (adjustable from 100 to 100,000 km, per car). A message appears once, then an amber banner stays at the top of the screen; tap it once the service is done and tracking starts again from zero.
 - 📊 **Overview**: averages, consumption chart, monthly spending.
 - 📏 **Units and currency**: kilometres or miles (L/100 km, UK mpg, or US mpg with US gallons) and €, £, $, CHF, zł, lei or ₺. Chosen with three wheels at first launch (language, units, currency) and changeable in Settings. Data is always stored in km and litres, so switching units loses nothing.
-- 🚗 **Several cars**, each with its own history and reminders, managed in the *My garage* tab (optional advanced options: purchase price, mileage at purchase, insurance per year or per month).
+- 🚗 **Several cars**, each with its own history and reminders, managed in the *My garage* tab (optional advanced options: purchase price and date, mileage at purchase, insurance per year or per month).
+- 💶 **Buying a new car?** *My garage* compares the yearly cost of your current car (from your fill-ups) with the one you want to buy, and tells you when the change pays for itself. Updated as you type.
 - 💾 **Automatic backup** to `konso.json`, updated after every change.
 - 🎡 **Wheel pickers** for language, units, currency, categories and service distance.
 - 🌍 **10 languages**: English, French, Spanish, German, Italian, Portuguese, Dutch, Polish, Turkish, Romanian.
@@ -177,7 +178,8 @@ Comment elle est faite :
 - 🛠️ **Rappels d'entretien** : tous les ans ou tous les 10 000 km, au premier des deux (réglable de 100 à 100 000 km, par voiture). Un message s'affiche une fois, puis un bandeau ambre reste en haut de l'écran ; un appui valide l'entretien et le suivi repart de zéro.
 - 📊 **Bilan** : moyennes, courbe de consommation, dépenses par mois.
 - 📏 **Unités et monnaie** : kilomètres ou miles (L/100 km, mpg britannique, ou mpg américain avec gallons US) et €, £, $, CHF, zł, lei ou ₺. Choisis avec trois roues au premier lancement (langue, unités, monnaie), modifiables dans les Réglages. Les données sont toujours enregistrées en km et en litres : changer d'unité ne perd rien.
-- 🚗 **Plusieurs voitures**, chacune avec son historique et ses rappels, gérées dans l'onglet *Mon garage* (options avancées facultatives : prix d'achat, kilométrage à l'achat, assurance par an ou par mois).
+- 🚗 **Plusieurs voitures**, chacune avec son historique et ses rappels, gérées dans l'onglet *Mon garage* (options avancées facultatives : prix et date d'achat, kilométrage à l'achat, assurance par an ou par mois).
+- 💶 **Envie d'une nouvelle voiture ?** *Mon garage* compare le coût annuel de ta voiture actuelle (d'après tes pleins) avec celle que tu veux acheter, et te dit quand le changement est rentabilisé. Calculé pendant que tu tapes.
 - 💾 **Sauvegarde automatique** dans `konso.json`, mise à jour à chaque modification.
 - 🎡 **Choix par roue** pour la langue, les unités, la monnaie, les catégories et le kilométrage d'entretien.
 - 🌍 **10 langues** : français, anglais, espagnol, allemand, italien, portugais, néerlandais, polonais, turc, roumain.
