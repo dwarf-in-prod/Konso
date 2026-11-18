@@ -35,7 +35,17 @@ function demo(serviceDaysAgo, svcKm) {
     { id: 202, car: 'c1', d: day(-130), e: 386, c: 'Pneus', n: '4 all-season tyres', k: 0, s: '' },
     { id: 203, car: 'c1', d: day(-180), e: 44.9, c: 'Huile moteur', n: 'Engine oil 5W-30, 5 L', k: 0, s: '' }
   ];
-  return { app: 'konso', version: 2, cur: 'c1', cars: [{ id: 'c1', name: '', fuel: 'SP95-E10', svcKm }], fuel, buys };
+  return { app: 'konso', version: 2, cur: 'c1', cars: [{ id: 'c1', name: '', fuel: 'SP95-E10', svcKm }], fuel, buys, stations: demoStations() };
+}
+// Demo followed stations (Stations tab): made-up addresses, E10 prices changing every few days
+// over the last two months, drawn as steps in the chart.
+function demoStations() {
+  const st = (id, adr, base, step) => {
+    const h = [];
+    for (let i = 60; i >= 0; i -= step) h.push([day(-i) + 'T08:00', r2((base + 0.04 * Math.sin(i / 9) + (i % 7) * 0.002) * 1000) / 1000]);
+    return { id, adr, ville: 'Lyon', cp: '69007', h: { e10: h } };
+  };
+  return [st(69007901, '12 Avenue de la Gare', 1.79, 4), st(69007902, 'Route de Vienne', 1.82, 6), st(69007903, 'Centre commercial des Lilas', 1.75, 5)];
 }
 
 (async () => {
@@ -58,6 +68,14 @@ function demo(serviceDaysAgo, svcKm) {
       localStorage.setItem('konso-lang', 'en');
       localStorage.setItem('konso-data', json);
       localStorage.setItem('konso-install-seen', '1'); // web version: no install advice over the screenshot
+      // Stations: connection allowed, but the official price site is answered here with no new
+      // price, so the screenshots never use the internet and stay the same on every run
+      localStorage.setItem('konso-online', '1');
+      const realFetch = window.fetch;
+      window.fetch = (u, o) =>
+        String(u).includes('data.economie.gouv.fr')
+          ? Promise.resolve(new Response(JSON.stringify({ total_count: 0, results: [] }), { headers: { 'Content-Type': 'application/json' } }))
+          : realFetch(u, o);
       // stand-in for the Android bridge of MainActivity: a backup folder is already chosen
       if (!web) window.Android = { folderName: () => 'Konso', fileName: () => 'konso.json', pickFolder: () => {}, readFile: () => json, writeFile: () => 'ok' };
     }, [data, !!web]);
@@ -88,8 +106,11 @@ function demo(serviceDaysAgo, svcKm) {
   await page.evaluate(() => showTab('stats'));
   await shot(page, '3-overview.png');
 
+  await page.evaluate(() => showTab('stations'));
+  await page.waitForTimeout(300);
+  await shot(page, '5-stations.png');
+
   await page.evaluate(() => showTab('save'));
-  await shot(page, '5-settings.png');
 
   await page.click('#svcKmBtn');
   await shot(page, '6-wheel-picker.png');

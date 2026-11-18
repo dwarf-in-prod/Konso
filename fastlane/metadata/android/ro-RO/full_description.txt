@@ -6,10 +6,11 @@ Funcții:
 * Cumpărături: ulei, piese, anvelope, revizii… sortate pe categorii.
 * Mementouri de întreținere: în fiecare an sau la fiecare 10.000 km, care vine primul (reglabil pentru fiecare mașină).
 * Rezumat: medii, grafic de consum, cheltuieli lunare.
+* Prețuri la benzinării (Franța, opțional): urmărește câte benzinării vrei, cu ultimul preț oficial și un grafic al prețului carburantului tău.
 * Mai multe mașini, fiecare cu istoricul și mementourile ei.
 * Copie de siguranță automată într-un simplu fișier konso.json, în dosarul ales de tine.
 * 10 limbi, temă luminoasă sau întunecată, ajutor integrat.
 
-Confidențialitate: singura permisiune de rețea servește la afișarea fișierelor proprii ale aplicației pe 127.0.0.1. Orice cerere către alt server este blocată.
+Confidențialitate: permisiunea de rețea servește doar la afișarea fișierelor aplicației pe 127.0.0.1; orice cerere către alt server este blocată. Singura excepție, dezactivată implicit: dacă o activezi în fila Benzinării, aplicația poate accesa site-ul oficial francez al prețurilor carburanților (data.economie.gouv.fr), și doar pe acesta.
 
 Konso a fost creată cu IA (Claude Code); fiecare versiune este testată de un om pe un telefon real. Codul sursă este deschis, sub licența GPL-3.0.

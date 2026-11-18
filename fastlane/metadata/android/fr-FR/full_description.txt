@@ -6,10 +6,11 @@ Fonctionnalités :
 * Achats : huile, pièces, pneus, entretien… classés par catégorie.
 * Rappels d'entretien : tous les ans ou tous les 10 000 km, au premier des deux (réglable pour chaque voiture).
 * Bilan : moyennes, courbe de consommation, dépenses par mois.
+* Prix des stations (France, facultatif) : suis autant de stations que tu veux, avec le dernier prix officiel et un graphique du prix de ton carburant.
 * Plusieurs voitures, chacune avec son historique et ses rappels.
 * Sauvegarde automatique dans un simple fichier konso.json, dans le dossier de ton choix.
 * 10 langues, thème clair ou sombre, aide intégrée.
 
-Vie privée : la seule permission réseau sert à afficher les fichiers de l'appli sur 127.0.0.1. Toute requête vers un autre hôte est bloquée.
+Vie privée : la permission réseau sert à afficher les fichiers de l'appli sur 127.0.0.1 ; toute requête vers un autre hôte est bloquée. Seule exception, désactivée par défaut : si tu l'actives dans l'onglet Stations, l'appli peut joindre le site officiel des prix des carburants (data.economie.gouv.fr), et uniquement lui.
 
 Konso a été créée avec l'IA (Claude Code) ; chaque version est testée sur un vrai téléphone par un humain. Son code source est ouvert, sous licence GPL-3.0.

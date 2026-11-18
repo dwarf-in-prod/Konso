@@ -5,8 +5,8 @@
  * (installable PWA) is the same files, published by tools/build-web.js with web/ (offline cache, icons).
  *
  * Files
- * - index.html: the screens (four tabs: Fill-ups, Purchases, Stats, My garage; Settings, opened
- *               with the gear of the top bar; plus overlays).
+ * - index.html: the screens (four tabs: Fill-ups, Stations, Stats, My garage with the cars and
+ *               the purchases; Settings, opened with the gear of the top bar; plus overlays).
  * - app.css:    the styles (Material Design 3, light and dark theme).
  * - app.js:     this file, all the behaviour.
  * - i18n.js:    every text shown, in 10 languages. The code never contains visible text: tx(key).
@@ -207,6 +207,8 @@ const catLabel = c => {
 //   fuel: fill-ups  [{id, car, d: date, k: km since the previous fill-up, l: litres, e: amount, c: fuel type, s: station}]
 //   buys: purchases [{id, car, d: date, e: amount, c: category, n: description, k: odometer in km, s: shop}]
 //   plan: the car the user wants to buy (My garage, "Buying a new car"), see planDefault()
+//   stations: followed stations (Stations tab) [{id: number of the official feed, adr, ville, cp,
+//             h: {fuel name of the feed (e10, gazole...): [[date "YYYY-MM-DDTHH:MM", price per litre]]}}]
 // Lists are kept sorted from the most recent date. LS is the localStorage key of the copy.
 // The car the user wants to buy, empty. price, ins (paid per insPer), cons in L/100 km, fuel = price
 // of a litre, withBuys = count the purchases of the current car, resale = resale price of the
@@ -222,7 +224,14 @@ const planDefault = () => ({
   km: null,
   resale: 0,
 });
-let S = { cars: [{ id: 'c1', name: '', fuel: 'SP95-E10' }], cur: 'c1', fuel: [], buys: [], plan: planDefault() },
+let S = {
+    cars: [{ id: 'c1', name: '', fuel: 'SP95-E10' }],
+    cur: 'c1',
+    fuel: [],
+    buys: [],
+    plan: planDefault(),
+    stations: [],
+  },
   LS = KP + 'data';
 const carName = c => c.name || tx('car_default'); // the default car has no name: translated label
 // Clean data coming from a file, an import or localStorage: types checked, texts cut to a maximum
@@ -288,7 +297,27 @@ function norm(d) {
     }))
     .filter(x => x.e > 0)
     .sort(byDate);
-  return { cars, cur: car(d.cur), fuel, buys, plan: normPlan(d.plan) };
+  return { cars, cur: car(d.cur), fuel, buys, plan: normPlan(d.plan), stations: normStations(d.stations) };
+}
+// Clean the followed stations: a positive number id (once), texts cut to a maximum length, and for
+// each fuel the valid [date, price] pairs, oldest first, at most 400.
+function normStations(list) {
+  const seen = new Set();
+  return (Array.isArray(list) ? list : [])
+    .filter(x => x && typeof x === 'object' && +x.id > 0 && !seen.has(+x.id) && seen.add(+x.id))
+    .map(x => {
+      const h = {};
+      for (const f of ['e10', 'sp95', 'sp98', 'e85', 'gplc', 'gazole']) {
+        const pts = (Array.isArray(x.h && x.h[f]) ? x.h[f] : [])
+          .filter(p => Array.isArray(p) && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(p[0]) && +p[1] > 0)
+          .map(p => [p[0], +p[1]])
+          .sort((a, b) => a[0].localeCompare(b[0]))
+          .slice(-400);
+        if (pts.length) h[f] = pts;
+      }
+      const t = (v, n) => String(v == null ? '' : v).slice(0, n);
+      return { id: +x.id, adr: t(x.adr, 120), ville: t(x.ville, 80), cp: t(x.cp, 5), h };
+    });
 }
 // Clean the "Buying a new car" data (planDefault() if missing): numbers >= 0, km null when not
 // typed by the user.
@@ -349,6 +378,7 @@ function payload() {
       fuel: S.fuel,
       buys: S.buys,
       plan: S.plan,
+      stations: S.stations,
     },
     null,
     2,
@@ -1496,7 +1526,8 @@ $('addB').onclick = () => {
 // Histories and Stats tab
 // ================================================================================================
 
-// Delete a fill-up or a purchase with two taps (confirm() dialogs are blocked in the WebView):
+// Delete a fill-up, a purchase or a followed station (kind = fuel, buys or stations) with two taps
+// (confirm() dialogs are blocked in the WebView):
 // the first tap turns the bin into "Confirm?" for 3 seconds, the second deletes.
 let armed = null;
 function delClick(kind, id, btn) {
@@ -1530,6 +1561,7 @@ function render() {
   barChart();
   svcUI();
   renderPlan();
+  renderStations();
 }
 
 // Bin button of a history line.
@@ -2354,17 +2386,332 @@ $('pReset').onclick = () => {
 };
 
 // ================================================================================================
+// Stations (official fuel prices, France)
+// Konso does not use the internet, except here and only while the user has turned the switch on:
+// the app then reads the official French feed "Prix des carburants en France - Flux instantané v2"
+// (data.economie.gouv.fr, updated every 10 minutes, one record per station). In the Android app,
+// MainActivity lets the page reach that host only while the switch is on (Android.setOnline()).
+// The feed only gives the current prices: every new price is kept in S.stations, so the chart
+// builds up over time. The chart also shows the price per litre of the user's own fill-ups.
+// ================================================================================================
+
+// Records of the official feed, and the fields read from it.
+const PRICES_API =
+  'https://data.economie.gouv.fr/api/explore/v2.1/catalog/datasets/prix-des-carburants-en-france-flux-instantane-v2/records';
+// Konso fuel types -> name of the fuel in the feed (fields <name>_prix and <name>_maj).
+const FEED_FUEL = { 'SP95-E10': 'e10', SP95: 'sp95', SP98: 'sp98', E85: 'e85', GPL: 'gplc', Gazole: 'gazole' };
+const FEED_FIELDS =
+  'id,adresse,ville,cp,' +
+  Object.values(FEED_FUEL)
+    .map(f => f + '_prix,' + f + '_maj')
+    .join(',');
+// The switch "Allow the connection for stations": a preference of the device (localStorage).
+const OK_KEY = KP + 'online';
+let ONLINE = false;
+// Time of the last refresh of the followed stations (ms, this session), and the search results.
+let stChecked = 0,
+  stFound = [];
+const ST_EVERY = 30 * 60e3; // automatic refresh at most every 30 minutes
+const ST_KEEP = 400; // prices kept per station and fuel
+
+// Turn the connection on or off (and tell the Android side, which enforces it).
+function setOnline(on) {
+  ONLINE = !!on;
+  try {
+    localStorage.setItem(OK_KEY, ONLINE ? '1' : '0');
+  } catch (e) {}
+  if (NA && typeof NA.setOnline === 'function') NA.setOnline(ONLINE);
+  renderStations();
+  if (ONLINE) refreshStations(true);
+}
+$('stOnline').onchange = () => setOnline($('stOnline').checked);
+
+// Ask the feed for the stations matching an ODSQL condition (where), at most limit records.
+async function feed(where, limit) {
+  const q = new URLSearchParams({ where, limit: String(limit), select: FEED_FIELDS });
+  const r = await fetch(PRICES_API + '?' + q, { cache: 'no-store' });
+  if (!r.ok) throw new Error('HTTP ' + r.status);
+  return (await r.json()).results || [];
+}
+// Keep the new prices of a feed record in station st: for each fuel, a price is added when its
+// date of change differs from the last one kept. The feed's dates are French local time although
+// they end in +00:00, so only "YYYY-MM-DDTHH:MM" is kept and shown as is.
+function keepPrices(st, rec) {
+  st.adr = String(rec.adresse || st.adr || '').slice(0, 120);
+  st.ville = String(rec.ville || st.ville || '').slice(0, 80);
+  st.cp = String(rec.cp || st.cp || '').slice(0, 5);
+  for (const f of Object.values(FEED_FUEL)) {
+    const p = +rec[f + '_prix'],
+      d = String(rec[f + '_maj'] || '').slice(0, 16);
+    if (!(p > 0) || !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(d)) continue;
+    const h = (st.h[f] = st.h[f] || []),
+      last = h[h.length - 1];
+    if (last && last[0] >= d) continue;
+    h.push([d, p]);
+    if (h.length > ST_KEEP) h.splice(0, h.length - ST_KEEP);
+  }
+}
+// Update the prices of the followed stations (one request for up to 100 stations). Automatic when
+// the tab opens (at most every ST_EVERY), or forced by the Refresh button. Errors: a message.
+async function refreshStations(force) {
+  if (!ONLINE || !S.stations.length) return;
+  if (!force && Date.now() - stChecked < ST_EVERY) return;
+  stChecked = Date.now();
+  $('stUpd').textContent = tx('st_busy');
+  try {
+    for (let i = 0; i < S.stations.length; i += 100) {
+      const ids = S.stations.slice(i, i + 100).map(s => s.id);
+      const recs = await feed('id in (' + ids.join(',') + ')', 100);
+      recs.forEach(r => {
+        const st = S.stations.find(s => s.id === +r.id);
+        if (st) keepPrices(st, r);
+      });
+    }
+    persistQuiet();
+  } catch (e) {
+    stChecked = 0;
+    status(tx('st_err'));
+  }
+  renderStations();
+}
+$('stRefresh').onclick = () => refreshStations(true);
+
+// Search the stations of a postcode (5 digits) and list them with a + button to follow them.
+async function searchStations() {
+  const cp = $('stCp').value.trim();
+  if (!/^\d{5}$/.test(cp)) return status(tx('st_need_cp'));
+  $('stRes').innerHTML = '<div class="note">' + esc(tx('st_busy')) + '</div>';
+  try {
+    stFound = await feed('cp="' + cp + '"', 100);
+  } catch (e) {
+    stFound = [];
+    $('stRes').innerHTML = '';
+    return status(tx('st_err'));
+  }
+  renderFound();
+}
+$('stSearch').onclick = searchStations;
+$('stCp').addEventListener('keydown', e => {
+  if (e.key === 'Enter') searchStations();
+});
+// The search results: address, postcode and town, price of the car's fuel, + (or "Followed").
+function renderFound() {
+  const key = FEED_FUEL[defaultFuel()];
+  const rows = stFound.map(r => {
+    const followed = S.stations.some(s => s.id === +r.id),
+      p = +r[key + '_prix'];
+    const right = followed
+      ? `<span class="st-done">${esc(tx('st_already'))}</span>`
+      : `<button class="st-add" data-i="${+r.id}" aria-label="${esc(tx('st_add'))}">${PLUS_SVG}</button>`;
+    return (
+      '<div class="row">' +
+      `<div class="l"><div class="t">${esc(prettyAdr(r.adresse))}</div><div class="m">${esc((r.cp || '') + ' ' + (r.ville || ''))}</div></div>` +
+      `<div class="r"><div class="t">${p > 0 ? stPrice(p) : '–'}</div></div>` +
+      right +
+      '</div>'
+    );
+  });
+  $('stRes').innerHTML =
+    `<div class="note">${esc(tx(stFound.length ? 'st_found' : 'st_nores', { n: stFound.length }))}</div>` +
+    rows.join('');
+  $('stRes')
+    .querySelectorAll('.st-add')
+    .forEach(b => (b.onclick = () => followStation(+b.dataset.i)));
+}
+// "+" icon of the search results.
+const PLUS_SVG = '<svg class="i" viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>';
+// Follow station id (from the search results): saved with the prices of the search.
+function followStation(id) {
+  const rec = stFound.find(r => +r.id === id);
+  if (!rec || S.stations.some(s => s.id === id)) return;
+  const st = { id, adr: '', ville: '', cp: '', h: {} };
+  keepPrices(st, rec);
+  S.stations.push(st);
+  persist();
+  renderStations();
+  renderFound();
+}
+
+// An address of the feed as shown: the ones written in capitals ("65 COURS ALBERT THOMAS") get
+// small letters with a capital at the start of each word ("65 Cours Albert Thomas").
+function prettyAdr(a) {
+  a = String(a || '');
+  if (a !== a.toUpperCase()) return a;
+  return a.toLowerCase().replace(/(^|[\s'-])(\p{L})/gu, (m, sep, c) => sep + c.toUpperCase());
+}
+// A price per litre, shown per displayed volume (litre or US gallon) with 3 decimals.
+const stPrice = p => money(priceOut(p), 3) + '/' + VU();
+// Short date and time of a price: "18/11 09:40".
+const stWhen = d => sd(d) + ' ' + d.slice(11, 16);
+// Last price kept for fuel key at station st: [date, price] or null.
+const stLast = (st, key) => {
+  const h = st.h[key];
+  return h && h.length ? h[h.length - 1] : null;
+};
+// Colours of the chart: the user's fill-ups, then one per station (in the order followed).
+const ST_COLORS = ['var(--s2)', 'var(--s3)', 'var(--s4)', 'var(--s5)', 'var(--s6)'];
+const stColor = i => ST_COLORS[i % ST_COLORS.length];
+
+// Draw the Stations tab: the switch, the chart, the followed stations (last price of the car's
+// fuel and its date, the cheapest highlighted), and the tools that need the connection (refresh,
+// add a station), replaced by a note while the connection is off. Called by render().
+function renderStations() {
+  const fuel = defaultFuel(),
+    key = FEED_FUEL[fuel];
+  $('stOnline').checked = ONLINE;
+  $('stChartT').textContent = tx('st_chart', { fuel: fuelLabel(fuel) });
+  $('stTools').classList.toggle('hide', !ONLINE);
+  $('stOff').textContent = ONLINE ? '' : tx('st_off');
+  $('stOff').classList.toggle('hide', ONLINE);
+  $('stRefresh').classList.toggle('hide', !S.stations.length);
+  $('stUpd').textContent = stChecked ? tx('st_updated', { t: new Date(stChecked).toTimeString().slice(0, 5) }) : '';
+  const prices = S.stations.map(st => stLast(st, key)).filter(Boolean).map(x => x[1]),
+    best = prices.length > 1 ? Math.min(...prices) : null;
+  $('st-list').innerHTML = S.stations.length
+    ? S.stations.map((st, i) => stationRow(st, i, key, fuel, best)).join('')
+    : '<div class="empty">' + esc(tx('st_none')) + '</div>';
+  $('st-list')
+    .querySelectorAll('.del')
+    .forEach(b => (b.onclick = () => delClick('stations', +b.dataset.i, b)));
+  stationChart(fuel, key);
+}
+// One followed station: colour of its line in the chart, address, postcode and town; on the
+// right the last price of the car's fuel (highlighted when it is the cheapest) and its date.
+function stationRow(st, i, key, fuel, best) {
+  const last = stLast(st, key),
+    price = last
+      ? `<div class="${last[1] === best ? 'hl' : 't'}">${stPrice(last[1])}</div><div class="m">${stWhen(last[0])}</div>`
+      : `<div class="m">${esc(tx('st_nofuel', { fuel: fuelLabel(fuel) }))}</div>`;
+  return (
+    '<div class="row">' +
+    `<i class="dot" style="background:${stColor(i)}"></i>` +
+    `<div class="l"><div class="t">${esc(prettyAdr(st.adr))}</div><div class="m">${esc(st.cp + ' ' + st.ville)}</div></div>` +
+    `<div class="r">${price}</div>` +
+    deleteButton('stations', st.id) +
+    '</div>'
+  );
+}
+
+// Time (ms) of a date "YYYY-MM-DD" or "YYYY-MM-DDTHH:MM" (local time).
+const stTime = d => new Date(d.length > 10 ? d : d + 'T12:00').getTime();
+// The series of the chart, over the last 12 months: the user's fill-ups of this fuel (price per
+// litre paid, points joined by a line) and each station (its prices, drawn as steps: a price holds
+// until the next change, the last one until now).
+function stationSeries(fuel, key) {
+  const from = Date.now() - 365 * 864e5;
+  const mine = FU()
+    .filter(f => f.c === fuel && stTime(f.d) >= from)
+    .map(f => [stTime(f.d), f.e / f.l])
+    .reverse();
+  const sts = S.stations.map((st, i) => {
+    const h = (st.h[key] || []).map(x => [stTime(x[0]), x[1]]);
+    // keep the last price before the 12 months, moved to their start
+    const before = h.filter(x => x[0] < from).pop(),
+      pts = (before ? [[from, before[1]]] : []).concat(h.filter(x => x[0] >= from));
+    return { name: prettyAdr(st.adr), color: stColor(i), pts };
+  });
+  return { mine, sts: sts.filter(s => s.pts.length) };
+}
+// Stations > chart of the fuel price: x = time, y = price per displayed volume. A bubble shows
+// the prices at the date under the finger or the pointer. Same look as the Stats charts.
+function stationChart(fuel, key) {
+  const box = $('c3'),
+    { mine, sts } = stationSeries(fuel, key);
+  const legend = (mine.length ? [{ name: tx('st_mine'), color: 'var(--s1)' }] : []).concat(sts);
+  $('stLegend').innerHTML = legend
+    .map(s => `<span><i style="background:${s.color}"></i><span>${esc(s.name)}</span></span>`)
+    .join('');
+  if (mine.length < 2 && !sts.length) {
+    box.innerHTML = '<div class="empty">' + esc(tx('st_need2')) + '</div>';
+    return;
+  }
+  const now = Date.now(),
+    all = mine.concat(...sts.map(s => s.pts)),
+    t0 = Math.min(...all.map(x => x[0])),
+    t1 = Math.max(now, ...all.map(x => x[0]));
+  const vs = all.map(x => priceOut(x[1])),
+    lo = Math.min(...vs),
+    hi = Math.max(...vs),
+    pad = (hi - lo > 1e-6 ? hi - lo : 0.1) * 0.15;
+  const W = 600,
+    H = 220,
+    m = { l: 44, r: 12, t: 14, b: 26 },
+    iw = W - m.l - m.r,
+    ih = H - m.t - m.b;
+  const tk = niceTicks(lo - pad, hi + pad, 4),
+    y0 = tk[0],
+    y1 = tk[tk.length - 1];
+  const X = t => m.l + (iw * (t - t0)) / (t1 - t0 || 1),
+    Y = v => m.t + ih * (1 - (priceOut(v) - y0) / (y1 - y0));
+  let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc($('stChartT').textContent)}">`;
+  tk.forEach(v => {
+    s += `<line class="grid" x1="${m.l}" x2="${W - m.r}" y1="${Y(priceIn(v))}" y2="${Y(priceIn(v))}"/>`;
+    s += `<text x="${m.l - 6}" y="${Y(priceIn(v)) + 4}" text-anchor="end">${fmt(v, 2)}</text>`;
+  });
+  sts.forEach(st => {
+    let d = '';
+    st.pts.forEach((x, i) => (d += (i ? `H${X(x[0])}V${Y(x[1])}` : `M${X(x[0])},${Y(x[1])}`)));
+    d += `H${X(t1)}`;
+    s += `<path d="${d}" fill="none" stroke="${st.color}" stroke-width="2" stroke-linejoin="round"/>`;
+  });
+  if (mine.length) {
+    s += `<polyline fill="none" stroke="var(--s1)" stroke-width="2" stroke-linejoin="round" points="${mine.map(x => X(x[0]) + ',' + Y(x[1])).join(' ')}"/>`;
+    mine.forEach(x => (s += `<circle cx="${X(x[0])}" cy="${Y(x[1])}" r="3.5" fill="var(--s1)" stroke="var(--surf)" stroke-width="1.5"/>`));
+  }
+  // local date "YYYY-MM-DD" of a time
+  const day = t => {
+    const d = new Date(t),
+      p = n => String(n).padStart(2, '0');
+    return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate());
+  };
+  s += `<text x="${m.l}" y="${H - 6}" text-anchor="start">${sd(day(t0))}</text>`;
+  s += `<text x="${W - m.r}" y="${H - 6}" text-anchor="end">${sd(day(t1))}</text>`;
+  s += `<line id="c3v" y1="${m.t}" y2="${m.t + ih}" stroke="var(--on-surf-v)" stroke-width="1" style="display:none"/></svg><div class="tip"></div>`;
+  box.innerHTML = s;
+  const svg = box.querySelector('svg'),
+    vl = svg.querySelector('#c3v');
+  // price of a series at time t: the last point at or before t
+  const at = (pts, t) => {
+    let v = null;
+    for (const x of pts) if (x[0] <= t) v = x[1];
+    return v;
+  };
+  const move = e => {
+    const r = svg.getBoundingClientRect(),
+      px = Math.max(m.l, Math.min(W - m.r, ((e.clientX - r.left) / r.width) * W)),
+      t = t0 + ((px - m.l) / iw) * (t1 - t0);
+    vl.setAttribute('x1', px);
+    vl.setAttribute('x2', px);
+    vl.style.display = '';
+    const line = (name, v) => (v === null ? '' : `<br>${esc(name)} : ${stPrice(v)}`);
+    tipShow(
+      box,
+      `<b>${fdate(day(t))}</b>` + line(tx('st_mine'), at(mine, t)) + sts.map(st => line(st.name, at(st.pts, t))).join(''),
+      px,
+      W,
+      r,
+    );
+  };
+  wireTip(svg, move, () => {
+    vl.style.display = 'none';
+    box.querySelector('.tip').style.display = 'none';
+  });
+}
+
+// ================================================================================================
 // Navigation and keyboard
 // ================================================================================================
 
-// Show tab t (fuel, buys, stats, garage, or save = the settings) with a short animation.
+// Show tab t (fuel, stations, stats, garage, or save = the settings) with a short animation.
 // The settings are not in the bottom bar: they open with the gear of the top bar, which is then
-// highlighted. Leaving the garage closes its car form.
+// highlighted. Leaving the garage closes its car form; opening Stations refreshes the prices
+// (at most every 30 minutes, only when the connection is allowed).
 function showTab(t) {
   document.querySelectorAll('.nav button').forEach(x => x.classList.toggle('on', x.dataset.t === t));
   $('setBtn').classList.toggle('on', t === 'save');
-  ['fuel', 'buys', 'stats', 'garage', 'save'].forEach(id => $(id).classList.toggle('hide', id !== t));
+  ['fuel', 'stations', 'stats', 'garage', 'save'].forEach(id => $(id).classList.toggle('hide', id !== t));
   if (t !== 'garage') closeCarForm();
+  if (t === 'stations') refreshStations(false);
   const el = $(t);
   el.classList.remove('tabin');
   void el.offsetWidth;
@@ -2373,6 +2720,15 @@ function showTab(t) {
 }
 document.querySelectorAll('.nav button').forEach(b => (b.onclick = () => showTab(b.dataset.t)));
 $('setBtn').onclick = () => showTab('save');
+// My garage has two parts, chosen with the buttons at the top: the cars ('cars') and the
+// purchases ('buys').
+function showGarage(part) {
+  document.querySelectorAll('.seg button').forEach(b => b.classList.toggle('on', b.dataset.g === part));
+  $('garCars').classList.toggle('hide', part !== 'cars');
+  $('buys').classList.toggle('hide', part !== 'buys');
+  closeCarForm();
+}
+document.querySelectorAll('.seg button').forEach(b => (b.onclick = () => showGarage(b.dataset.g)));
 document.addEventListener('focusin', e => {
   if (/^(INPUT|TEXTAREA)$/.test(e.target.tagName) && e.target.type !== 'date')
     document.body.classList.add('kb');
@@ -2401,7 +2757,10 @@ function init() {
       m = localStorage.getItem(MK);
     if (UNITS.includes(u)) UNIT = u;
     if (MONEY.includes(m)) MONEYC = m;
+    ONLINE = localStorage.getItem(OK_KEY) === '1';
   } catch (e) {}
+  // the Android side blocks the internet unless told otherwise: keep it in step with the switch
+  if (NA && typeof NA.setOnline === 'function') NA.setOnline(ONLINE);
   const known = LANGS.some(l => l[0] === saved);
   setLang(known ? saved : guessLang(), false);
   if (!known) showLangScreen();
