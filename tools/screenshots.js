@@ -131,12 +131,8 @@ function demoStations() {
   const shots = path.join(STORE, 'phoneScreenshots');
   fs.mkdirSync(shots, { recursive: true });
   for (const f of fs.readdirSync(OUT).filter(f => /^\d-.*\.png$/.test(f))) fs.copyFileSync(path.join(OUT, f), path.join(shots, f));
-  const res = path.join(__dirname, '..', 'app', 'src', 'main', 'res');
-  const bg = fs.readFileSync(path.join(res, 'values', 'colors.xml'), 'utf8').match(/name="ic_bg">([^<]+)</)[1];
-  const fg = fs.readFileSync(path.join(res, 'drawable', 'ic_fg.xml'), 'utf8');
-  const fill = fg.match(/fillColor="([^"]+)"/)[1], d = fg.match(/pathData="([^"]+)"/)[1];
   page = await (await browser.newContext({ viewport: { width: 512, height: 512 } })).newPage();
-  await page.setContent(`<body style="margin:0"><svg width="512" height="512" viewBox="0 0 108 108"><rect width="108" height="108" fill="${bg}"/><path fill="${fill}" d="${d}"/></svg>`);
+  await page.setContent(`<body style="margin:0">${require('./icon-svg').iconSvg(0, 512)}</body>`);
   await page.screenshot({ path: path.join(STORE, 'icon.png') });
   console.log('fastlane/metadata/android/en-US/images/ (icon and screenshots)');
 
