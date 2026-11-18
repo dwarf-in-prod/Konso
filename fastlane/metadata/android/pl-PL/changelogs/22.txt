@@ -1,0 +1,1 @@
+W poziomie na telefonie aplikacja sięga teraz do krawędzi ekranu: koniec z czarnym pasem obok aparatu, a treść trzyma się od niego z dala. Pasek nawigacji telefonu przyjmuje kolor strony, gdy menu jest z boku.

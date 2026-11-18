@@ -1,0 +1,1 @@
+Telefonda yatay modda uygulama artık ekranın kenarına kadar uzanıyor: kameranın yanında siyah şerit yok ve içerik kameradan uzak duruyor. Menü yandayken telefonun gezinme çubuğu sayfanın rengini alıyor.

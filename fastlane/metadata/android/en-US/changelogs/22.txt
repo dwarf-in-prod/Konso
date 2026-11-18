@@ -1,0 +1,1 @@
+In landscape on a phone, the app now reaches the edge of the screen: no more black band next to the camera, and the content stays clear of it. The phone's navigation bar takes the page's colour when the menu is on the side.

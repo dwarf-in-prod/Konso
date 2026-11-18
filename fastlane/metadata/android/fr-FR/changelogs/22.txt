@@ -1,0 +1,1 @@
+En paysage sur un téléphone, l'appli va jusqu'au bord de l'écran : plus de bande noire à côté de la caméra, et le contenu reste à l'écart de celle-ci. La barre de navigation du téléphone prend la couleur de la page quand le menu est sur le côté.

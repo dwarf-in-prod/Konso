@@ -1,0 +1,1 @@
+Na horizontal num telemóvel, a app chega agora até à borda do ecrã: acabou a faixa preta junto à câmara, e o conteúdo fica afastado dela. A barra de navegação do telemóvel fica com a cor da página quando o menu está ao lado.
