@@ -767,11 +767,12 @@ function showLangScreen() {
     onboardUnits();
   };
 }
-// First launch, steps 2 and 3: units, then currency, with Back / Next.
+// First launch, steps 2 to 4: units, currency, then theme, with Back / Next.
 // Until the user has chosen, the proposal follows the language (UK miles and pound for English,
-// the currency of the language's country otherwise).
+// the currency of the language's country otherwise); the theme proposed is Light.
 let obUnit = null,
-  obMoney = null;
+  obMoney = null,
+  obTheme = null;
 function onboardUnits() {
   const u = obUnit || (LANG === 'en' ? 'uk' : 'km');
   picker({
@@ -808,6 +809,34 @@ function onboardMoney() {
     onOk: i => {
       obMoney = MONEY[i];
       setMoney(obMoney, true);
+      onboardTheme();
+    },
+  });
+}
+// First launch, step 4: the theme (Automatic / Light / Dark), Light selected at first. The app
+// shows each theme while the wheel turns; Back goes back to the currency with the saved theme.
+// Next saves the choice, then the app starts (and, in the web version, gives its install advice).
+function onboardTheme() {
+  const t = obTheme || 'light';
+  applyTheme(t);
+  picker({
+    icon: 'theme',
+    title: 'theme_pick',
+    step: 'step4',
+    labels: THEMES.map(x => tx('theme_' + x)),
+    sel: THEMES.indexOf(t),
+    loop: false,
+    sub: () => tx('theme_sub'),
+    ok: 'next',
+    cancel: 'back',
+    onPick: i => applyTheme(THEMES[i]),
+    onCancel: () => {
+      applyTheme(THEME);
+      onboardMoney();
+    },
+    onOk: i => {
+      obTheme = THEMES[i];
+      setTheme(obTheme, true);
       render();
       installAdvice();
     },
@@ -2795,6 +2824,11 @@ function showGarage(part) {
   closeCarForm();
 }
 document.querySelectorAll('.seg button').forEach(b => (b.onclick = () => showGarage(b.dataset.g)));
+// Stats > Spending: the link under the reminder opens My garage -> Purchases.
+$('sxGo').onclick = () => {
+  showTab('garage');
+  showGarage('buys');
+};
 // Keyboard open (body.kb hides the bottom bar): while a field that is typed into has the focus.
 // Date fields, switches (checkboxes) and file inputs open no keyboard.
 const typesIn = e => !!e && /^(INPUT|TEXTAREA)$/.test(e.tagName) && !/^(date|checkbox|radio|file)$/.test(e.type);
