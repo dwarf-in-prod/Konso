@@ -1,0 +1,1 @@
+Wersja internetowa: komunikat o instalacji jest teraz krótki i jasny. Wyjaśnia, po co instalować aplikację, przypomina, że dane zostają na urządzeniu (bez konta, reklam i śledzenia, kod open source), i pokazuje kroki dla Twojej przeglądarki w niebieskiej ramce. Aplikacja na Androida się nie zmienia.

@@ -1,0 +1,1 @@
+Version web : le message d'installation est maintenant court et clair. Il explique pourquoi installer l'appli, rappelle que tes données restent sur ton appareil (pas de compte, pas de pub, aucun pistage, code open source) et montre les étapes pour ton navigateur dans un encadré bleu. L'appli Android ne change pas.

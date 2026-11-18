@@ -661,6 +661,8 @@ body.kb #st {
 .dialog {
   width: 100%;
   max-width: 360px;
+  max-height: calc(100vh - 48px);
+  overflow-y: auto;
   background: var(--surf-high);
   color: var(--on-surf);
   border-radius: 28px;
@@ -684,6 +686,74 @@ body.kb #st {
   line-height: 1.5;
   color: var(--on-surf-v);
   margin: 0 0 10px;
+}
+/* install advice (dialog): one line, then three points with an icon */
+.dialog .lead {
+  color: var(--on-surf);
+  font-size: 15px;
+  text-align: center;
+  margin: 0 0 16px;
+}
+.pts {
+  list-style: none;
+  margin: 0 0 16px;
+  padding: 0;
+  display: grid;
+  gap: 12px;
+}
+.pts li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 14px;
+  line-height: 1.4;
+}
+.pts svg.i {
+  width: 20px;
+  height: 20px;
+  color: var(--primary);
+}
+/* "How to do it?" box with numbered steps, in the blue of the live results of the fill-up form */
+.howto {
+  background: var(--primary-c);
+  color: var(--on-primary-c);
+  border-radius: 16px;
+  padding: 12px 14px;
+  margin: 12px 0 4px;
+  font-size: 14px;
+  line-height: 1.4;
+}
+.howto b {
+  display: block;
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+.howto ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+.howto li {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+.howto .n {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 11px;
+  background: var(--primary);
+  color: var(--on-primary);
+  font: 500 12px/22px var(--font);
+  text-align: center;
+}
+.howto svg.i {
+  width: 18px;
+  height: 18px;
+  vertical-align: -4px;
 }
 .dbtns {
   display: flex;
