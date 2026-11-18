@@ -31,12 +31,13 @@
   --on-amber-c: #261a00;
   --inverse: #2e3036;
   --on-inverse: #f0f0f7;
+  /* chart series colours: each one has at least 3:1 contrast with the cards (--surf) */
   --s1: #2a78d6;
-  --s2: #eb6834;
+  --s2: #d4561f;
   /* more series colours, for the followed stations (Stations chart) */
-  --s3: #1e9e63;
+  --s3: #188a55;
   --s4: #9b4dca;
-  --s5: #c99400;
+  --s5: #9e7400;
   --s6: #d63c8c;
   --font: system-ui, Roboto, -apple-system, 'Segoe UI', sans-serif;
   /* width of the single column (phones, small tablets) */
@@ -287,7 +288,8 @@ h2.sec {
   -webkit-appearance: none;
 }
 .f input:focus,
-.f select:focus {
+.f select:focus,
+.f .fieldbtn:focus-visible {
   border: 2px solid var(--primary);
   padding: 0 13px;
 }
@@ -321,7 +323,8 @@ h2.sec {
   color: var(--primary);
 }
 .f.todo input,
-.f.todo select {
+.f.todo select,
+.f.todo .fieldbtn {
   border: 2px solid var(--ok);
   padding: 0 13px;
 }
@@ -331,7 +334,8 @@ h2.sec {
   color: var(--ok);
 }
 .f.need input,
-.f.need select {
+.f.need select,
+.f.need .fieldbtn {
   border: 2px solid var(--error);
   padding: 0 13px;
 }
@@ -449,6 +453,15 @@ textarea {
 .row .r {
   text-align: right;
   white-space: nowrap;
+}
+/* a piece of the details that must not be cut, and the small unit after the consumption */
+.row .nw {
+  white-space: nowrap;
+}
+.row .r .u {
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--on-surf-v);
 }
 .row .hl {
   display: inline-block;
@@ -700,9 +713,9 @@ details.fold {
   border: 0;
   background: transparent;
   color: var(--on-surf-v);
-  width: 40px;
-  height: 40px;
-  border-radius: 20px;
+  width: 48px;
+  height: 48px;
+  border-radius: 24px;
   display: grid;
   place-items: center;
   padding: 0;
@@ -805,9 +818,12 @@ details.fold {
   display: block;
   touch-action: pan-y;
 }
+/* Charts are drawn in 600-unit-wide SVG coordinates, then scaled to the card: --chart-k
+   (600 / drawn width in px, set by watchChartScale() in app.js) keeps the labels at 12 px on
+   screen. 1.8 is the value for a common phone, used until the first measure. */
 .chart text {
   fill: var(--on-surf-v);
-  font-size: 11px;
+  font-size: calc(12px * var(--chart-k, 1.8));
 }
 .chart .grid {
   stroke: var(--outline-v);
@@ -859,6 +875,11 @@ details.fold {
 }
 details {
   margin-top: 12px;
+}
+/* raw text read on the receipt, or the technical log of a failed scan */
+.ocrtext {
+  white-space: pre-wrap;
+  font-size: 12px;
 }
 summary {
   cursor: pointer;

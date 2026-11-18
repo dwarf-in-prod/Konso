@@ -1,0 +1,1 @@
+Daha sade arayüz. Bir yakıt alımının yakıtı, diğer listeler gibi çarkla seçiliyor. Mesafe, litre ve tutar boşken yeşil. Form daha kısa: hesaplar ve ipuçları yalnızca işe yaradığında görünüyor. Bakım mesajında doğrudan "Evet, yapıldı" denebiliyor. Daha okunaklı grafikler (daha büyük yazı, daha belirgin renkler) ve dokunması daha kolay çöp kutusu.

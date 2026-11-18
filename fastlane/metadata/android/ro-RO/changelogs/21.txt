@@ -1,0 +1,1 @@
+Interfață mai clară. Carburantul unei alimentări se alege cu roata, ca celelalte liste. Distanța, litrii și suma sunt verzi cât timp sunt goale. Formularul e mai scurt: calculele și sfaturile apar doar când sunt utile. Mesajul de revizie permite răspunsul „Da, e făcută” direct. Grafice mai lizibile (text mai mare, culori mai contrastante) și coș de gunoi mai ușor de atins.

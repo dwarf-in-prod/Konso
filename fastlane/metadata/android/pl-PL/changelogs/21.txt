@@ -1,0 +1,1 @@
+Czytelniejszy interfejs. Paliwo tankowania wybiera się kołem, jak inne listy. Dystans, litry i kwota są zielone, dopóki są puste. Formularz jest krótszy: obliczenia i wskazówki pojawiają się tylko wtedy, gdy są przydatne. W komunikacie o serwisie można od razu odpowiedzieć „Tak, zrobione”. Czytelniejsze wykresy (większy tekst, mocniejsze kolory) i kosz łatwiejszy do dotknięcia.
