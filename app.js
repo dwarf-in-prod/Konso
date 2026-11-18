@@ -152,7 +152,19 @@ function applyTheme(t) {
     const own = /dark/.test(m.media) ? 'dark' : 'light';
     m.content = BAR_COLOR[t === 'auto' ? own : t];
   });
+  syncBars(t);
 }
+// Android app: colour the phone's status bar like the top of the page (--surface) and its
+// navigation bar like the page's bottom bar (--surf), with icons that stay readable, so the app
+// looks like it fills the screen (MainActivity: Bridge.setBars()). t = the theme shown.
+function syncBars(t) {
+  if (!NA || typeof NA.setBars !== 'function') return;
+  const css = getComputedStyle(document.documentElement),
+    dark = t === 'dark' || (t === 'auto' && matchMedia('(prefers-color-scheme: dark)').matches);
+  NA.setBars(css.getPropertyValue('--surface').trim(), css.getPropertyValue('--surf').trim(), dark);
+}
+// The device switches between light and dark (Automatic theme): the bars follow.
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => syncBars(THEME));
 // Choose theme t; store = remember it on this device.
 function setTheme(t, store) {
   THEME = THEMES.includes(t) ? t : 'auto';
@@ -2812,6 +2824,11 @@ function showGarage(part) {
   closeCarForm();
 }
 document.querySelectorAll('.seg button').forEach(b => (b.onclick = () => showGarage(b.dataset.g)));
+// Stats > Spending: the link under the reminder opens My garage -> Purchases.
+$('sxGo').onclick = () => {
+  showTab('garage');
+  showGarage('buys');
+};
 // Keyboard open (body.kb hides the bottom bar): while a field that is typed into has the focus.
 // Date fields, switches (checkboxes) and file inputs open no keyboard.
 const typesIn = e => !!e && /^(INPUT|TEXTAREA)$/.test(e.tagName) && !/^(date|checkbox|radio|file)$/.test(e.type);
