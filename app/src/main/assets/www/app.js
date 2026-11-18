@@ -154,17 +154,35 @@ function applyTheme(t) {
   });
   syncBars(t);
 }
+// Layout with the navigation rail on the left (wide screens, phones in landscape), as in app.css.
+const RAIL = matchMedia('(min-width: 840px)');
 // Android app: colour the phone's status bar like the top of the page (--surface) and its
-// navigation bar like the page's bottom bar (--surf), with icons that stay readable, so the app
-// looks like it fills the screen (MainActivity: Bridge.setBars()). t = the theme shown.
+// navigation bar like what is just above it: the page's bottom bar (--surf), or the page itself
+// (--surface) when the navigation is the rail on the left. Icons stay readable, so the app looks
+// like it fills the screen (MainActivity: Bridge.setBars()). t = the theme shown.
 function syncBars(t) {
   if (!NA || typeof NA.setBars !== 'function') return;
   const css = getComputedStyle(document.documentElement),
     dark = t === 'dark' || (t === 'auto' && matchMedia('(prefers-color-scheme: dark)').matches);
-  NA.setBars(css.getPropertyValue('--surface').trim(), css.getPropertyValue('--surf').trim(), dark);
+  const top = css.getPropertyValue('--surface').trim(),
+    bottom = css.getPropertyValue(RAIL.matches ? '--surface' : '--surf').trim();
+  NA.setBars(top, bottom, dark);
 }
-// The device switches between light and dark (Automatic theme): the bars follow.
+// The device switches between light and dark (Automatic theme), or the layout changes (phone
+// turned): the bars follow.
 matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => syncBars(THEME));
+RAIL.addEventListener('change', () => syncBars(THEME));
+// Android app in landscape: the page is drawn next to the camera cutout; keep its content clear of
+// it with the room the cutout takes on the left and right (--cut-l, --cut-r, used by --sa-l and
+// --sa-r in app.css). MainActivity calls window.onInsets when it changes (phone turned).
+function syncInsets() {
+  if (!NA || typeof NA.insets !== 'function') return;
+  const [l, r] = String(NA.insets()).split(',').map(Number),
+    px = v => (v > 0 ? v : 0) + 'px';
+  document.documentElement.style.setProperty('--cut-l', px(l));
+  document.documentElement.style.setProperty('--cut-r', px(r));
+}
+window.onInsets = syncInsets;
 // Choose theme t; store = remember it on this device.
 function setTheme(t, store) {
   THEME = THEMES.includes(t) ? t : 'auto';
@@ -2863,6 +2881,7 @@ function init() {
     ONLINE = localStorage.getItem(OK_KEY) === '1';
   } catch (e) {}
   applyTheme(THEME);
+  syncInsets();
   // the Android side blocks the internet unless told otherwise: keep it in step with the switch
   if (NA && typeof NA.setOnline === 'function') NA.setOnline(ONLINE);
   const known = LANGS.some(l => l[0] === saved);
