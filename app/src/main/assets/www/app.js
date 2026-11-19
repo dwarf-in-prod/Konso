@@ -2579,6 +2579,9 @@ let stChecked = 0,
   stFound = [];
 const ST_EVERY = 30 * 60e3; // automatic refresh at most every 30 minutes
 const ST_KEEP = 400; // prices kept per station and fuel
+// Fuel (feed name) of the prices shown by the Stations tab: when it changes (another car, or a
+// fill-up with another fuel), the followed stations' prices are refreshed at once.
+let stKey = '';
 
 // Turn the connection on or off (and tell the Android side, which enforces it).
 function setOnline(on) {
@@ -2740,6 +2743,13 @@ function renderStations() {
     key = FEED_FUEL[fuel];
   $('stOnline').checked = ONLINE;
   $('stIntro').classList.toggle('hide', ONLINE); // explained in How it works once allowed
+  if (stKey && key !== stKey) {
+    // another fuel: its prices of the followed stations may be old, refresh them now (or when the
+    // tab is opened) instead of waiting for the 30 minutes
+    stChecked = 0;
+    if (!$('stations').classList.contains('hide')) refreshStations(false);
+  }
+  stKey = key;
   $('stMapCard').classList.toggle('hide', !ONLINE);
   $('stMapT').textContent = tx('map_title', { fuel: fuelLabel(fuel) });
   if (ONLINE && !$('stations').classList.contains('hide')) mapShow();
@@ -2914,7 +2924,11 @@ let map = null, // the Leaflet map, created the first time it is shown
   mapSeq = 0, // number of the last request, to drop late answers
   mapTimer = 0,
   mapKey = '', // fuel of the prices shown (feed name)
-  mapRecs = []; // feed records shown
+  mapRecs = [], // feed records shown
+  mapTotal = 0; // stations of the area in the feed (can be more than mapRecs)
+// The price labels on the map, by station id. They are kept and updated in place rather than
+// drawn again, so the window of a station stays open while new answers arrive (see mapDraw()).
+const mapMarkers = new Map();
 
 // Load Leaflet (script and style) once; resolves when it is ready.
 let leafletLoading = null;
@@ -2973,6 +2987,16 @@ function mapCreate() {
     clearTimeout(mapTimer);
     mapTimer = setTimeout(mapLoad, 350);
   });
+  // a label kept only because its window was open is removed once the window closes
+  map.on('popupclose', () => setTimeout(() => mapDraw(mapKey, mapTotal), 0));
+}
+// Remove the price labels: all of them, or (keepOpen) all but the one whose window is open.
+function mapClear(keepOpen) {
+  for (const [id, m] of mapMarkers) {
+    if (keepOpen && m.isPopupOpen()) continue;
+    mapPins.removeLayer(m);
+    mapMarkers.delete(id);
+  }
 }
 // Show the map (Stations tab open, connection allowed): Leaflet is loaded and the map created the
 // first time; afterwards it only takes its size again and, if the car's fuel changed, its prices.
@@ -2983,7 +3007,7 @@ function mapShow() {
       if (!map) mapCreate();
       map.invalidateSize();
       if (mapKey !== FEED_FUEL[defaultFuel()]) mapLoad();
-      else mapDraw(mapKey, mapRecs.length);
+      else mapDraw(mapKey, mapTotal);
     })
     .catch(() => mapNote(tx('st_err')));
 }
@@ -2993,10 +3017,16 @@ async function mapLoad() {
   if (!map || !ONLINE) return;
   const key = FEED_FUEL[defaultFuel()],
     seq = ++mapSeq;
+  if (key !== mapKey) {
+    // another fuel (another car): the labels and the open window show the old fuel's prices
+    map.closePopup();
+    mapClear(false);
+    mapRecs = [];
+  }
   mapKey = key;
   if (map.getZoom() < MAP_MIN_ZOOM) {
     mapRecs = [];
-    mapPins.clearLayers();
+    mapClear(true);
     return mapNote(tx('map_zoom'));
   }
   const b = map.getBounds(),
@@ -3009,7 +3039,8 @@ async function mapLoad() {
     const j = await feedJson(where, MAP_MAX, key + '_prix');
     if (seq !== mapSeq) return; // the view moved meanwhile: a newer answer follows
     mapRecs = (j.results || []).filter(r => r.geom && typeof r.geom.lat === 'number');
-    mapDraw(key, j.total_count || mapRecs.length);
+    mapTotal = j.total_count || mapRecs.length;
+    mapDraw(key, mapTotal);
   } catch (e) {
     if (seq === mapSeq) mapNote(tx('st_err'));
   }
@@ -3020,22 +3051,45 @@ function mapLevel(p, lo, hi) {
   const t = hi > lo ? (p - lo) / (hi - lo) : 0;
   return t < 1 / 3 ? 'lo' : t < 2 / 3 ? 'mid' : 'hi';
 }
-// Draw a price label for each record of mapRecs (the cheapest on top; the followed stations get
+// The Leaflet icon of a price label (its HTML: the coloured price).
+const pinIcon = html => L.divIcon({ className: 'pin', iconSize: [0, 0], html });
+// Show a price label for each record of mapRecs (the cheapest on top; the followed stations get
 // a ring), and say how many there are. total = stations of the area in the feed.
+// The labels are updated in place: a station already shown keeps its label (its colour and price
+// change if needed), new ones are added, the ones out of the answer are removed. The label whose
+// window is open is never changed or removed meanwhile, so a new answer (after the map moved,
+// or the followed stations refreshed) does not close the window the user is reading.
 function mapDraw(key, total) {
   if (!mapPins) return;
-  mapPins.clearLayers();
   const prices = mapRecs.map(r => +r[key + '_prix']),
     lo = Math.min(...prices),
-    hi = Math.max(...prices);
+    hi = Math.max(...prices),
+    shown = new Set();
   mapRecs.forEach((r, i) => {
-    const p = prices[i],
-      cls = 'pin-' + mapLevel(p, lo, hi) + (S.stations.some(st => st.id === +r.id) ? ' pin-f' : '');
-    const icon = L.divIcon({ className: 'pin', iconSize: [0, 0], html: `<span class="${cls}">${fmt(priceOut(p), 3)}</span>` });
-    L.marker([r.geom.lat, r.geom.lon], { icon, keyboard: false, zIndexOffset: (mapRecs.length - i) * 10 })
-      .bindPopup(() => mapPopup(r, key), { maxWidth: 280, minWidth: 220 })
-      .addTo(mapPins);
+    const id = +r.id,
+      p = prices[i],
+      cls = 'pin-' + mapLevel(p, lo, hi) + (S.stations.some(st => st.id === id) ? ' pin-f' : ''),
+      html = `<span class="${cls}">${fmt(priceOut(p), 3)}</span>`;
+    shown.add(id);
+    let m = mapMarkers.get(id);
+    if (!m) {
+      m = L.marker([r.geom.lat, r.geom.lon], { icon: pinIcon(html), keyboard: false });
+      m.bindPopup(() => mapPopup(m.rec, mapKey), { maxWidth: 280, minWidth: 220 });
+      m.html = html;
+      m.addTo(mapPins);
+      mapMarkers.set(id, m);
+    } else if (m.html !== html && !m.isPopupOpen()) {
+      m.setIcon(pinIcon(html));
+      m.html = html;
+    }
+    if (!m.isPopupOpen()) m.rec = r; // the open window keeps the record it was opened with
+    m.setZIndexOffset((mapRecs.length - i) * 10);
   });
+  for (const [id, m] of mapMarkers) {
+    if (shown.has(id) || m.isPopupOpen()) continue;
+    mapPins.removeLayer(m);
+    mapMarkers.delete(id);
+  }
   if (map.getZoom() < MAP_MIN_ZOOM) return;
   if (!mapRecs.length) mapNote(tx('map_none'));
   else mapNote(tx(total > mapRecs.length ? 'map_many' : 'map_count', { n: mapRecs.length, t: total }));
@@ -3063,7 +3117,7 @@ function mapPopup(r, key) {
   el.querySelector('[data-a="f"]').onclick = () => {
     followRecord(r);
     map.closePopup();
-    mapDraw(key, mapRecs.length);
+    mapDraw(key, mapTotal);
     status(tx('map_followed'));
   };
   el.querySelector('[data-a="r"]').onclick = () => mapRoute(r);
