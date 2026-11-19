@@ -76,6 +76,17 @@ def gradle_version_code(source, build):
     return None
 
 
+def print_categories(path):
+    """Prints the category names F-Droid accepts (the top-level keys of fdroiddata's
+    categories.yml), to help fix an invalid "Categories" entry."""
+    names = []
+    with open(path, encoding='utf-8') as f:
+        for line in f:
+            if line[:1] not in ('', ' ', '\t', '#', '\n') and line.rstrip().endswith(':'):
+                names.append(line.rstrip()[:-1].strip('"\''))
+    print('Valid categories: ' + ', '.join(names))
+
+
 def step_lint(args):
     """Checks the recipe with "fdroid lint" in a temporary copy of fdroiddata's layout
     (metadata/<app id>.yml next to fdroiddata's config/ folder, which holds the list of
@@ -89,6 +100,7 @@ def step_lint(args):
         fdroid = shutil.which('fdroid') or sys.exit('The fdroid command (fdroidserver) is missing.')
         result = subprocess.run([fdroid, 'lint', '-v', app_id], cwd=tmp)
         if result.returncode != 0:
+            print_categories(os.path.join(args.config, 'categories.yml'))
             sys.exit('fdroid lint found problems in the recipe.')
     print('Recipe OK for fdroid lint.')
 
