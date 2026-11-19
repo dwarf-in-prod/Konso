@@ -2743,6 +2743,7 @@ function renderStations() {
     key = FEED_FUEL[fuel];
   $('stOnline').checked = ONLINE;
   $('stIntro').classList.toggle('hide', ONLINE); // explained in How it works once allowed
+  $('stSwitchCard').classList.toggle('compact', ONLINE); // only the switch, on one short line
   if (stKey && key !== stKey) {
     // another fuel: its prices of the followed stations may be old, refresh them now (or when the
     // tab is opened) instead of waiting for the 30 minutes
