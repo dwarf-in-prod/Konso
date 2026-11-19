@@ -1,0 +1,1 @@
+Pestaña Gasolineras: con la conexión activada, el interruptor ocupa una sola línea y el mapa se ajusta al tamaño de la pantalla, para que el principio de Mis gasolineras siga visible debajo: basta con deslizar fuera del mapa para bajar hasta tus gasolineras.

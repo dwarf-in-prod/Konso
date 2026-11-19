@@ -1,0 +1,1 @@
+Scheda Distributori: con la connessione attiva, l'interruttore occupa una sola riga e la mappa si adatta alle dimensioni dello schermo, così l'inizio di I miei distributori resta visibile sotto: basta scorrere fuori dalla mappa per arrivare ai tuoi distributori.

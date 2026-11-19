@@ -1,0 +1,1 @@
+Tab Tankstellen: Bei erlaubter Verbindung braucht der Schalter nur noch eine Zeile und die Karte passt sich der Bildschirmgröße an, sodass der Anfang von Meine Tankstellen darunter sichtbar bleibt: Ein Wischen außerhalb der Karte genügt, um zu deinen Tankstellen zu scrollen.

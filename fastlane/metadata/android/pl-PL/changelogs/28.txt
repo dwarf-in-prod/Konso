@@ -1,0 +1,1 @@
+Zakładka Stacje: przy włączonym połączeniu przełącznik zajmuje jedną linię, a mapa dopasowuje się do rozmiaru ekranu, więc początek listy Moje stacje pozostaje widoczny pod nią: wystarczy przesunąć palcem poza mapą, by przejść do swoich stacji.
