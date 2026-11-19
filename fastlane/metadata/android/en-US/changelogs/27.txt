@@ -1,0 +1,1 @@
+Stations tab fixes: when you switch cars, the map and My stations show the prices of its fuel at once, without restarting the app. On the map, a station's window stays open when new prices arrive or the map moves, and the labels no longer flicker.

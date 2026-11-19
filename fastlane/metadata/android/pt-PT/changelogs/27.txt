@@ -1,0 +1,1 @@
+Correções do separador Postos: ao mudar de carro, o mapa e Os meus postos mostram logo os preços do seu combustível, sem reiniciar a app. No mapa, a janela de um posto fica aberta quando chegam novos preços ou o mapa se move, e as etiquetas já não piscam.

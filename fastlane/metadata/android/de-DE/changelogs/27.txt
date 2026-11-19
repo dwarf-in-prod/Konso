@@ -1,0 +1,1 @@
+Korrekturen im Tab Tankstellen: Wenn du das Auto wechselst, zeigen die Karte und Meine Tankstellen sofort die Preise seines Kraftstoffs, ohne Neustart der App. Auf der Karte bleibt das Fenster einer Tankstelle offen, wenn neue Preise ankommen oder die Karte sich bewegt, und die Preisschilder flackern nicht mehr.
