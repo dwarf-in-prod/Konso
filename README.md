@@ -95,6 +95,7 @@ Once installed it has its own icon and works without internet, receipt scanning 
 - **Web version**: `node tools/build-web.js <folder>` builds the site (the files of `assets/www`, plus `web/`: icons, offline cache). The *Publier la version web* workflow publishes it to the `gh-pages` branch, which GitHub Pages serves (*Settings → Pages → Deploy from a branch → gh-pages*).
 - **OCR engine from source**: `tools/build-tesseract.sh` rebuilds the Tesseract files of `vendor/` from the source code of [tesseract.js-core](https://github.com/naptha/tesseract.js-core) and [tesseract.js](https://github.com/naptha/tesseract.js) (Emscripten 4.0.15, Node.js). The *Tesseract from source* workflow runs it and checks the result with `tools/ocr-test.js`.
 - **Map library from source**: `tools/build-leaflet.sh` rebuilds `vendor/leaflet.js` and `leaflet.css` from the source code of [Leaflet](https://github.com/Leaflet/Leaflet) 1.9.4 (Node.js: Rollup and UglifyJS, as Leaflet's own release build). The *Leaflet from source* workflow runs it and checks that the result is identical, byte for byte, to the files of the repository.
+- **F-Droid recipe**: `fdroid/app.konso.yml` is the build recipe for F-Droid (see [`fdroid/README.md`](fdroid/README.md)). The *F-Droid check* workflow replays it the way F-Droid's build server does, with F-Droid's own tool: source scan, vendored files rebuilt from source, unsigned release APK, APK scan (`tools/fdroid-check.py`).
 
 ## Development
 
@@ -134,7 +135,9 @@ tools/
 ├── screenshots.js          Regenerates the screenshots (README and store listing)
 ├── build-tesseract.sh      Rebuilds the OCR engine from source
 ├── build-leaflet.sh        Rebuilds the map library (Leaflet) from source
-└── ocr-test.js             Checks that an OCR engine build reads text
+├── ocr-test.js             Checks that an OCR engine build reads text
+└── fdroid-check.py         Replays the F-Droid recipe step by step (F-Droid check workflow)
+fdroid/app.konso.yml        F-Droid build recipe (to submit to fdroiddata)
 fastlane/metadata/android/  Store listing (F-Droid, IzzyOnDroid), 10 languages
 ```
 
@@ -217,6 +220,7 @@ Une fois installée, elle a sa propre icône et fonctionne sans internet, lectur
 - **Version web** : `node tools/build-web.js <dossier>` construit le site (les fichiers de `assets/www`, plus `web/` : icônes, cache hors ligne). Le workflow *Publier la version web* le publie dans la branche `gh-pages`, servie par GitHub Pages (*Settings → Pages → Deploy from a branch → gh-pages*).
 - **Moteur OCR depuis les sources** : `tools/build-tesseract.sh` recompile les fichiers Tesseract de `vendor/` depuis le code source de [tesseract.js-core](https://github.com/naptha/tesseract.js-core) et [tesseract.js](https://github.com/naptha/tesseract.js) (Emscripten 4.0.15, Node.js). Le workflow *Tesseract depuis les sources* le lance et vérifie le résultat avec `tools/ocr-test.js`.
 - **Bibliothèque de carte depuis les sources** : `tools/build-leaflet.sh` recompile `vendor/leaflet.js` et `leaflet.css` depuis le code source de [Leaflet](https://github.com/Leaflet/Leaflet) 1.9.4 (Node.js : Rollup et UglifyJS, comme la compilation officielle de Leaflet). Le workflow *Leaflet from source* le lance et vérifie que le résultat est identique, octet pour octet, aux fichiers du dépôt.
+- **Recette F-Droid** : `fdroid/app.konso.yml` est la recette de compilation pour F-Droid (voir [`fdroid/README.md`](fdroid/README.md)). Le workflow *F-Droid check* la rejoue comme le serveur de compilation de F-Droid, avec l'outil de F-Droid lui-même : analyse du code source, fichiers embarqués recompilés depuis les sources, APK release non signé, analyse de l'APK (`tools/fdroid-check.py`).
 
 ## Développement
 

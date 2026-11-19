@@ -1,0 +1,46 @@
+Categories:
+  - Money
+  - Finance Manager
+License: GPL-3.0-only
+SourceCode: https://github.com/dwarf-in-prod/Konso
+IssueTracker: https://github.com/dwarf-in-prod/Konso/issues
+Changelog: https://github.com/dwarf-in-prod/Konso/releases
+
+AutoName: Konso
+
+RepoType: git
+Repo: https://github.com/dwarf-in-prod/Konso.git
+
+Builds:
+  - versionName: '2.17'
+    versionCode: 28
+    commit: v2.17
+    subdir: app
+    sudo:
+      - apt-get update
+      - apt-get install -y autoconf automake libtool pkg-config cmake make curl nodejs npm
+    gradle:
+      - yes
+    rm:
+      - app/src/main/assets/www/vendor/tesseract-core-simd-lstm.wasm.js
+      - app/src/main/assets/www/vendor/tesseract.min.js
+      - app/src/main/assets/www/vendor/worker.min.js
+      - app/src/main/assets/www/vendor/leaflet.js
+      - app/src/main/assets/www/vendor/lang/fra.traineddata.gz.bin
+    build:
+      - cd ..
+      - git clone --depth 1 --branch 4.0.15 https://github.com/emscripten-core/emsdk.git build/emsdk
+      - build/emsdk/emsdk install 4.0.15
+      - build/emsdk/emsdk activate 4.0.15
+      - source build/emsdk/emsdk_env.sh
+      - tools/build-tesseract.sh
+      - tools/build-leaflet.sh
+      - curl -fsSL -o build/fra-1.0.0.tgz https://registry.npmjs.org/@tesseract.js-data/fra/-/fra-1.0.0.tgz
+      - echo 'ffcef66c64e763499d56ea3f8d7470215390b7c3ab8f33df19a2ab0f2d88c0e5  build/fra-1.0.0.tgz' | sha256sum -c
+      - tar -xzf build/fra-1.0.0.tgz -C build package/4.0.0_best_int/fra.traineddata.gz
+      - cp build/package/4.0.0_best_int/fra.traineddata.gz app/src/main/assets/www/vendor/lang/fra.traineddata.gz.bin
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags ^v[0-9.]+$
+CurrentVersion: '2.17'
+CurrentVersionCode: 28

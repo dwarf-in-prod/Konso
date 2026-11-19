@@ -1,0 +1,102 @@
+name: F-Droid check
+
+# Replays the F-Droid build recipe (fdroid/app.konso.yml) the way F-Droid's build server does,
+# with F-Droid's own tool (fdroidserver), so a problem shows up here before the submission:
+#   1. "recipe" job, in Debian (the system of F-Droid's build machines): checks the recipe with
+#      "fdroid lint", installs the recipe's Debian packages, deletes the vendored files, removes
+#      the signing keys, runs F-Droid's source scanner (must find nothing), then runs the recipe's
+#      build commands, which rebuild the vendored files from source (tools/fdroid-check.py).
+#   2. "apk" job: builds the release APK, unsigned, like F-Droid (gradle assembleRelease), checks
+#      that the rebuilt OCR engine reads text (tools/ocr-test.js) and scans the APK with F-Droid's
+#      scanner. The APK is attached to the run (artifact "fdroid-apk"); nothing is published.
+
+on:
+  push:
+    paths:
+      - 'fdroid/**'
+      - 'tools/fdroid-check.py'
+      - 'tools/build-tesseract.sh'
+      - 'tools/build-leaflet.sh'
+      - 'app/build.gradle'
+      - 'app/src/main/assets/www/vendor/**'
+      - '.github/workflows/fdroid-check.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  RECIPE: fdroid/app.konso.yml
+  FDROIDSERVER: fdroidserver==2.4.5
+
+jobs:
+  recipe:
+    runs-on: ubuntu-latest
+    container: debian:bookworm
+    timeout-minutes: 90
+    steps:
+      - name: Base tools
+        run: |
+          apt-get update
+          apt-get install -y git curl ca-certificates python3-venv
+      - uses: actions/checkout@v4
+      - name: fdroidserver
+        run: |
+          python3 -m venv /opt/fdroidserver
+          /opt/fdroidserver/bin/pip install --quiet "$FDROIDSERVER"
+          echo /opt/fdroidserver/bin >> "$GITHUB_PATH"
+      - name: Lint the recipe (fdroid lint)
+        run: |
+          curl -fsSL -o "$RUNNER_TEMP/categories.yml" https://gitlab.com/fdroid/fdroiddata/-/raw/master/config/categories.yml
+          python tools/fdroid-check.py lint "$RECIPE" "$RUNNER_TEMP/categories.yml"
+      - name: Recipe "sudo" (Debian packages)
+        run: python tools/fdroid-check.py sudo "$RECIPE"
+      - name: Recipe "rm", signing keys removed, source scan
+        run: python tools/fdroid-check.py prepare "$RECIPE"
+      - name: Recipe "build" (vendored files rebuilt from source)
+        run: python tools/fdroid-check.py build "$RECIPE"
+      - name: Keep the prepared source for the APK job
+        run: tar --exclude=./.git --exclude=./build -czf "$RUNNER_TEMP/prepared.tgz" .
+      - uses: actions/upload-artifact@v4
+        with:
+          name: fdroid-prepared-source
+          path: ${{ runner.temp }}/prepared.tgz
+          retention-days: 3
+
+  apk:
+    needs: recipe
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: fdroid-prepared-source
+          path: ${{ runner.temp }}
+      - name: Unpack the prepared source
+        run: tar -xzf "$RUNNER_TEMP/prepared.tgz"
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: fdroidserver
+        run: pip install --quiet "$FDROIDSERVER"
+      - name: Build the release APK, unsigned (gradle assembleRelease)
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleRelease --no-daemon
+          ls -l app/build/outputs/apk/release/
+          test -f app/build/outputs/apk/release/app-release-unsigned.apk
+      - name: Scan the APK (F-Droid scanner)
+        run: python tools/fdroid-check.py scan-apk app/build/outputs/apk/release/app-release-unsigned.apk
+      - name: Test the OCR with the rebuilt engine and model
+        run: |
+          npm install --no-save --no-audit --no-fund playwright
+          npx playwright install --with-deps chromium
+          node tools/ocr-test.js
+      - uses: actions/upload-artifact@v4
+        with:
+          name: fdroid-apk
+          path: app/build/outputs/apk/release/app-release-unsigned.apk
