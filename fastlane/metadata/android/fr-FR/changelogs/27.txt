@@ -1,0 +1,1 @@
+Corrections de l'onglet Stations : quand tu changes de voiture, la carte et Mes stations passent tout de suite aux prix de son carburant, sans relancer l'appli. Sur la carte, la fenêtre d'une station reste ouverte quand de nouveaux prix arrivent ou que la carte bouge, et les étiquettes ne clignotent plus.

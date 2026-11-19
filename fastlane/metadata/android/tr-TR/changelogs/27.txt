@@ -1,0 +1,1 @@
+İstasyonlar sekmesi düzeltmeleri: araç değiştirdiğinde harita ve İstasyonlarım, uygulamayı yeniden başlatmadan hemen o aracın yakıt fiyatlarını gösteriyor. Haritada yeni fiyatlar geldiğinde veya harita kaydığında istasyon penceresi açık kalıyor ve etiketler artık yanıp sönmüyor.

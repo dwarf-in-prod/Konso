@@ -1,0 +1,1 @@
+Correzioni della scheda Distributori: quando cambi auto, la mappa e I miei distributori mostrano subito i prezzi del suo carburante, senza riavviare l'app. Sulla mappa, la finestra di un distributore resta aperta quando arrivano nuovi prezzi o la mappa si sposta, e le etichette non lampeggiano più.

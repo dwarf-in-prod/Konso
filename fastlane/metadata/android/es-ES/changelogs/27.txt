@@ -1,0 +1,1 @@
+Correcciones de la pestaña Gasolineras: al cambiar de coche, el mapa y Mis gasolineras muestran enseguida los precios de su combustible, sin reiniciar la app. En el mapa, la ventana de una gasolinera sigue abierta cuando llegan nuevos precios o el mapa se mueve, y las etiquetas ya no parpadean.

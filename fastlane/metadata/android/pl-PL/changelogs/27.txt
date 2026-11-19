@@ -1,0 +1,1 @@
+Poprawki zakładki Stacje: po zmianie samochodu mapa i Moje stacje od razu pokazują ceny jego paliwa, bez ponownego uruchamiania aplikacji. Na mapie okno stacji pozostaje otwarte, gdy przychodzą nowe ceny lub mapa się przesuwa, a etykiety już nie migają.

@@ -1,0 +1,1 @@
+Corecții în fila Benzinării: când schimbi mașina, harta și Benzinăriile mele arată imediat prețurile carburantului ei, fără a reporni aplicația. Pe hartă, fereastra unei benzinării rămâne deschisă când sosesc prețuri noi sau harta se mișcă, iar etichetele nu mai clipesc.

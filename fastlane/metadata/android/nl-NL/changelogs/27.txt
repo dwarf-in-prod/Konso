@@ -1,0 +1,1 @@
+Oplossingen in het tabblad Tankstations: als je van auto wisselt, tonen de kaart en Mijn tankstations meteen de prijzen van zijn brandstof, zonder de app te herstarten. Op de kaart blijft het venster van een tankstation open als er nieuwe prijzen binnenkomen of de kaart beweegt, en de labels knipperen niet meer.
