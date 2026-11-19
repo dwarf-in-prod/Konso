@@ -7,7 +7,8 @@ It relies on F-Droid's own tool, fdroidserver (pip install fdroidserver), for ev
 decides itself: reading the recipe, removing the signing keys, and the source and APK scanners.
 
 Steps, in F-Droid's order (fdroidserver: common.prepare_source(), then build.build_local()):
-  lint     RECIPE CATEGORIES  check the recipe with "fdroid lint", as fdroiddata's CI does
+  lint     RECIPE CONFIG      check the recipe with "fdroid lint", as fdroiddata's CI does
+                              (CONFIG: the config/ folder of fdroiddata: categories and icons)
   sudo     RECIPE             run the recipe's "sudo" commands (install the Debian packages)
   prepare  RECIPE             delete the "rm" files, remove the signing keys, run "prebuild",
                               then scan the source: fails if the scanner finds a problem
@@ -77,14 +78,14 @@ def gradle_version_code(source, build):
 
 def step_lint(args):
     """Checks the recipe with "fdroid lint" in a temporary copy of fdroiddata's layout
-    (metadata/<app id>.yml, config/categories.yml), so wrong fields, an unknown category or a
-    badly formatted file are caught before the merge request to fdroiddata."""
+    (metadata/<app id>.yml next to fdroiddata's config/ folder, which holds the list of
+    categories and their icons), so wrong fields, an unknown category or a badly formatted file
+    are caught before the merge request to fdroiddata."""
     with tempfile.TemporaryDirectory() as tmp:
         os.makedirs(os.path.join(tmp, 'metadata'))
-        os.makedirs(os.path.join(tmp, 'config'))
+        shutil.copytree(args.config, os.path.join(tmp, 'config'))
         app_id = os.path.splitext(os.path.basename(args.recipe))[0]
         shutil.copy(args.recipe, os.path.join(tmp, 'metadata', app_id + '.yml'))
-        shutil.copy(args.categories, os.path.join(tmp, 'config', 'categories.yml'))
         fdroid = shutil.which('fdroid') or sys.exit('The fdroid command (fdroidserver) is missing.')
         result = subprocess.run([fdroid, 'lint', '-v', app_id], cwd=tmp)
         if result.returncode != 0:
@@ -155,7 +156,7 @@ def main():
         p.set_defaults(func=func)
     p = sub.add_parser('lint')
     p.add_argument('recipe')
-    p.add_argument('categories')
+    p.add_argument('config')
     p.set_defaults(func=step_lint)
     p = sub.add_parser('scan-apk')
     p.add_argument('apk')

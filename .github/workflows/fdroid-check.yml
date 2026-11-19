@@ -47,8 +47,10 @@ jobs:
           echo /opt/fdroidserver/bin >> "$GITHUB_PATH"
       - name: Lint the recipe (fdroid lint)
         run: |
-          curl -fsSL -o "$RUNNER_TEMP/categories.yml" https://gitlab.com/fdroid/fdroiddata/-/raw/master/config/categories.yml
-          python tools/fdroid-check.py lint "$RECIPE" "$RUNNER_TEMP/categories.yml"
+          # only the config/ folder of fdroiddata (categories and their icons), not the whole repository
+          git clone --depth 1 --filter=blob:none --sparse https://gitlab.com/fdroid/fdroiddata.git "$RUNNER_TEMP/fdroiddata"
+          git -C "$RUNNER_TEMP/fdroiddata" sparse-checkout set config
+          python tools/fdroid-check.py lint "$RECIPE" "$RUNNER_TEMP/fdroiddata/config"
       - name: Recipe "sudo" (Debian packages)
         run: python tools/fdroid-check.py sudo "$RECIPE"
       - name: Recipe "rm", signing keys removed, source scan
