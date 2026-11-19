@@ -87,8 +87,16 @@ jobs:
         run: pip install --quiet "$FDROIDSERVER"
       - name: Build the release APK, unsigned (gradle assembleRelease)
         run: |
-          chmod +x gradlew
-          ./gradlew assembleRelease --no-daemon
+          # F-Droid's scanner deletes gradlew and gradle-wrapper.jar; F-Droid then runs its own
+          # launcher (gradlew-fdroid) with the Gradle version named in gradle-wrapper.properties,
+          # from the recipe's subdir. Do the same: download that Gradle and run it from app/.
+          test ! -e gradlew
+          URL=$(sed -n 's/^distributionUrl=//p' gradle/wrapper/gradle-wrapper.properties | sed 's/\\:/:/g')
+          echo "Gradle from $URL"
+          curl -fsSL -o "$RUNNER_TEMP/gradle.zip" "$URL"
+          unzip -q "$RUNNER_TEMP/gradle.zip" -d "$RUNNER_TEMP/gradle"
+          GRADLE=$(ls -d "$RUNNER_TEMP"/gradle/gradle-*)/bin/gradle
+          (cd app && "$GRADLE" assembleRelease --no-daemon)
           ls -l app/build/outputs/apk/release/
           test -f app/build/outputs/apk/release/app-release-unsigned.apk
       - name: Scan the APK (F-Droid scanner)
