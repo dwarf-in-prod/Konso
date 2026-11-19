@@ -1,0 +1,1 @@
+Separador Postos: com a ligação ativada, o interruptor ocupa uma só linha e o mapa ajusta-se ao tamanho do ecrã, para que o início de Os meus postos fique visível por baixo: basta deslizar fora do mapa para descer até aos teus postos.

@@ -1,0 +1,1 @@
+Stations tab: when the connection is on, the switch takes a single line and the map is sized to the screen, so the start of My stations stays visible below it: one swipe outside the map scrolls down to your stations.

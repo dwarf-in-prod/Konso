@@ -125,7 +125,9 @@
            turns the switch on: Konso does not use the internet otherwise. Chart of the fuel price of the
            selected car, followed stations, search by postcode (renderStations() in app.js). -->
       <section id="stations" class="hide">
-        <div class="card">
+        <!-- connection switch; once the connection is allowed, only the switch remains, on one short
+             line (.compact), to leave room for the map and the start of My stations -->
+        <div class="card" id="stSwitchCard">
           <h3 data-i18n="st_title"></h3>
           <!-- explanation hidden once the connection is allowed (setOnline() in app.js) -->
           <div class="note" id="stIntro" style="margin-top: 0" data-i18n="st_intro"></div>

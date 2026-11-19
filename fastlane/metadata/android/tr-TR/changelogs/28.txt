@@ -1,0 +1,1 @@
+İstasyonlar sekmesi: bağlantı açıkken anahtar tek satıra sığıyor ve harita ekran boyutuna uyuyor; böylece İstasyonlarım'ın başı altında görünür kalıyor: istasyonlarına inmek için haritanın dışında bir kez kaydırman yeterli.

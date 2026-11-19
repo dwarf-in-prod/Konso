@@ -1,0 +1,1 @@
+Tabblad Tankstations: als de verbinding aan staat, neemt de schakelaar nog maar één regel in en past de kaart zich aan het scherm aan, zodat het begin van Mijn tankstations eronder zichtbaar blijft: één veeg naast de kaart brengt je naar je tankstations.

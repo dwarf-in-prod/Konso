@@ -1,0 +1,1 @@
+Onglet Stations : quand la connexion est autorisée, l'interrupteur tient sur une seule ligne et la carte s'adapte à la taille de l'écran, pour que le début de Mes stations reste visible en dessous : un glissement hors de la carte suffit pour descendre jusqu'à tes stations.
