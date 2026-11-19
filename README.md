@@ -94,6 +94,7 @@ Once installed it has its own icon and works without internet, receipt scanning 
 - **GitHub Actions**: every push to `main` builds the APK (artifact `konso-apk`). Running the workflow manually, or a commit on `main` whose message contains `[release]`, publishes the APK in the `latest` release, and once per version in a `v<versionName>` release (`konso-<version>.apk`), whose tag is used by F-Droid-style app stores.
 - **Web version**: `node tools/build-web.js <folder>` builds the site (the files of `assets/www`, plus `web/`: icons, offline cache). The *Publier la version web* workflow publishes it to the `gh-pages` branch, which GitHub Pages serves (*Settings → Pages → Deploy from a branch → gh-pages*).
 - **OCR engine from source**: `tools/build-tesseract.sh` rebuilds the Tesseract files of `vendor/` from the source code of [tesseract.js-core](https://github.com/naptha/tesseract.js-core) and [tesseract.js](https://github.com/naptha/tesseract.js) (Emscripten 4.0.15, Node.js). The *Tesseract from source* workflow runs it and checks the result with `tools/ocr-test.js`.
+- **Map library from source**: `tools/build-leaflet.sh` rebuilds `vendor/leaflet.js` and `leaflet.css` from the source code of [Leaflet](https://github.com/Leaflet/Leaflet) 1.9.4 (Node.js: Rollup and UglifyJS, as Leaflet's own release build). The *Leaflet from source* workflow runs it and checks that the result is identical, byte for byte, to the files of the repository.
 
 ## Development
 
@@ -132,6 +133,7 @@ tools/
 ├── web-icons.js            Regenerates web/icons from the Android launcher icon
 ├── screenshots.js          Regenerates the screenshots (README and store listing)
 ├── build-tesseract.sh      Rebuilds the OCR engine from source
+├── build-leaflet.sh        Rebuilds the map library (Leaflet) from source
 └── ocr-test.js             Checks that an OCR engine build reads text
 fastlane/metadata/android/  Store listing (F-Droid, IzzyOnDroid), 10 languages
 ```
@@ -214,6 +216,7 @@ Une fois installée, elle a sa propre icône et fonctionne sans internet, lectur
 - **GitHub Actions** : chaque push sur `main` compile l'APK (artefact `konso-apk`). Un lancement manuel du workflow, ou un commit sur `main` dont le message contient `[release]`, publie l'APK dans la release `latest`, et une fois par version dans une release `v<versionName>` (`konso-<version>.apk`) dont le tag sert aux magasins d'applis de type F-Droid.
 - **Version web** : `node tools/build-web.js <dossier>` construit le site (les fichiers de `assets/www`, plus `web/` : icônes, cache hors ligne). Le workflow *Publier la version web* le publie dans la branche `gh-pages`, servie par GitHub Pages (*Settings → Pages → Deploy from a branch → gh-pages*).
 - **Moteur OCR depuis les sources** : `tools/build-tesseract.sh` recompile les fichiers Tesseract de `vendor/` depuis le code source de [tesseract.js-core](https://github.com/naptha/tesseract.js-core) et [tesseract.js](https://github.com/naptha/tesseract.js) (Emscripten 4.0.15, Node.js). Le workflow *Tesseract depuis les sources* le lance et vérifie le résultat avec `tools/ocr-test.js`.
+- **Bibliothèque de carte depuis les sources** : `tools/build-leaflet.sh` recompile `vendor/leaflet.js` et `leaflet.css` depuis le code source de [Leaflet](https://github.com/Leaflet/Leaflet) 1.9.4 (Node.js : Rollup et UglifyJS, comme la compilation officielle de Leaflet). Le workflow *Leaflet from source* le lance et vérifie que le résultat est identique, octet pour octet, aux fichiers du dépôt.
 
 ## Développement
 
