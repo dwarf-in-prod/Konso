@@ -1,0 +1,1 @@
+Neue geführte Tour: Bei der Erstinstallation stellen einige Blasen Auto, Käufe, Tankungen und Tankstellen vor, dann erklärt sich jeder Tab beim ersten Öffnen (in den Einstellungen erneut abrufbar). Neue Karte Neuigkeiten in den Einstellungen, mit den Änderungen jeder Version und ihrem Datum. Die Wartungserinnerung wird jetzt im Formular jedes Autos eingestellt.

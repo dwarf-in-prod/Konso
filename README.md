@@ -63,6 +63,7 @@ Written by an AI does not mean unchecked: all the source code is open, so anyone
 - 💶 **Buying a new car?** *My garage* compares the yearly cost of your current car (from your fill-ups) with the one you want to buy, and tells you when the change pays for itself. Updated as you type.
 - 💾 **Automatic backup** to `konso.json`, updated after every change.
 - 🎡 **Wheel pickers** for language, units, currency, categories and service distance.
+- 👋 **Guided tour**: at the first launch, a few bubbles over a dimmed screen show the car, the purchases, the fill-ups and the stations, then each tab explains itself the first time it is opened. Nothing is mandatory (one OK button), and it can be shown again from Settings → How it works.
 - 🌍 **10 languages**: English, French, Spanish, German, Italian, Portuguese, Dutch, Polish, Turkish, Romanian.
 - ❓ **Built-in help** ("How it works" in Settings) and a Material Design 3 interface with light and dark themes: automatic (like the device), or chosen in Settings.
 - 🖥️ **Adaptive layout**: bottom bar on phones; on tablets, computers and phones in landscape, a navigation rail on the left and two columns.
@@ -191,6 +192,7 @@ Comment elle est faite :
 - 💶 **Envie d'une nouvelle voiture ?** *Mon garage* compare le coût annuel de ta voiture actuelle (d'après tes pleins) avec celle que tu veux acheter, et te dit quand le changement est rentabilisé. Calculé pendant que tu tapes.
 - 💾 **Sauvegarde automatique** dans `konso.json`, mise à jour à chaque modification.
 - 🎡 **Choix par roue** pour la langue, les unités, la monnaie, les catégories et le kilométrage d'entretien.
+- 👋 **Visite guidée** : au premier lancement, quelques bulles sur un écran assombri présentent la voiture, les achats, les pleins et les stations, puis chaque onglet s'explique la première fois qu'on l'ouvre. Rien d'obligatoire (un bouton OK), et on peut la revoir depuis Réglages → Comment ça marche ?
 - 🌍 **10 langues** : français, anglais, espagnol, allemand, italien, portugais, néerlandais, polonais, turc, roumain.
 - ❓ **Aide intégrée** (« Comment ça marche ? » dans les Réglages) et interface Material Design 3, en thème clair ou sombre : automatique (comme l'appareil) ou choisi dans les Réglages.
 - 🖥️ **Mise en page adaptative** : barre en bas sur téléphone ; sur tablette, ordinateur et téléphone à l'horizontale, un rail de navigation à gauche et deux colonnes.
