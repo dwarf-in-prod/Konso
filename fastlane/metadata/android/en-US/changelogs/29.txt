@@ -1,0 +1,1 @@
+New guided tour: at first install, a few bubbles present the car, purchases, fill-ups and stations, then each tab explains itself the first time it opens (can be replayed from Settings). New What's new card in Settings, with each version's changes and their date. The service reminder is now set in each car's form.

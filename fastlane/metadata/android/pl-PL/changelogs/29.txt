@@ -1,0 +1,1 @@
+Nowy przewodnik: przy pierwszej instalacji dymki przedstawiają samochód, zakupy, tankowania i stacje, a każda zakładka objaśnia się przy pierwszym otwarciu (można go obejrzeć ponownie w Ustawieniach). Nowa karta Nowości w Ustawieniach, ze zmianami każdej wersji i ich datą. Przypomnienie o serwisie ustawia się teraz w karcie każdego auta.

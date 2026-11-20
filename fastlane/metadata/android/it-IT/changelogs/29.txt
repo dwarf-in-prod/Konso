@@ -1,0 +1,1 @@
+Nuova visita guidata: alla prima installazione, alcune bolle presentano l'auto, gli acquisti, i rifornimenti e i distributori, poi ogni scheda si spiega alla prima apertura (si può rivedere dalle Impostazioni). Nuova scheda Novità nelle Impostazioni, con le modifiche di ogni versione e la data. Il promemoria di manutenzione ora si imposta nella scheda di ogni auto.

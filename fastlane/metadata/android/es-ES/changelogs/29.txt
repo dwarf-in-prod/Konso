@@ -1,0 +1,1 @@
+Nueva visita guiada: en la primera instalación, unas burbujas presentan el coche, las compras, los repostajes y las gasolineras, y cada pestaña se explica la primera vez que se abre (se puede volver a ver en Ajustes). Nueva tarjeta Novedades en Ajustes, con los cambios de cada versión y su fecha. El recordatorio de mantenimiento se ajusta ahora en la ficha de cada coche.
