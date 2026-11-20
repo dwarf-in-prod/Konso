@@ -439,8 +439,35 @@ textarea {
   background: var(--error);
   color: var(--on-error);
 }
-.btn.first {
-  margin-top: 0;
+/* Small button, as wide as its text (the "Scan" button of the fill-up card) */
+.btn.small {
+  display: inline-flex;
+  width: auto;
+  height: 36px;
+  margin: 0;
+  padding: 0 14px 0 12px;
+  border-radius: 18px;
+  font-size: 14px;
+}
+.btn.small .i {
+  width: 18px;
+  height: 18px;
+}
+/* Fill-up and purchase cards: the title, and on its right an optional small button */
+.cardhead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 36px;
+  margin-bottom: 12px;
+}
+.card .cardhead h3 {
+  margin: 0;
+}
+/* what was read on the receipt, between the title and the form */
+#scan .scanres {
+  margin: 0 0 14px;
 }
 .btns2 {
   display: grid;
