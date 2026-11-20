@@ -1595,6 +1595,10 @@ summary:focus-visible,
 .tour-arrow.none {
   display: none;
 }
+/* My garage: the Servicing card, under the list of cars and its hint */
+#svcCard {
+  margin-top: 16px;
+}
 /* Settings > What's new: one block per version, one line per change with its coloured label */
 .news-ver + .news-ver {
   margin-top: 14px;
