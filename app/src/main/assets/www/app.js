@@ -424,8 +424,8 @@ const NA = typeof Android !== 'undefined' ? Android : null; // null in a plain b
 let folder = '',
   pendingFile = null,
   setupMode = false;
-// At first launch, once the folder is chosen: the guided tour (in My garage), or if it was already
-// seen, the Fill-ups tab.
+// At first launch, once the folder is chosen: the Fill-ups tab (or the guided tour, in My garage,
+// if it was not seen yet).
 function finishSetup() {
   if (!setupMode) return;
   setupMode = false;
@@ -854,9 +854,9 @@ function onboardTheme() {
       setTheme(obTheme, true);
       render();
       installAdvice();
-      // the guided tour, once the install advice is closed (in the Android app: once the backup
-      // folder is chosen, see finishSetup())
-      if (!setupMode) tourWhenIdle(() => tourStart('start'));
+      // the guided tour, once the install advice is closed (in the Android app, before the backup
+      // folder is chosen: the tour ends on the folder screen, see tourEnd())
+      tourWhenIdle(() => tourStart('start'));
     },
   });
 }
@@ -3329,10 +3329,9 @@ function tourSteps(name) {
     st => st.since > tourState.base && !tourState.seen.includes(name + '.' + st.id) && (!st.when || st.when()),
   );
 }
-// True while something else holds the screen: first-launch wheels, a dialog, or the backup folder
-// setup while its screen is shown (a user who leaves it without choosing a folder gets the tour).
+// True while something else holds the screen: first-launch wheels or a dialog. The backup folder
+// screen of the first launch does not hold it: the first tour comes before the folder is chosen.
 const tourBusy = () =>
-  (setupMode && tabShown() === 'save') ||
   !$('lang').classList.contains('hide') ||
   !$('picker').classList.contains('hide') ||
   !$('dlg').classList.contains('hide');
@@ -3436,11 +3435,15 @@ function tourNext() {
   else tourEnd();
 }
 // End the tour on screen; then the tab's own tours may follow (e.g. the map after the switch).
+// At the first launch in the Android app, the first tour ends back on the backup folder screen,
+// still to be done (setupMode).
 function tourEnd() {
+  const first = tourRun && tourRun.name === 'start';
   clearInterval(tourFollow);
   tourRun = null;
   $('tour').classList.add('hide');
-  tourSoon();
+  if (first && setupMode) showTab('save');
+  else tourSoon();
 }
 // Skip: the rest of this tour is marked as seen (the other tours still come at their time).
 function tourSkip() {
@@ -3575,8 +3578,9 @@ function init() {
   render();
   renderSave();
   if (setupMode) showTab('save');
-  // a tour not finished at the last start (or the first tour after the first launch's wheels)
-  else if (known) tourWhenIdle(() => tourStart('start') || tourSoon());
+  // a tour not finished at the last start (or the first tour after the first launch's wheels); in
+  // the Android app without a folder yet, it ends back on the folder screen
+  if (known) tourWhenIdle(() => tourStart('start') || tourSoon());
 }
 $('fd').value = today();
 $('bd').value = today();
