@@ -311,6 +311,14 @@
                 ><label data-i18n="car_fuel"></label>
               </div>
             </div>
+            <!-- Servicing of this car: interval, last and next service, and the distance wheel
+                 (renderSvc() in app.js). Hidden for a car not saved yet. -->
+            <div id="svcCard">
+              <h4 class="sub" data-i18n="svc_title"></h4>
+              <div class="sum" id="svcInfo"></div>
+              <div class="note" data-i18n="svc_note"></div>
+              <button class="btn tonal" id="svcKmBtn" data-i18n="svc_change"></button>
+            </div>
             <!-- Optional details of the car, folded: purchase price, mileage at purchase, insurance -->
             <details id="carAdv">
               <summary data-i18n="car_adv"></summary>
@@ -414,12 +422,6 @@
               </div>
             </div>
           </div>
-          <div class="card" id="svcCard">
-            <h3 data-i18n="svc_title"></h3>
-            <div class="sum" id="svcInfo"></div>
-            <div class="note" data-i18n="svc_note"></div>
-            <button class="btn tonal" id="svcKmBtn" data-i18n="svc_change"></button>
-          </div>
           <div class="card" id="backup">
             <h3 id="sv-title"></h3>
             <div id="sv-folder" class="sum"></div>
@@ -452,6 +454,17 @@
               <div class="note" data-i18n="manual_note"></div>
             </details>
           </div>
+        </div>
+        <!-- Right column on wide screens: what's new, then the help -->
+        <div class="col">
+        <!-- What's new: the latest version's changes, then the earlier versions folded (renderNews()) -->
+        <div class="card" id="news">
+          <h3 data-i18n="news_title"></h3>
+          <div id="newsNow"></div>
+          <details class="fold-news">
+            <summary data-i18n="news_older"></summary>
+            <div id="newsOld"></div>
+          </details>
         </div>
         <div class="card" id="help">
           <h3 data-i18n="help_title"></h3>
@@ -507,6 +520,9 @@
             <summary data-i18n="help_q13"></summary>
             <div class="note" data-i18n-html="help_a13"></div>
           </details>
+          <!-- start the guided tour again (tourReplay() in app.js) -->
+          <button class="btn tonal" id="tourReplay" data-i18n="tour_replay"></button>
+        </div>
         </div>
       </section>
     </main>
@@ -597,6 +613,23 @@
         <h2 id="dlgT"></h2>
         <div id="dlgM"></div>
         <div class="dbtns" id="dlgB"></div>
+      </div>
+    </div>
+
+    <!-- Guided tour (the "Guided tour" section of app.js): a layer over the whole app that stops taps,
+         a lit hole around the element shown (its shadow dims the rest), an arrow and the bubble. -->
+    <div id="tour" class="hide">
+      <div class="tour-block"></div>
+      <div class="tour-hole" id="tourHole"></div>
+      <div class="tour-arrow" id="tourArrow"></div>
+      <div class="tour-bub" id="tourBub" role="dialog" aria-modal="true" aria-labelledby="tourT">
+        <h4 id="tourT"></h4>
+        <p id="tourX"></p>
+        <div class="tour-bar">
+          <span id="tourN"></span>
+          <span><button class="tour-skip" id="tourSkip" data-i18n="tour_skip"></button
+            ><button class="tour-ok" id="tourOk"></button></span>
+        </div>
       </div>
     </div>
 
