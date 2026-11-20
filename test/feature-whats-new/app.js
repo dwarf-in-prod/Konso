@@ -2149,7 +2149,8 @@ function svcReason(i) {
     v,
   );
 }
-// My garage > Servicing card (the car shown): interval, last service, next service.
+// The Servicing block of the car form (My garage, tap a car): interval, last service, next
+// service of car c (i = svcInfo(c)).
 function renderSvc(c, i) {
   let h = tx('svc_rule', { car: esc(carName(c)), km: kmTxt(svcEvery(c)) });
   if (!i) h += '<br>' + tx('svc_nodata');
@@ -2166,7 +2167,10 @@ function svcUI() {
   const c = curCar(),
     i = svcInfo(c),
     due = !!(i && i.due);
-  renderSvc(c, i);
+  if (carEditing) {
+    const e = S.cars.find(x => x.id === carEditing);
+    if (e) renderSvc(e, svcInfo(e)); // the car form open: keep its Servicing block up to date
+  }
   $('svcBarTxt').textContent = tx('svc_banner');
   $('svcBar').classList.toggle('hide', !due);
   if (!due) return;
@@ -2212,9 +2216,11 @@ $('svcBar').onclick = () =>
     { t: tx('svc_not_yet'), tonal: true },
     { t: tx('svc_done_yes'), fn: svcDoneToday },
   ]);
-// My garage > Servicing > Change the distance: wheel of SVC_KM in the chosen unit.
+// Car form > Servicing > Change the distance: wheel of SVC_KM in the chosen unit, for the car of
+// the form.
 $('svcKmBtn').onclick = () => {
-  const c = curCar();
+  const c = S.cars.find(x => x.id === carEditing);
+  if (!c) return;
   picker({
     icon: 'wrench',
     color: 'var(--amber)',
@@ -2354,6 +2360,9 @@ function openCarForm(id) {
   $('carName').value = c ? carName(c) : '';
   setCarFuel((c && FUELV.includes(c.fuel) && c.fuel) || 'SP95-E10');
   fillCarAdvanced(c);
+  // Servicing: for a car already saved (its reminder is kept on the car)
+  $('svcCard').classList.toggle('hide', !c);
+  if (c) renderSvc(c, svcInfo(c));
   $('carDel').classList.toggle('hide', !(c && S.cars.length > 1));
   $('carDel').textContent = tx('car_del');
   $('carNote').textContent = c ? (S.cars.length > 1 ? tx('car_note_del') : tx('car_note_keep')) : '';
