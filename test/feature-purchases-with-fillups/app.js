@@ -1414,12 +1414,13 @@ async function prepImage(file) {
   x.putImageData(im, 0, 0);
   return await new Promise(r => c.toBlob(r, 'image/png'));
 }
-// "Scan a receipt" button. For each photo: prepare it, run OCR twice with two page layouts
+// "Scan" button (small, on the right of the fill-up card's title). For each photo: prepare it, run OCR twice with two page layouts
 // (6 = single block, 4 = single column), keep the reading whose parsed values are the most complete,
 // fill the form and show what was read. Gives up if the engine does not progress for 60 s.
 function initScan() {
   if (typeof Tesseract === 'undefined' || typeof TicketParse === 'undefined') return;
   $('scan').classList.remove('hide');
+  $('scanBtn').classList.remove('hide');
   const box = $('scanres');
   let busy = false;
   $('sc1').addEventListener('change', async e => {
@@ -3278,7 +3279,7 @@ const TOURS = {
     { id: 'navst', tab: 'garage', sel: '.nav [data-t="stations"]', since: 1 },
   ],
   fuel: [
-    { id: 'scan', sel: '#scan .btn', when: () => !$('scan').classList.contains('hide'), since: 1 },
+    { id: 'scan', sel: '#scanBtn', when: () => !$('scanBtn').classList.contains('hide'), since: 1 },
     { id: 'form', sel: '#fill .grid', since: 1 },
     { id: 'buys', sel: '#fuel .seg [data-p="buys"]', since: 2 },
   ],

@@ -80,20 +80,26 @@
         </div>
         <div id="fill">
           <div class="card">
-            <div id="scan" class="hide">
-              <label class="btn tonal first" for="sc1"
+            <!-- Card title, and the small "Scan" button on its right (shown by initScan() when the OCR
+                 engine is there): visible, but lighter than the form, as few people scan receipts -->
+            <div class="cardhead">
+              <h3 data-i18n="new_fill"></h3>
+              <label class="btn tonal small hide" id="scanBtn" for="sc1" data-i18n-title="scan_btn"
                 ><svg class="i" viewBox="0 0 24 24">
                   <circle cx="12" cy="12" r="3.2" />
                   <path
                     d="M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"
                   /></svg
-                ><span data-i18n="scan_btn"></span
+                ><span data-i18n="scan_short"></span
               ></label>
-              <input type="file" id="sc1" accept="image/*" hidden />
-              <div class="note" id="scanHint" style="margin: 8px 0 0" data-i18n="scan_hint"></div>
+            </div>
+            <input type="file" id="sc1" accept="image/*" hidden />
+            <!-- first-use hint and what was read on the receipt -->
+            <div id="scan" class="hide">
+              <div class="note" id="scanHint" style="margin: 0 0 14px" data-i18n="scan_hint"></div>
               <div id="scanres" class="scanres hide"></div>
             </div>
-            <div class="grid" style="margin-top: 20px">
+            <div class="grid">
               <div class="f fl"><input type="date" id="fd" /><label for="fd" data-i18n="date"></label></div>
               <div class="f">
                 <input type="number" id="fk" inputmode="decimal" step="0.1" placeholder=" " /><label
@@ -139,7 +145,8 @@
         <!-- Purchases (form, history), the second part of the Fill-ups tab -->
         <div id="buys" class="hide">
           <div class="card">
-            <div class="grid" style="margin-top: 6px">
+            <div class="cardhead"><h3 data-i18n="new_buy"></h3></div>
+            <div class="grid">
               <div class="f fl"><input type="date" id="bd" /><label for="bd" data-i18n="date"></label></div>
               <div class="f">
                 <input type="number" id="be" inputmode="decimal" step="0.01" placeholder=" " /><label
