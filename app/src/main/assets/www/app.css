@@ -527,30 +527,61 @@ textarea {
   text-decoration: underline;
   cursor: pointer;
 }
-/* Fill-ups tab: the two buttons at the top (fill-ups / purchases), M3 segmented buttons */
+/* Fill-ups tab: the two tabs at the top (fill-ups / purchases), M3 primary tabs: icon and label, a
+   thin line under the row, and under the part shown a primary line that slides (.seg.right = the
+   second part, set by showFuelPart() in app.js) */
 .seg {
+  position: relative;
   display: flex;
-  border: 1px solid var(--outline);
-  border-radius: 20px;
-  overflow: hidden;
-  margin: 4px 0 16px;
+  border-bottom: 1px solid var(--outline-v);
+  margin: 0 0 16px;
 }
 .seg button {
   flex: 1;
   min-width: 0;
-  height: 40px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
   border: 0;
   background: transparent;
-  color: var(--on-surf);
+  color: var(--on-surf-v);
   font: 500 14px/1.2 var(--font);
   cursor: pointer;
 }
-.seg button + button {
-  border-left: 1px solid var(--outline);
+.seg button span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.seg button .i {
+  flex: none;
+  width: 20px;
+  height: 20px;
 }
 .seg button.on {
-  background: var(--secondary-c);
-  color: var(--on-secondary-c);
+  color: var(--primary);
+}
+/* the line under the part shown: a quarter of the row, centred under its tab */
+.seg::after {
+  content: '';
+  position: absolute;
+  left: 12.5%;
+  bottom: -1px;
+  width: 25%;
+  height: 3px;
+  border-radius: 3px 3px 0 0;
+  background: var(--primary);
+  transition: transform 0.25s cubic-bezier(0.2, 0, 0, 1);
+}
+.seg.right::after {
+  transform: translateX(200%);
+}
+@media (prefers-reduced-motion: reduce) {
+  .seg::after {
+    transition: none;
+  }
 }
 /* Stations: postcode field and its Search button on one line */
 .stsearch {
