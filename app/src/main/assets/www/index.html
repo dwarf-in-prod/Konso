@@ -453,6 +453,17 @@
             </details>
           </div>
         </div>
+        <!-- Right column on wide screens: what's new, then the help -->
+        <div class="col">
+        <!-- What's new: the latest version's changes, then the earlier versions folded (renderNews()) -->
+        <div class="card" id="news">
+          <h3 data-i18n="news_title"></h3>
+          <div id="newsNow"></div>
+          <details class="fold-news">
+            <summary data-i18n="news_older"></summary>
+            <div id="newsOld"></div>
+          </details>
+        </div>
         <div class="card" id="help">
           <h3 data-i18n="help_title"></h3>
           <details>
@@ -509,6 +520,7 @@
           </details>
           <!-- start the guided tour again (tourReplay() in app.js) -->
           <button class="btn tonal" id="tourReplay" data-i18n="tour_replay"></button>
+        </div>
         </div>
       </section>
     </main>

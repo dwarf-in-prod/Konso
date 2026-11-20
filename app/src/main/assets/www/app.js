@@ -1075,6 +1075,40 @@ $('sv-import').onclick = () => {
 };
 
 // ================================================================================================
+// Settings: what's new
+// ================================================================================================
+// The changes of the latest versions, in a few simple words each, in Settings: the latest version
+// first, the earlier ones folded under it. Each change has a kind (new feature, improvement, fix)
+// and a text (news_<version>_<n> in i18n.js). Before each release, add its version at the top of
+// NEWS, with its texts in the 10 languages.
+const NEWS = [
+  { v: '2.18', items: [['new', 'news_218_1'], ['new', 'news_218_2']] },
+  { v: '2.17', items: [['better', 'news_217_1']] },
+  { v: '2.16', items: [['fix', 'news_216_1'], ['fix', 'news_216_2']] },
+  { v: '2.15', items: [['new', 'news_215_1'], ['better', 'news_215_2']] },
+  { v: '2.14', items: [['fix', 'news_214_1']] },
+  { v: '2.13', items: [['fix', 'news_213_1'], ['new', 'news_213_2']] },
+  { v: '2.12', items: [['fix', 'news_212_1']] },
+  { v: '2.11', items: [['better', 'news_211_1']] },
+  { v: '2.10', items: [['better', 'news_210_1']] },
+];
+// One version: its number, then one line per change with a coloured label (New, Improved, Fixed).
+function newsVersion(n) {
+  const item = ([kind, key]) =>
+    '<div class="news-item">' +
+    `<span class="news-tag news-${kind}">${esc(tx('news_' + kind))}</span><span>${esc(tx(key))}</span>` +
+    '</div>';
+  const items = n.items.map(item).join('');
+  return `<div class="news-ver"><div class="news-v">${esc(tx('news_ver', { v: n.v }))}</div>${items}</div>`;
+}
+// Fill the What's new card (Settings): the latest version, then the earlier ones. Called by
+// render(), so it follows the language.
+function renderNews() {
+  $('newsNow').innerHTML = newsVersion(NEWS[0]);
+  $('newsOld').innerHTML = NEWS.slice(1).map(newsVersion).join('');
+}
+
+// ================================================================================================
 // Web version (installable PWA, in a browser on any phone, tablet or computer)
 // There is no backup folder: the data lives in the browser (localStorage), and the user saves a backup
 // file and opens it again, on the same device or another one. The published site also has an offline
@@ -1702,6 +1736,7 @@ function render() {
   svcUI();
   renderPlan();
   renderStations();
+  renderNews();
 }
 
 // Bin button of a history line.

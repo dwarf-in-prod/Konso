@@ -1595,6 +1595,43 @@ summary:focus-visible,
 .tour-arrow.none {
   display: none;
 }
+/* Settings > What's new: one block per version, one line per change with its coloured label */
+.news-ver + .news-ver {
+  margin-top: 14px;
+}
+.news-v {
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+.news-item {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin: 6px 0;
+  font-size: 14px;
+}
+.news-tag {
+  flex: none;
+  padding: 0 8px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+}
+.news-new {
+  background: var(--primary-c);
+  color: var(--on-primary-c);
+}
+.news-better {
+  background: var(--secondary-c);
+  color: var(--on-secondary-c);
+}
+.news-fix {
+  background: var(--amber-c);
+  color: var(--on-amber-c);
+}
+.fold-news {
+  margin-top: 14px;
+}
 #tourReplay {
   margin-top: 16px;
 }
