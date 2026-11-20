@@ -1078,28 +1078,33 @@ $('sv-import').onclick = () => {
 // Settings: what's new
 // ================================================================================================
 // The changes of the latest versions, in a few simple words each, in Settings: the latest version
-// first, the earlier ones folded under it. Each change has a kind (new feature, improvement, fix)
-// and a text (news_<version>_<n> in i18n.js). Before each release, add its version at the top of
-// NEWS, with its texts in the 10 languages.
+// first, the earlier ones folded under it. Each version has its release date (d, YYYY-MM-DD; null
+// until it is released) and its changes: a kind (new feature, improvement, fix) and a text
+// (news_<version>_<n> in i18n.js). Before each release, add its version at the top of NEWS with
+// its texts in the 10 languages, and its date.
 const NEWS = [
-  { v: '2.18', items: [['new', 'news_218_1'], ['new', 'news_218_2']] },
-  { v: '2.17', items: [['better', 'news_217_1']] },
-  { v: '2.16', items: [['fix', 'news_216_1'], ['fix', 'news_216_2']] },
-  { v: '2.15', items: [['new', 'news_215_1'], ['better', 'news_215_2']] },
-  { v: '2.14', items: [['fix', 'news_214_1']] },
-  { v: '2.13', items: [['fix', 'news_213_1'], ['new', 'news_213_2']] },
-  { v: '2.12', items: [['fix', 'news_212_1']] },
-  { v: '2.11', items: [['better', 'news_211_1']] },
-  { v: '2.10', items: [['better', 'news_210_1']] },
+  { v: '2.18', d: null, items: [['new', 'news_218_1'], ['new', 'news_218_2']] },
+  { v: '2.17', d: '2026-11-19', items: [['better', 'news_217_1']] },
+  { v: '2.16', d: '2026-11-19', items: [['fix', 'news_216_1'], ['fix', 'news_216_2']] },
+  { v: '2.15', d: '2026-11-18', items: [['new', 'news_215_1'], ['better', 'news_215_2']] },
+  { v: '2.14', d: '2026-11-18', items: [['fix', 'news_214_1']] },
+  { v: '2.13', d: '2026-11-18', items: [['fix', 'news_213_1'], ['new', 'news_213_2']] },
+  { v: '2.12', d: '2026-11-18', items: [['fix', 'news_212_1']] },
+  { v: '2.11', d: '2026-11-18', items: [['better', 'news_211_1']] },
+  { v: '2.10', d: '2026-11-18', items: [['better', 'news_210_1']] },
 ];
-// One version: its number, then one line per change with a coloured label (New, Improved, Fixed).
+// A release date written out in the app's language, e.g. "19 novembre 2026" or "19 November 2026".
+const newsDate = d => new Date(d + 'T12:00').toLocaleDateString(LOC, { day: 'numeric', month: 'long', year: 'numeric' });
+// One version: its number and date, then one line per change with a coloured label (New,
+// Improved, Fixed).
 function newsVersion(n) {
   const item = ([kind, key]) =>
     '<div class="news-item">' +
     `<span class="news-tag news-${kind}">${esc(tx('news_' + kind))}</span><span>${esc(tx(key))}</span>` +
     '</div>';
   const items = n.items.map(item).join('');
-  return `<div class="news-ver"><div class="news-v">${esc(tx('news_ver', { v: n.v }))}</div>${items}</div>`;
+  const date = n.d ? `<span class="news-d">${esc(newsDate(n.d))}</span>` : '';
+  return `<div class="news-ver"><div class="news-v">${esc(tx('news_ver', { v: n.v }))}${date}</div>${items}</div>`;
 }
 // Fill the What's new card (Settings): the latest version, then the earlier ones. Called by
 // render(), so it follows the language.
@@ -3297,10 +3302,10 @@ function tourSteps(name) {
     st => st.since > tourState.base && !tourState.seen.includes(name + '.' + st.id) && (!st.when || st.when()),
   );
 }
-// True while something else holds the screen: first-launch wheels, a dialog, the backup folder
-// setup, an open car form.
+// True while something else holds the screen: first-launch wheels, a dialog, or the backup folder
+// setup while its screen is shown (a user who leaves it without choosing a folder gets the tour).
 const tourBusy = () =>
-  setupMode ||
+  (setupMode && tabShown() === 'save') ||
   !$('lang').classList.contains('hide') ||
   !$('picker').classList.contains('hide') ||
   !$('dlg').classList.contains('hide');
@@ -3322,11 +3327,12 @@ function tourWhenIdle(fn) {
   if (tourBusy()) setTimeout(() => tourWhenIdle(fn), 600);
   else fn();
 }
-// Offer the tours of the tab on screen, a moment after it opened (its animation).
+// A moment after a tab opened (its animation): the first tour if it was not shown yet (e.g. the
+// user left the backup folder screen without choosing a folder), else the tours of that tab.
 let tourTimer = 0;
 function tourSoon() {
   clearTimeout(tourTimer);
-  tourTimer = setTimeout(() => (TAB_TOURS[tabShown()] || []).some(tourStart), 450);
+  tourTimer = setTimeout(() => tourStart('start') || (TAB_TOURS[tabShown()] || []).some(tourStart), 450);
 }
 
 // Show the current step: its tab, then the bubble once the element is in view. A step whose

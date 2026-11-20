@@ -1603,6 +1603,13 @@ summary:focus-visible,
   font-weight: 600;
   margin-bottom: 4px;
 }
+/* the release date, after the version number */
+.news-d {
+  margin-left: 8px;
+  font-weight: 400;
+  font-size: 13px;
+  color: var(--on-surf-v);
+}
 .news-item {
   display: flex;
   align-items: baseline;
