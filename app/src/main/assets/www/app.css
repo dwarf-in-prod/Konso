@@ -1595,9 +1595,14 @@ summary:focus-visible,
 .tour-arrow.none {
   display: none;
 }
-/* My garage: the Servicing card, under the list of cars and its hint */
+/* Car form: the Servicing block, between the fuel and the advanced options */
 #svcCard {
-  margin-top: 16px;
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid var(--outline-v);
+}
+#svcCard h4 {
+  margin-top: 0;
 }
 /* Settings > What's new: one block per version, one line per change with its coloured label */
 .news-ver + .news-ver {
