@@ -424,11 +424,12 @@ const NA = typeof Android !== 'undefined' ? Android : null; // null in a plain b
 let folder = '',
   pendingFile = null,
   setupMode = false;
-// At first launch, once the folder is chosen, switch to the Fill-ups tab by itself.
+// At first launch, once the folder is chosen: the guided tour (in My garage), or if it was already
+// seen, the Fill-ups tab.
 function finishSetup() {
   if (!setupMode) return;
   setupMode = false;
-  setTimeout(() => showTab('fuel'), 900);
+  setTimeout(() => tourStart('start') || showTab('fuel'), 900);
 }
 // Short message at the bottom of the screen (snackbar), hidden after 4.5 s.
 let stT = null;
@@ -853,6 +854,9 @@ function onboardTheme() {
       setTheme(obTheme, true);
       render();
       installAdvice();
+      // the guided tour, once the install advice is closed (in the Android app: once the backup
+      // folder is chosen, see finishSetup())
+      if (!setupMode) tourWhenIdle(() => tourStart('start'));
     },
   });
 }
@@ -3007,6 +3011,7 @@ function mapShow() {
     .then(() => {
       if (!map) mapCreate();
       map.invalidateSize();
+      tourSoon(); // the map's bubbles, the first time it is shown
       if (mapKey !== FEED_FUEL[defaultFuel()]) mapLoad();
       else mapDraw(mapKey, mapTotal);
     })
@@ -3190,6 +3195,212 @@ document.addEventListener('visibilitychange', () => {
 });
 
 // ================================================================================================
+// Guided tour (bubbles over a dimmed screen)
+// ================================================================================================
+// A few bubbles, each pointing at one element of the app with a short explanation and an OK
+// button (nothing has to be done). The rest of the screen is dimmed and cannot be tapped.
+// - "start": after the first launch (the wheels, then in the Android app the backup folder), in
+//   My garage: the car, the car selector, the purchases, then the Fill-ups and Stations tabs.
+// - "fuel", "stations", "map", "stats": the first time the user opens that tab (or sees the map).
+// Who sees what (keep this rule): a new install gets every bubble; someone who already had the
+// app only gets the bubbles added by a major update. Each step has `since`, the TOUR_VERSION that
+// added it; the device remembers (TOUR_KEY) `base`, the tour version it already knew (0 for a new
+// install, TOUR_VERSION for an older install meeting the tour for the first time), and the steps
+// seen. A step shows when step.since > base and it was not seen. To present something new in a
+// major update: add its steps with since = TOUR_VERSION + 1, then raise TOUR_VERSION.
+const TOUR_VERSION = 1;
+const TOUR_KEY = KP + 'tour';
+// The steps of each tour: id (texts tour_<id>_t and tour_<id>_x in i18n.js), the tab to show
+// (if any), what to prepare, the element pointed at, when it applies, and since.
+const TOURS = {
+  start: [
+    { id: 'car', tab: 'garage', prep: () => showGarage('cars'), sel: '#cars-list .carrow', since: 1 },
+    { id: 'carsel', tab: 'garage', sel: '.carsel', since: 1 },
+    { id: 'buys', tab: 'garage', sel: '.seg [data-g="buys"]', since: 1 },
+    { id: 'navfuel', tab: 'garage', sel: '.nav [data-t="fuel"]', since: 1 },
+    { id: 'navst', tab: 'garage', sel: '.nav [data-t="stations"]', since: 1 },
+  ],
+  fuel: [
+    { id: 'scan', sel: '#scan .btn', when: () => !$('scan').classList.contains('hide'), since: 1 },
+    { id: 'form', sel: '#fuel .grid', since: 1 },
+  ],
+  stations: [{ id: 'switch', sel: '#stSwitchCard .switch', since: 1 }],
+  map: [
+    { id: 'map', sel: '#stMap', when: () => ONLINE && !!map, since: 1 },
+    { id: 'locate', sel: '#stLocate', when: () => ONLINE && !!map, since: 1 },
+  ],
+  stats: [{ id: 'stats', sel: '#stats .card', since: 1 }],
+};
+// The tours of each tab, offered the first time it is opened.
+const TAB_TOURS = { fuel: ['fuel'], stations: ['stations', 'map'], stats: ['stats'] };
+let tourState = null, // { base, seen: ['start.car', …] }, saved in TOUR_KEY
+  tourRun = null, // the tour on screen: { name, steps, i }
+  tourFollow = 0; // timer keeping the bubble on its element while the page settles
+
+// Read and save what this device has seen of the tour.
+function tourSave() {
+  try {
+    localStorage.setItem(TOUR_KEY, JSON.stringify(tourState));
+  } catch (e) {}
+}
+// At startup: newInstall = the first-launch screens are shown (nothing known about this device).
+// A device without tour state but with a known language had the app before the tour existed: it
+// knows the app as of TOUR_VERSION, so it is only shown later additions.
+function tourInit(newInstall) {
+  try {
+    const t = JSON.parse(localStorage.getItem(TOUR_KEY));
+    if (t && typeof t.base === 'number' && Array.isArray(t.seen)) tourState = t;
+  } catch (e) {}
+  if (!tourState) {
+    tourState = { base: newInstall ? 0 : TOUR_VERSION, seen: [] };
+    tourSave();
+  }
+}
+// The steps of tour name still to show on this device, among those that apply now.
+function tourSteps(name) {
+  return TOURS[name].filter(
+    st => st.since > tourState.base && !tourState.seen.includes(name + '.' + st.id) && (!st.when || st.when()),
+  );
+}
+// True while something else holds the screen: first-launch wheels, a dialog, the backup folder
+// setup, an open car form.
+const tourBusy = () =>
+  setupMode ||
+  !$('lang').classList.contains('hide') ||
+  !$('picker').classList.contains('hide') ||
+  !$('dlg').classList.contains('hide');
+// The tab on screen.
+const tabShown = () => ['fuel', 'stations', 'stats', 'garage', 'save'].find(id => !$(id).classList.contains('hide'));
+
+// Start tour name if it has steps to show and nothing else is on screen. Returns true if started.
+function tourStart(name) {
+  if (tourRun || !tourState || tourBusy()) return false;
+  const steps = tourSteps(name);
+  if (!steps.length) return false;
+  tourRun = { name, steps, i: 0 };
+  $('tour').classList.remove('hide');
+  tourShow();
+  return true;
+}
+// Run fn once nothing else is on screen (first-launch wheels, install advice, dialog…).
+function tourWhenIdle(fn) {
+  if (tourBusy()) setTimeout(() => tourWhenIdle(fn), 600);
+  else fn();
+}
+// Offer the tours of the tab on screen, a moment after it opened (its animation).
+let tourTimer = 0;
+function tourSoon() {
+  clearTimeout(tourTimer);
+  tourTimer = setTimeout(() => (TAB_TOURS[tabShown()] || []).some(tourStart), 450);
+}
+
+// Show the current step: its tab, then the bubble once the element is in view. A step whose
+// element is missing or hidden is skipped.
+function tourShow() {
+  const st = tourRun.steps[tourRun.i],
+    tabChange = st.tab && tabShown() !== st.tab;
+  if (tabChange) showTab(st.tab);
+  if (st.prep) st.prep();
+  tourState.seen.push(tourRun.name + '.' + st.id);
+  tourSave();
+  setTimeout(() => {
+    const el = document.querySelector(st.sel);
+    if (!el || !el.getClientRects().length) return tourNext();
+    const r = el.getBoundingClientRect();
+    if (r.top < 64 || r.bottom > innerHeight - 96) el.scrollIntoView({ block: 'center' });
+    tourText(st);
+    setTimeout(() => tourPlace(el), 60);
+    // the page may still move (a tab's animation, a map that appears…): follow the element
+    clearInterval(tourFollow);
+    tourFollow = setInterval(() => tourPlace(el), 250);
+  }, tabChange ? 400 : 60);
+}
+// The texts of the bubble: title, explanation, "2 / 5", and OK ("Let's go!" at the end of the
+// first tour).
+function tourText(st) {
+  const { name, steps, i } = tourRun,
+    last = i === steps.length - 1;
+  $('tourT').textContent = tx('tour_' + st.id + '_t');
+  $('tourX').textContent = tx('tour_' + st.id + '_x');
+  $('tourN').textContent = steps.length > 1 ? i + 1 + ' / ' + steps.length : '';
+  $('tourOk').textContent = tx(last && name === 'start' ? 'tour_go' : 'ok');
+}
+// Light the element el and place the bubble next to it: below if there is room, else above, else
+// over the element's lower part (a big element like the map); the arrow points at it.
+function tourPlace(el) {
+  if (!tourRun) return;
+  const r = el.getBoundingClientRect(),
+    pad = 6,
+    gap = 16,
+    bub = $('tourBub'),
+    arrow = $('tourArrow');
+  Object.assign($('tourHole').style, {
+    left: r.left - pad + 'px',
+    top: r.top - pad + 'px',
+    width: r.width + 2 * pad + 'px',
+    height: r.height + 2 * pad + 'px',
+  });
+  const bw = bub.offsetWidth,
+    bh = bub.offsetHeight,
+    cx = r.left + r.width / 2,
+    left = Math.min(Math.max(cx - bw / 2, 16), innerWidth - bw - 16);
+  let top, dir;
+  if (r.bottom + pad + gap + bh + 8 <= innerHeight) {
+    top = r.bottom + pad + gap;
+    dir = 'up';
+  } else if (r.top - pad - gap - bh >= 8) {
+    top = r.top - pad - gap - bh;
+    dir = 'down';
+  } else {
+    top = Math.max(8, Math.min(innerHeight - bh - 8, r.bottom - bh - gap));
+    dir = 'none';
+  }
+  Object.assign(bub.style, { left: left + 'px', top: top + 'px' });
+  arrow.className = 'tour-arrow ' + dir;
+  const ax = Math.min(Math.max(cx, left + 24), left + bw - 24) - 11;
+  Object.assign(arrow.style, { left: ax + 'px', top: (dir === 'up' ? top - 22 : top + bh) + 'px' });
+}
+// OK: next step, or the end of the tour.
+function tourNext() {
+  if (!tourRun) return;
+  tourRun.i++;
+  if (tourRun.i < tourRun.steps.length) tourShow();
+  else tourEnd();
+}
+// End the tour on screen; then the tab's own tours may follow (e.g. the map after the switch).
+function tourEnd() {
+  clearInterval(tourFollow);
+  tourRun = null;
+  $('tour').classList.add('hide');
+  tourSoon();
+}
+// Skip: the rest of this tour is marked as seen (the other tours still come at their time).
+function tourSkip() {
+  if (!tourRun) return;
+  tourRun.steps.forEach(st => {
+    const k = tourRun.name + '.' + st.id;
+    if (!tourState.seen.includes(k)) tourState.seen.push(k);
+  });
+  tourSave();
+  tourEnd();
+}
+// Settings > How it works > "Show the guided tour again": every bubble again, the first tour now.
+function tourReplay() {
+  tourState = { base: 0, seen: [] };
+  tourSave();
+  tourStart('start');
+}
+$('tourOk').onclick = tourNext;
+$('tourSkip').onclick = tourSkip;
+$('tourReplay').onclick = tourReplay;
+// the screen turned or changed size: place the bubble again
+addEventListener('resize', () => {
+  if (!tourRun) return;
+  const el = document.querySelector(tourRun.steps[tourRun.i].sel);
+  if (el) tourPlace(el);
+});
+
+// ================================================================================================
 // Navigation and keyboard
 // ================================================================================================
 
@@ -3211,6 +3422,7 @@ function showTab(t) {
   void el.offsetWidth;
   el.classList.add('tabin');
   window.scrollTo(0, 0);
+  tourSoon(); // the bubbles of this tab, the first time
 }
 document.querySelectorAll('.nav button').forEach(b => (b.onclick = () => showTab(b.dataset.t)));
 $('setBtn').onclick = () => showTab('save');
@@ -3267,6 +3479,7 @@ function init() {
   if (NA && typeof NA.setOnline === 'function') NA.setOnline(ONLINE);
   const known = LANGS.some(l => l[0] === saved);
   setLang(known ? saved : guessLang(), false);
+  tourInit(!known);
   if (!known) showLangScreen();
   const c = cacheLoad();
   if (c) S = norm(c);
@@ -3288,6 +3501,8 @@ function init() {
   render();
   renderSave();
   if (setupMode) showTab('save');
+  // a tour not finished at the last start (or the first tour after the first launch's wheels)
+  else if (known) tourWhenIdle(() => tourStart('start') || tourSoon());
 }
 $('fd').value = today();
 $('bd').value = today();

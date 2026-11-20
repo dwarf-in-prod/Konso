@@ -507,6 +507,8 @@
             <summary data-i18n="help_q13"></summary>
             <div class="note" data-i18n-html="help_a13"></div>
           </details>
+          <!-- start the guided tour again (tourReplay() in app.js) -->
+          <button class="btn tonal" id="tourReplay" data-i18n="tour_replay"></button>
         </div>
       </section>
     </main>
@@ -597,6 +599,23 @@
         <h2 id="dlgT"></h2>
         <div id="dlgM"></div>
         <div class="dbtns" id="dlgB"></div>
+      </div>
+    </div>
+
+    <!-- Guided tour (the "Guided tour" section of app.js): a layer over the whole app that stops taps,
+         a lit hole around the element shown (its shadow dims the rest), an arrow and the bubble. -->
+    <div id="tour" class="hide">
+      <div class="tour-block"></div>
+      <div class="tour-hole" id="tourHole"></div>
+      <div class="tour-arrow" id="tourArrow"></div>
+      <div class="tour-bub" id="tourBub" role="dialog" aria-modal="true" aria-labelledby="tourT">
+        <h4 id="tourT"></h4>
+        <p id="tourX"></p>
+        <div class="tour-bar">
+          <span id="tourN"></span>
+          <span><button class="tour-skip" id="tourSkip" data-i18n="tour_skip"></button
+            ><button class="tour-ok" id="tourOk"></button></span>
+        </div>
       </div>
     </div>
 
