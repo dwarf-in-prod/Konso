@@ -242,6 +242,22 @@ svg.i {
 .carsel:has(select:focus-visible) .cur {
   outline: 2px solid var(--primary);
 }
+/* My garage is about all the cars: the tab's name replaces the car selector (body[data-tab] is set by
+   showTab() in app.js) */
+.carsel .tabname,
+body[data-tab='garage'] .carsel .cur,
+body[data-tab='garage'] .carsel select {
+  display: none;
+}
+body[data-tab='garage'] .carsel .tabname {
+  display: block;
+  padding: 8px 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--on-surf);
+  font: 500 22px/1.2 var(--font);
+}
 .appbar .icon {
   justify-self: end;
 }
@@ -423,8 +439,35 @@ textarea {
   background: var(--error);
   color: var(--on-error);
 }
-.btn.first {
-  margin-top: 0;
+/* Small button, as wide as its text (the "Scan" button of the fill-up card) */
+.btn.small {
+  display: inline-flex;
+  width: auto;
+  height: 36px;
+  margin: 0;
+  padding: 0 14px 0 12px;
+  border-radius: 18px;
+  font-size: 14px;
+}
+.btn.small .i {
+  width: 18px;
+  height: 18px;
+}
+/* Fill-up and purchase cards: the title, and on its right an optional small button */
+.cardhead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 36px;
+  margin-bottom: 12px;
+}
+.card .cardhead h3 {
+  margin: 0;
+}
+/* what was read on the receipt, between the title and the form */
+#scan .scanres {
+  margin: 0 0 14px;
 }
 .btns2 {
   display: grid;
@@ -511,30 +554,61 @@ textarea {
   text-decoration: underline;
   cursor: pointer;
 }
-/* My garage: the two buttons at the top (cars / purchases), M3 segmented buttons */
+/* Fill-ups tab: the two tabs at the top (fill-ups / purchases), M3 primary tabs: icon and label, a
+   thin line under the row, and under the part shown a primary line that slides (.seg.right = the
+   second part, set by showFuelPart() in app.js) */
 .seg {
+  position: relative;
   display: flex;
-  border: 1px solid var(--outline);
-  border-radius: 20px;
-  overflow: hidden;
-  margin: 4px 0 16px;
+  border-bottom: 1px solid var(--outline-v);
+  margin: 0 0 16px;
 }
 .seg button {
   flex: 1;
   min-width: 0;
-  height: 40px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
   border: 0;
   background: transparent;
-  color: var(--on-surf);
+  color: var(--on-surf-v);
   font: 500 14px/1.2 var(--font);
   cursor: pointer;
 }
-.seg button + button {
-  border-left: 1px solid var(--outline);
+.seg button span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.seg button .i {
+  flex: none;
+  width: 20px;
+  height: 20px;
 }
 .seg button.on {
-  background: var(--secondary-c);
-  color: var(--on-secondary-c);
+  color: var(--primary);
+}
+/* the line under the part shown: a quarter of the row, centred under its tab */
+.seg::after {
+  content: '';
+  position: absolute;
+  left: 12.5%;
+  bottom: -1px;
+  width: 25%;
+  height: 3px;
+  border-radius: 3px 3px 0 0;
+  background: var(--primary);
+  transition: transform 0.25s cubic-bezier(0.2, 0, 0, 1);
+}
+.seg.right::after {
+  transform: translateX(200%);
+}
+@media (prefers-reduced-motion: reduce) {
+  .seg::after {
+    transition: none;
+  }
 }
 /* Stations: postcode field and its Search button on one line */
 .stsearch {
@@ -726,23 +800,31 @@ textarea {
 :root[data-theme='dark'] #stMap .leaflet-tile-pane {
   filter: invert(1) hue-rotate(180deg) brightness(0.9) contrast(0.9);
 }
-/* My garage: one line per car, the whole line is a button that opens the edit form */
+/* My garage: one line per car. The main part is a button that chooses the car (.pick), the pencil
+   at the end opens its form (.edit). */
 .carrow {
-  width: 100%;
-  border-left: 0;
-  border-right: 0;
-  border-bottom: 0;
+  padding-block: 0;
+}
+.carrow .pick {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+  border: 0;
   background: transparent;
   color: inherit;
   font: inherit;
   text-align: left;
-  padding-inline: 0;
 }
 .carrow .l {
   display: flex;
   flex-direction: column;
 }
-.carrow > svg.i {
+.carrow .edit {
+  flex: none;
+  margin-right: -12px;
   color: var(--on-surf-v);
 }
 .carico {
@@ -755,25 +837,18 @@ textarea {
   background: var(--secondary-c);
   color: var(--on-secondary-c);
 }
-/* small label next to the name of the car selected in the top bar */
-.chip {
-  display: inline-block;
-  margin-left: 6px;
-  padding: 0 8px;
-  border-radius: 8px;
-  background: var(--primary-c);
-  color: var(--on-primary-c);
-  font-size: 12px;
+/* the car followed by the other tabs: a check mark in place of the car icon */
+.carrow.on .carico {
+  background: var(--primary);
+  color: var(--on-primary);
+}
+.carrow.on .l .t {
   font-weight: 600;
-  vertical-align: 1px;
 }
 #garList > .btn {
   margin-top: 16px;
 }
-/* My garage: a folded card whose summary is a button ("Car purchase & payback") */
-details.fold {
-  margin-top: 16px;
-}
+/* Stats: a folded card whose summary is a button ("Car purchase & payback") */
 .fold > summary {
   display: flex;
   align-items: center;
@@ -799,7 +874,7 @@ details.fold {
 .fold[open] > summary {
   margin-bottom: 16px;
 }
-/* My garage, buying a new car: subheadings, notes under a field, switch, result */
+/* Stats, buying a new car: subheadings, notes under a field, switch, result */
 .card h4.sub {
   font: 500 14px/1.4 var(--font);
   color: var(--primary);
@@ -1395,8 +1470,8 @@ body.kb #st {
   main {
     padding: 0 24px;
   }
-  #garCars,
-  #garage > .seg {
+  #garage,
+  #fuel > .seg {
     max-width: 640px;
   }
   /* navigation rail */
@@ -1434,7 +1509,7 @@ body.kb #st {
     --maxw: 1112px;
   }
   /* Fill-ups and Purchases: the form on the left, the history on the right */
-  #fuel,
+  #fill,
   #buys {
     display: grid;
     grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
@@ -1451,7 +1526,7 @@ body.kb #st {
     column-gap: 16px;
   }
   #stats > .card:first-child,
-  #stats > .card:last-child {
+  #stats > .card:nth-child(n + 4) {
     grid-column: 1 / -1;
   }
   /* Stations: the switch and the chart on the left, the followed stations on the right */
@@ -1476,7 +1551,7 @@ body.kb #st {
 @media (hover: hover) and (pointer: fine) {
   .icon,
   .del,
-  .carrow,
+  .carrow .pick,
   .nav button,
   .svcbar,
   summary {
@@ -1490,7 +1565,7 @@ body.kb #st {
   .svcbar:hover {
     filter: brightness(1.06);
   }
-  .carrow:hover .t {
+  .carrow .pick:hover .t {
     color: var(--primary);
   }
   .nav button:not(.on):hover .pill {
