@@ -224,6 +224,13 @@
             <div class="card" id="cars-list"></div>
             <button class="btn" id="carAdd" data-i18n="car_add"></button>
             <div class="note" data-i18n="g_hint"></div>
+            <!-- Servicing of the car shown: interval, last and next service (renderSvc() in app.js) -->
+            <div class="card" id="svcCard">
+              <h3 data-i18n="svc_title"></h3>
+              <div class="sum" id="svcInfo"></div>
+              <div class="note" data-i18n="svc_note"></div>
+              <button class="btn tonal" id="svcKmBtn" data-i18n="svc_change"></button>
+            </div>
             <!-- "Car purchase & payback": folded under a button, so the garage stays simple; other
                  tools can be added inside later. -->
             <details class="card fold" id="planFold">
@@ -413,12 +420,6 @@
                 ><label data-i18n="set_theme"></label>
               </div>
             </div>
-          </div>
-          <div class="card" id="svcCard">
-            <h3 data-i18n="svc_title"></h3>
-            <div class="sum" id="svcInfo"></div>
-            <div class="note" data-i18n="svc_note"></div>
-            <button class="btn tonal" id="svcKmBtn" data-i18n="svc_change"></button>
           </div>
           <div class="card" id="backup">
             <h3 id="sv-title"></h3>

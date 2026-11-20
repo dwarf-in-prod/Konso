@@ -1083,7 +1083,7 @@ $('sv-import').onclick = () => {
 // (news_<version>_<n> in i18n.js). Before each release, add its version at the top of NEWS with
 // its texts in the 10 languages, and its date.
 const NEWS = [
-  { v: '2.18', d: null, items: [['new', 'news_218_1'], ['new', 'news_218_2']] },
+  { v: '2.18', d: null, items: [['new', 'news_218_1'], ['new', 'news_218_2'], ['better', 'news_218_3']] },
   { v: '2.17', d: '2026-11-19', items: [['better', 'news_217_1']] },
   { v: '2.16', d: '2026-11-19', items: [['fix', 'news_216_1'], ['fix', 'news_216_2']] },
   { v: '2.15', d: '2026-11-18', items: [['new', 'news_215_1'], ['better', 'news_215_2']] },
@@ -2149,7 +2149,7 @@ function svcReason(i) {
     v,
   );
 }
-// Settings > Servicing card: interval, last service, next service.
+// My garage > Servicing card (the car shown): interval, last service, next service.
 function renderSvc(c, i) {
   let h = tx('svc_rule', { car: esc(carName(c)), km: kmTxt(svcEvery(c)) });
   if (!i) h += '<br>' + tx('svc_nodata');
@@ -2212,7 +2212,7 @@ $('svcBar').onclick = () =>
     { t: tx('svc_not_yet'), tonal: true },
     { t: tx('svc_done_yes'), fn: svcDoneToday },
   ]);
-// Settings > Servicing > Change the distance: wheel of SVC_KM in the chosen unit.
+// My garage > Servicing > Change the distance: wheel of SVC_KM in the chosen unit.
 $('svcKmBtn').onclick = () => {
   const c = curCar();
   picker({

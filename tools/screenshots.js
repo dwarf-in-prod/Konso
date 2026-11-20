@@ -155,7 +155,7 @@ function plainTile() {
   await page.waitForTimeout(800);
   await shot(page, '5-stations.png');
 
-  await page.evaluate(() => showTab('save'));
+  await page.evaluate(() => showTab('garage'));
 
   await page.click('#svcKmBtn');
   await shot(page, '6-wheel-picker.png');
