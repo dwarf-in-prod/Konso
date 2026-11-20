@@ -1,0 +1,1 @@
+Alışverişler artık Yakıt alımları sekmesinde, yakıt alımlarının yanında not ediliyor; sekmeler daha net. Garajım artık yalnızca arabaları yönetiyor: bir arabayı tüm uygulamada izlemek için ona, düzenlemek için kalemine dokun. “Araba alımı ve amortisman” hesabı Özet'e taşındı. Tara düğmesi daha küçük, “Yeni yakıt alımı” başlığının yanında.

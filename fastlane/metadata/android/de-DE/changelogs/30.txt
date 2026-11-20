@@ -1,0 +1,1 @@
+Käufe trägst du jetzt im Tab Tankungen ein, neben den Tankungen, mit klareren Tabs Tankungen / Käufe. Meine Garage verwaltet nur noch die Autos: Tippe auf ein Auto, um ihm in der ganzen App zu folgen, auf seinen Stift, um es zu bearbeiten. Die Rechnung „Autokauf & Amortisation“ ist jetzt in der Auswertung. Die Scannen-Schaltfläche ist kleiner, neben dem Titel „Neue Tankung“.

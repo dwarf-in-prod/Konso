@@ -1,0 +1,1 @@
+Zakupy zapisujesz teraz na karcie Tankowania, obok tankowań, z czytelniejszymi kartami Tankowania / Zakupy. Mój garaż służy już tylko do zarządzania autami: dotknij auta, aby śledzić je w całej aplikacji, jego ołówka, aby je edytować. Obliczenie „Zakup auta i zwrot kosztów” jest teraz w Podsumowaniu. Przycisk Skanuj jest mniejszy, obok tytułu „Nowe tankowanie”.
