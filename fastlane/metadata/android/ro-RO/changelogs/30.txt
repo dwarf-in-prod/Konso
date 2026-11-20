@@ -1,0 +1,1 @@
+Achizițiile se notează acum în fila Alimentări, lângă alimentări, cu file Alimentări / Achiziții mai clare. Garajul meu gestionează doar mașinile: atinge o mașină pentru a o urmări în toată aplicația, creionul ei pentru a o modifica. Calculul „Cumpărare mașină și amortizare” trece în Rezumat. Butonul Scanează este mai discret, lângă titlul „Alimentare nouă”.

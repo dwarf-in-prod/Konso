@@ -1,0 +1,1 @@
+Purchases are now noted in the Fill-ups tab, next to the fill-ups, with clearer Fill-ups / Purchases tabs. My garage now only manages the cars: tap a car to follow it across the app, its pencil to edit it. The “Car purchase & payback” calculation moves to Stats. The Scan button is smaller, next to the “New fill-up” title.

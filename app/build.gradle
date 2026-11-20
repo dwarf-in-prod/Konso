@@ -15,8 +15,8 @@ android {
         applicationId 'app.konso'
         minSdk 29
         targetSdk 34
-        versionCode 29
-        versionName '2.18'
+        versionCode 30
+        versionName '2.19'
         manifestPlaceholders = [appLabel: 'Konso']
     }
 

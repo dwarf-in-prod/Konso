@@ -20,7 +20,8 @@
     <link rel="stylesheet" href="app.css" />
   </head>
   <body>
-    <!-- Top bar: Konso logo and name on the left, car selector in the middle, settings (gear) on the right -->
+    <!-- Top bar: Konso logo and name on the left, car selector in the middle (the tab's name in My garage,
+         which is about all the cars), settings (gear) on the right -->
     <header class="appbar">
       <!-- The app icon (same drawing as res/drawable/ic_fg.xml on the ic_bg colour) and the app's name
            (a brand name, the same in every language, like the page title) -->
@@ -41,6 +42,7 @@
           ><span id="carShown"></span><svg class="i" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z" /></svg
         ></span>
         <select id="car" data-i18n-title="car_label"></select>
+        <span class="tabname" data-i18n="nav_garage"></span>
       </div>
       <button class="icon" id="setBtn" data-i18n-title="nav_settings">
         <svg class="i" viewBox="0 0 24 24">
@@ -61,63 +63,119 @@
         ><span id="svcBarTxt"></span
         ><svg class="i" viewBox="0 0 24 24"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" /></svg>
       </button>
-      <!-- Tab 1: fill-ups (receipt scan, form, history) -->
+      <!-- Tab 1: the expenses of the selected car, in two parts chosen with the buttons at the top:
+           the fill-ups (receipt scan, form, history), shown each time the tab opens, and the purchases
+           (form, history) -->
       <section id="fuel">
-        <div class="card">
-          <div id="scan" class="hide">
-            <label class="btn tonal first" for="sc1"
-              ><svg class="i" viewBox="0 0 24 24">
-                <circle cx="12" cy="12" r="3.2" />
-                <path
-                  d="M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"
-                /></svg
-              ><span data-i18n="scan_btn"></span
-            ></label>
-            <input type="file" id="sc1" accept="image/*" hidden />
-            <div class="note" id="scanHint" style="margin: 8px 0 0" data-i18n="scan_hint"></div>
-            <div id="scanres" class="scanres hide"></div>
-          </div>
-          <div class="grid" style="margin-top: 20px">
-            <div class="f fl"><input type="date" id="fd" /><label for="fd" data-i18n="date"></label></div>
-            <div class="f">
-              <input type="number" id="fk" inputmode="decimal" step="0.1" placeholder=" " /><label
-                for="fk"
-                data-i18n="distance"
-              ></label>
-            </div>
-            <div class="f">
-              <input type="number" id="fl" inputmode="decimal" step="0.01" placeholder=" " /><label
-                for="fl"
-                data-i18n="litres"
-              ></label>
-            </div>
-            <div class="f">
-              <input type="number" id="fe" inputmode="decimal" step="0.01" placeholder=" " /><label
-                for="fe"
-                data-i18n="amount"
-              ></label>
-            </div>
-            <div class="f fl sel">
-              <button type="button" class="fieldbtn" id="fc"></button
-              ><label data-i18n="fuel"></label>
-            </div>
-            <div class="f">
-              <input type="text" id="fs" placeholder=" " /><label for="fs" data-i18n="station"></label>
-            </div>
-          </div>
-          <!-- live results: hidden until there is something to show (live() in app.js) -->
-          <div class="live hide" id="live">
-            <div><b id="l1">–</b><span data-i18n="k_l100"></span></div>
-            <div><b id="l2">–</b><span data-i18n="k_e100"></span></div>
-            <div><b id="l3">–</b><span data-i18n="k_el"></span></div>
-          </div>
-          <button class="btn" id="addF" data-i18n="add_fill"></button>
-          <!-- first-use tip, hidden once the car has fill-ups (showTips() in app.js) -->
-          <div class="note" id="fillTip" data-i18n="fill_tip"></div>
+        <!-- Tabs with an icon (fuel pump, cart) and a line under the part shown, which slides from one to
+             the other (app.css) -->
+        <div class="seg" role="tablist">
+          <button data-p="fill" class="on" role="tab"
+            ><svg class="i" viewBox="0 0 24 24"><path d="M19.77 7.23l.01-.01-3.72-3.72L15 4.56l2.11 2.11A2.5 2.5 0 0015.5 9 2.5 2.5 0 0018 11.5c.36 0 .69-.08 1-.21v7.21c0 .55-.45 1-1 1s-1-.45-1-1V14c0-1.1-.9-2-2-2h-1V5c0-1.1-.9-2-2-2H6c-1.1 0-2 .9-2 2v16h10v-7.5h1.5v5A2.5 2.5 0 0018 21a2.5 2.5 0 002.5-2.5V9c0-.69-.28-1.32-.73-1.77zM12 10H6V5h6v5zm6 0c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1z" /></svg
+            ><span data-i18n="nav_fuel"></span></button
+          ><button data-p="buys" role="tab"
+            ><svg class="i" viewBox="0 0 24 24"><path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49A1.003 1.003 0 0020 4H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z" /></svg
+            ><span data-i18n="buys"></span>
+          </button>
         </div>
-        <div class="hist">
-          <h2 class="sec" data-i18n="hist_fuel"></h2>
-          <div class="card" id="fl-list"></div>
+        <div id="fill">
+          <div class="card">
+            <!-- Card title, and the small "Scan" button on its right (shown by initScan() when the OCR
+                 engine is there): visible, but lighter than the form, as few people scan receipts -->
+            <div class="cardhead">
+              <h3 data-i18n="new_fill"></h3>
+              <label class="btn tonal small hide" id="scanBtn" for="sc1" data-i18n-title="scan_btn"
+                ><svg class="i" viewBox="0 0 24 24">
+                  <circle cx="12" cy="12" r="3.2" />
+                  <path
+                    d="M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"
+                  /></svg
+                ><span data-i18n="scan_short"></span
+              ></label>
+            </div>
+            <input type="file" id="sc1" accept="image/*" hidden />
+            <!-- first-use hint and what was read on the receipt -->
+            <div id="scan" class="hide">
+              <div class="note" id="scanHint" style="margin: 0 0 14px" data-i18n="scan_hint"></div>
+              <div id="scanres" class="scanres hide"></div>
+            </div>
+            <div class="grid">
+              <div class="f fl"><input type="date" id="fd" /><label for="fd" data-i18n="date"></label></div>
+              <div class="f">
+                <input type="number" id="fk" inputmode="decimal" step="0.1" placeholder=" " /><label
+                  for="fk"
+                  data-i18n="distance"
+                ></label>
+              </div>
+              <div class="f">
+                <input type="number" id="fl" inputmode="decimal" step="0.01" placeholder=" " /><label
+                  for="fl"
+                  data-i18n="litres"
+                ></label>
+              </div>
+              <div class="f">
+                <input type="number" id="fe" inputmode="decimal" step="0.01" placeholder=" " /><label
+                  for="fe"
+                  data-i18n="amount"
+                ></label>
+              </div>
+              <div class="f fl sel">
+                <button type="button" class="fieldbtn" id="fc"></button
+                ><label data-i18n="fuel"></label>
+              </div>
+              <div class="f">
+                <input type="text" id="fs" placeholder=" " /><label for="fs" data-i18n="station"></label>
+              </div>
+            </div>
+            <!-- live results: hidden until there is something to show (live() in app.js) -->
+            <div class="live hide" id="live">
+              <div><b id="l1">–</b><span data-i18n="k_l100"></span></div>
+              <div><b id="l2">–</b><span data-i18n="k_e100"></span></div>
+              <div><b id="l3">–</b><span data-i18n="k_el"></span></div>
+            </div>
+            <button class="btn" id="addF" data-i18n="add_fill"></button>
+            <!-- first-use tip, hidden once the car has fill-ups (showTips() in app.js) -->
+            <div class="note" id="fillTip" data-i18n="fill_tip"></div>
+          </div>
+          <div class="hist">
+            <h2 class="sec" data-i18n="hist_fuel"></h2>
+            <div class="card" id="fl-list"></div>
+          </div>
+        </div>
+        <!-- Purchases (form, history), the second part of the Fill-ups tab -->
+        <div id="buys" class="hide">
+          <div class="card">
+            <div class="cardhead"><h3 data-i18n="new_buy"></h3></div>
+            <div class="grid">
+              <div class="f fl"><input type="date" id="bd" /><label for="bd" data-i18n="date"></label></div>
+              <div class="f">
+                <input type="number" id="be" inputmode="decimal" step="0.01" placeholder=" " /><label
+                  for="be"
+                  data-i18n="amount"
+                ></label>
+              </div>
+              <div class="f fl sel full">
+                <button type="button" class="fieldbtn" id="bc"></button><label data-i18n="category"></label>
+              </div>
+              <div class="f full">
+                <input type="text" id="bn" placeholder=" " /><label for="bn" data-i18n="description"></label>
+              </div>
+              <div class="f">
+                <input type="number" id="bk" inputmode="numeric" placeholder=" " /><label
+                  for="bk"
+                  data-i18n="odometer"
+                ></label>
+              </div>
+              <div class="f">
+                <input type="text" id="bs" placeholder=" " /><label for="bs" data-i18n="shop"></label>
+              </div>
+            </div>
+            <button class="btn" id="addB" data-i18n="add_buy"></button>
+          </div>
+          <div class="hist">
+            <h2 class="sec" data-i18n="hist_buys"></h2>
+            <div class="card" id="bl-list"></div>
+          </div>
         </div>
       </section>
 
@@ -181,7 +239,7 @@
         </div>
       </section>
 
-      <!-- Tab 3: stats (figures, charts, spending) -->
+      <!-- Tab 3: stats of the selected car (figures, charts, spending, car purchase & payback) -->
       <section id="stats" class="hide">
         <div class="card">
           <div class="stats" id="sf"></div>
@@ -204,192 +262,152 @@
           <h3 data-i18n="s_spend"></h3>
           <div id="sx"></div>
           <div id="cats" style="margin-top: 16px"></div>
-          <!-- Reminder: the purchases are entered in My garage -> Purchases; the link opens it -->
+          <!-- Reminder: the purchases are entered in Fill-ups -> Purchases; the link opens it -->
           <div class="note">
             <span data-i18n="s_buys_hint"></span>
             <button type="button" class="link" id="sxGo" data-i18n="s_buys_open"></button>
           </div>
         </div>
-      </section>
-
-      <!-- Tab 4: my garage, in two parts chosen with the buttons at the top: the cars (list, add, edit /
-           delete form, car purchase & payback) and the purchases -->
-      <section id="garage" class="hide">
-        <div class="seg" role="tablist">
-          <button data-g="cars" class="on" data-i18n="g_cars"></button
-          ><button data-g="buys" data-i18n="buys"></button>
-        </div>
-        <div id="garCars">
-          <div id="garList">
-            <div class="card" id="cars-list"></div>
-            <button class="btn" id="carAdd" data-i18n="car_add"></button>
-            <div class="note" data-i18n="g_hint"></div>
-            <!-- "Car purchase & payback": folded under a button, so the garage stays simple; other
-                 tools can be added inside later. -->
-            <details class="card fold" id="planFold">
-              <summary>
-                <span class="carico"
-                  ><svg class="i" viewBox="0 0 24 24">
-                    <path
-                      d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5.97 4.06L14.09 6l1.41 1.41L16.91 6l1.06 1.06-1.41 1.41 1.41 1.41-1.06 1.06-1.41-1.4-1.41 1.41-1.06-1.06 1.41-1.41-1.41-1.42zm-6.78.66h5v1.5h-5v-1.5zM11.5 16h-2v2H8v-2H6v-1.5h2v-2h1.5v2h2V16zm6.5 1.25h-5v-1.5h5v1.5zm0-2.5h-5v-1.5h5v1.5z"
-                    /></svg></span
-                ><span class="lbl" data-i18n="pl_fold"></span
-                ><svg class="i chev" viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6z" /></svg>
-              </summary>
-              <!-- Buying a new car: what the change costs and when it pays for itself, worked out while
-                   the user types (renderPlan() and planResult() in app.js). Everything is saved. -->
-              <div id="plan">
-                <div class="note" style="margin-top: 0" data-i18n="pl_intro"></div>
-                <h4 class="sub" data-i18n="pl_new"></h4>
-                <div class="grid">
-                  <div class="f full">
-                    <input type="number" id="pPrice" inputmode="decimal" step="0.01" min="0" placeholder=" " /><label
-                      for="pPrice"
-                      data-i18n="car_price"
-                    ></label>
-                  </div>
-                  <div class="f">
-                    <input type="number" id="pIns" inputmode="decimal" step="0.01" min="0" placeholder=" " /><label
-                      for="pIns"
-                      data-i18n="car_ins"
-                    ></label>
-                  </div>
-                  <div class="f fl sel">
-                    <button type="button" class="fieldbtn" id="pInsPer"></button
-                    ><label data-i18n="car_ins_per"></label>
-                  </div>
-                  <div class="f full">
-                    <input type="number" id="pCons" inputmode="decimal" step="0.1" min="0" placeholder=" " /><label
-                      for="pCons"
-                      data-i18n="pl_cons"
-                    ></label>
-                  </div>
-                  <div class="f full">
-                    <input type="number" id="pFuel" inputmode="decimal" step="0.001" min="0" placeholder=" " /><label
-                      for="pFuel"
-                      data-i18n="pl_fuel"
-                    ></label>
-                  </div>
-                </div>
-                <h4 class="sub" id="pCurT"></h4>
-                <div class="grid">
-                  <div class="f full">
-                    <input type="number" id="pKm" inputmode="numeric" step="1" min="0" placeholder=" " /><label
-                      for="pKm"
-                      data-i18n="pl_km"
-                    ></label>
-                  </div>
-                  <div class="note full fnote" id="pKmN"></div>
-                  <div class="f full">
-                    <input type="number" id="pResale" inputmode="decimal" step="1" min="0" placeholder=" " /><label
-                      for="pResale"
-                      data-i18n="pl_resale"
-                    ></label>
-                  </div>
-                </div>
-                <label class="switch">
-                  <input type="checkbox" id="pWith" /><span class="trk"></span><span data-i18n="pl_with"></span>
-                </label>
-                <div class="note" id="pWithN"></div>
-                <div class="planres" id="pRes"></div>
-                <button class="btn tonal" id="pReset" data-i18n="pl_reset"></button>
-              </div>
-            </details>
-          </div>
-          <!-- Add / edit car form (hides the list while open) -->
-          <div class="card hide" id="carForm">
-            <h3 id="carFormTitle"></h3>
+        <!-- "Car purchase & payback": a calculation on the selected car, folded under a button so the
+             stats stay simple -->
+        <details class="card fold" id="planFold">
+          <summary>
+            <span class="carico"
+              ><svg class="i" viewBox="0 0 24 24">
+                <path
+                  d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5.97 4.06L14.09 6l1.41 1.41L16.91 6l1.06 1.06-1.41 1.41 1.41 1.41-1.06 1.06-1.41-1.4-1.41 1.41-1.06-1.06 1.41-1.41-1.41-1.42zm-6.78.66h5v1.5h-5v-1.5zM11.5 16h-2v2H8v-2H6v-1.5h2v-2h1.5v2h2V16zm6.5 1.25h-5v-1.5h5v1.5zm0-2.5h-5v-1.5h5v1.5z"
+                /></svg></span
+            ><span class="lbl" data-i18n="pl_fold"></span
+            ><svg class="i chev" viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6z" /></svg>
+          </summary>
+          <!-- Buying a new car: what the change costs and when it pays for itself, worked out while
+               the user types (renderPlan() and planResult() in app.js). Everything is saved. -->
+          <div id="plan">
+            <div class="note" style="margin-top: 0" data-i18n="pl_intro"></div>
+            <h4 class="sub" data-i18n="pl_new"></h4>
             <div class="grid">
               <div class="f full">
-                <input type="text" id="carName" maxlength="40" placeholder=" " /><label
-                  for="carName"
-                  data-i18n="car_name"
+                <input type="number" id="pPrice" inputmode="decimal" step="0.01" min="0" placeholder=" " /><label
+                  for="pPrice"
+                  data-i18n="car_price"
+                ></label>
+              </div>
+              <div class="f">
+                <input type="number" id="pIns" inputmode="decimal" step="0.01" min="0" placeholder=" " /><label
+                  for="pIns"
+                  data-i18n="car_ins"
+                ></label>
+              </div>
+              <div class="f fl sel">
+                <button type="button" class="fieldbtn" id="pInsPer"></button
+                ><label data-i18n="car_ins_per"></label>
+              </div>
+              <div class="f full">
+                <input type="number" id="pCons" inputmode="decimal" step="0.1" min="0" placeholder=" " /><label
+                  for="pCons"
+                  data-i18n="pl_cons"
+                ></label>
+              </div>
+              <div class="f full">
+                <input type="number" id="pFuel" inputmode="decimal" step="0.001" min="0" placeholder=" " /><label
+                  for="pFuel"
+                  data-i18n="pl_fuel"
+                ></label>
+              </div>
+            </div>
+            <h4 class="sub" id="pCurT"></h4>
+            <div class="grid">
+              <div class="f full">
+                <input type="number" id="pKm" inputmode="numeric" step="1" min="0" placeholder=" " /><label
+                  for="pKm"
+                  data-i18n="pl_km"
+                ></label>
+              </div>
+              <div class="note full fnote" id="pKmN"></div>
+              <div class="f full">
+                <input type="number" id="pResale" inputmode="decimal" step="1" min="0" placeholder=" " /><label
+                  for="pResale"
+                  data-i18n="pl_resale"
+                ></label>
+              </div>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="pWith" /><span class="trk"></span><span data-i18n="pl_with"></span>
+            </label>
+            <div class="note" id="pWithN"></div>
+            <div class="planres" id="pRes"></div>
+            <button class="btn tonal" id="pReset" data-i18n="pl_reset"></button>
+          </div>
+        </details>
+      </section>
+
+      <!-- Tab 4: my garage, the management of all the cars: the list (a tap chooses the car followed
+           by the other tabs, the pencil opens its form), add, and the edit / delete form -->
+      <section id="garage" class="hide">
+        <div id="garList">
+          <div class="card" id="cars-list"></div>
+          <button class="btn" id="carAdd" data-i18n="car_add"></button>
+          <div class="note" data-i18n="g_hint"></div>
+        </div>
+        <!-- Add / edit car form (hides the list while open) -->
+        <div class="card hide" id="carForm">
+          <h3 id="carFormTitle"></h3>
+          <div class="grid">
+            <div class="f full">
+              <input type="text" id="carName" maxlength="40" placeholder=" " /><label
+                for="carName"
+                data-i18n="car_name"
+              ></label>
+            </div>
+            <div class="f full fl sel">
+              <button type="button" class="fieldbtn" id="carFuel"></button
+              ><label data-i18n="car_fuel"></label>
+            </div>
+          </div>
+          <!-- Servicing of this car: interval, last and next service, and the distance wheel
+               (renderSvc() in app.js). Hidden for a car not saved yet. -->
+          <div id="svcCard">
+            <h4 class="sub" data-i18n="svc_title"></h4>
+            <div class="sum" id="svcInfo"></div>
+            <div class="note" data-i18n="svc_note"></div>
+            <button class="btn tonal" id="svcKmBtn" data-i18n="svc_change"></button>
+          </div>
+          <!-- Optional details of the car, folded: purchase price, mileage at purchase, insurance -->
+          <details id="carAdv">
+            <summary data-i18n="car_adv"></summary>
+            <div class="note" data-i18n="car_adv_note"></div>
+            <div class="grid" style="margin-top: 12px">
+              <div class="f full">
+                <input type="number" id="carPrice" inputmode="decimal" step="0.01" min="0" placeholder=" " /><label
+                  for="carPrice"
+                  data-i18n="car_price"
+                ></label>
+              </div>
+              <div class="f full">
+                <input type="number" id="carBuyKm" inputmode="numeric" step="1" min="0" placeholder=" " /><label
+                  for="carBuyKm"
+                  data-i18n="car_buykm"
+                ></label>
+              </div>
+              <div class="f full">
+                <input type="number" id="carIns" inputmode="decimal" step="0.01" min="0" placeholder=" " /><label
+                  for="carIns"
+                  data-i18n="car_ins"
                 ></label>
               </div>
               <div class="f full fl sel">
-                <button type="button" class="fieldbtn" id="carFuel"></button
-                ><label data-i18n="car_fuel"></label>
+                <button type="button" class="fieldbtn" id="carInsPer"></button
+                ><label data-i18n="car_ins_per"></label>
               </div>
             </div>
-            <!-- Servicing of this car: interval, last and next service, and the distance wheel
-                 (renderSvc() in app.js). Hidden for a car not saved yet. -->
-            <div id="svcCard">
-              <h4 class="sub" data-i18n="svc_title"></h4>
-              <div class="sum" id="svcInfo"></div>
-              <div class="note" data-i18n="svc_note"></div>
-              <button class="btn tonal" id="svcKmBtn" data-i18n="svc_change"></button>
-            </div>
-            <!-- Optional details of the car, folded: purchase price, mileage at purchase, insurance -->
-            <details id="carAdv">
-              <summary data-i18n="car_adv"></summary>
-              <div class="note" data-i18n="car_adv_note"></div>
-              <div class="grid" style="margin-top: 12px">
-                <div class="f full">
-                  <input type="number" id="carPrice" inputmode="decimal" step="0.01" min="0" placeholder=" " /><label
-                    for="carPrice"
-                    data-i18n="car_price"
-                  ></label>
-                </div>
-                <div class="f full">
-                  <input type="number" id="carBuyKm" inputmode="numeric" step="1" min="0" placeholder=" " /><label
-                    for="carBuyKm"
-                    data-i18n="car_buykm"
-                  ></label>
-                </div>
-                <div class="f full">
-                  <input type="number" id="carIns" inputmode="decimal" step="0.01" min="0" placeholder=" " /><label
-                    for="carIns"
-                    data-i18n="car_ins"
-                  ></label>
-                </div>
-                <div class="f full fl sel">
-                  <button type="button" class="fieldbtn" id="carInsPer"></button
-                  ><label data-i18n="car_ins_per"></label>
-                </div>
-              </div>
-            </details>
-            <div class="btns2">
-              <button class="btn tonal" id="carCancel" data-i18n="cancel"></button>
-              <button class="btn" id="carSave" data-i18n="save"></button>
-            </div>
-            <button class="btn danger hide" id="carDel"></button>
-            <div class="note" id="carNote"></div>
+          </details>
+          <div class="btns2">
+            <button class="btn tonal" id="carCancel" data-i18n="cancel"></button>
+            <button class="btn" id="carSave" data-i18n="save"></button>
           </div>
+          <button class="btn danger hide" id="carDel"></button>
+          <div class="note" id="carNote"></div>
         </div>
-        <!-- Purchases (form, history), the second part of the garage -->
-        <div id="buys" class="hide">
-          <div class="card">
-            <div class="grid" style="margin-top: 6px">
-              <div class="f fl"><input type="date" id="bd" /><label for="bd" data-i18n="date"></label></div>
-              <div class="f">
-                <input type="number" id="be" inputmode="decimal" step="0.01" placeholder=" " /><label
-                  for="be"
-                  data-i18n="amount"
-                ></label>
-              </div>
-              <div class="f fl sel full">
-                <button type="button" class="fieldbtn" id="bc"></button><label data-i18n="category"></label>
-              </div>
-              <div class="f full">
-                <input type="text" id="bn" placeholder=" " /><label for="bn" data-i18n="description"></label>
-              </div>
-              <div class="f">
-                <input type="number" id="bk" inputmode="numeric" placeholder=" " /><label
-                  for="bk"
-                  data-i18n="odometer"
-                ></label>
-              </div>
-              <div class="f">
-                <input type="text" id="bs" placeholder=" " /><label for="bs" data-i18n="shop"></label>
-              </div>
-            </div>
-            <button class="btn" id="addB" data-i18n="add_buy"></button>
-          </div>
-          <div class="hist">
-            <h2 class="sec" data-i18n="hist_buys"></h2>
-            <div class="card" id="bl-list"></div>
-          </div>
-      </div>
       </section>
 
       <!-- Settings, opened with the gear of the top bar (install, language, units, currency, theme, servicing, backup, help) -->

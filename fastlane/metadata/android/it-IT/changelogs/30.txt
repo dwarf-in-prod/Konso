@@ -1,0 +1,1 @@
+Gli acquisti si annotano ora nella scheda Rifornimenti, accanto ai rifornimenti, con schede Rifornimenti / Acquisti più chiare. Il mio garage gestisce solo le auto: tocca un'auto per seguirla in tutta l'app, la sua matita per modificarla. Il calcolo «Acquisto auto e ammortamento» passa nel Riepilogo. Il pulsante Scansiona è più discreto, accanto al titolo «Nuovo rifornimento».

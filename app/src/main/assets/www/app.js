@@ -1083,6 +1083,11 @@ $('sv-import').onclick = () => {
 // (news_<version>_<n> in i18n.js). Before each release, add its version at the top of NEWS with
 // its texts in the 10 languages, and its date.
 const NEWS = [
+  {
+    v: '2.19',
+    d: '2026-11-20',
+    items: [['better', 'news_219_1'], ['better', 'news_219_2'], ['better', 'news_219_3'], ['better', 'news_219_4']],
+  },
   { v: '2.18', d: '2026-11-20', items: [['new', 'news_218_1'], ['new', 'news_218_2'], ['better', 'news_218_3']] },
   { v: '2.17', d: '2026-11-19', items: [['better', 'news_217_1']] },
   { v: '2.16', d: '2026-11-19', items: [['fix', 'news_216_1'], ['fix', 'news_216_2']] },
@@ -1414,12 +1419,13 @@ async function prepImage(file) {
   x.putImageData(im, 0, 0);
   return await new Promise(r => c.toBlob(r, 'image/png'));
 }
-// "Scan a receipt" button. For each photo: prepare it, run OCR twice with two page layouts
+// "Scan" button (small, on the right of the fill-up card's title). For each photo: prepare it, run OCR twice with two page layouts
 // (6 = single block, 4 = single column), keep the reading whose parsed values are the most complete,
 // fill the form and show what was read. Gives up if the engine does not progress for 60 s.
 function initScan() {
   if (typeof Tesseract === 'undefined' || typeof TicketParse === 'undefined') return;
   $('scan').classList.remove('hide');
+  $('scanBtn').classList.remove('hide');
   const box = $('scanres');
   let busy = false;
   $('sc1').addEventListener('change', async e => {
@@ -2249,7 +2255,10 @@ let carEditing = null,
 // Car icon of the garage list (Material "directions_car").
 const CAR_SVG =
   '<svg class="i" viewBox="0 0 24 24"><path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM5 11l1.5-4.5h11L19 11H5z"/></svg>';
-// Pencil icon at the end of a garage line: tells that the line opens the edit form.
+// Check mark in place of the car icon, on the line of the car followed by the other tabs.
+const CHECK_SVG =
+  '<svg class="i" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>';
+// Pencil icon at the end of a garage line: the button that opens the edit form.
 const PEN_SVG =
   '<svg class="i" viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 000-1.41l-2.34-2.34a1 1 0 00-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>';
 // Number of fill-ups and purchases of car id (shown in the garage, and before deleting a car).
@@ -2275,26 +2284,29 @@ function renderCars() {
   $('carShown').textContent = carName(curCar());
   renderGarage();
 }
-// One line of the garage: car icon, name (with a "Shown" chip for the car selected at the top),
-// usual fuel and number of records, pencil. The whole line is a button that opens the edit form.
+// One line of the garage: a button that chooses the car (icon, or a check mark for the car followed
+// by the other tabs; name; usual fuel and number of records), then the pencil that opens its form.
 function garageRow(c) {
   const n = carCounts(c.id),
-    shown = c.id === S.cur ? ` <span class="chip">${esc(tx('g_shown'))}</span>` : '',
+    on = c.id === S.cur,
+    id = esc(c.id),
     meta = [c.fuel ? fuelLabel(c.fuel) : '', tx('g_count', n)].filter(Boolean).join(' · ');
   return (
-    `<button type="button" class="row carrow" data-id="${esc(c.id)}">` +
-    `<span class="carico">${CAR_SVG}</span>` +
-    `<span class="l"><span class="t">${esc(carName(c))}${shown}</span>` +
-    `<span class="m">${esc(meta)}</span></span>` +
-    PEN_SVG +
-    '</button>'
+    `<div class="row carrow${on ? ' on' : ''}">` +
+    `<button type="button" class="pick" data-id="${id}" aria-pressed="${on}">` +
+    `<span class="carico">${on ? CHECK_SVG : CAR_SVG}</span>` +
+    `<span class="l"><span class="t">${esc(carName(c))}</span>` +
+    `<span class="m">${esc(meta)}</span></span></button>` +
+    `<button type="button" class="icon edit" data-id="${id}" title="${esc(tx('car_edit'))}">${PEN_SVG}</button>` +
+    '</div>'
   );
 }
-// List of the cars in the "My garage" tab; a tap on a line opens the form for that car.
+// List of the cars in the "My garage" tab: a tap on a line chooses that car, the pencil opens its form.
 function renderGarage() {
   const list = $('cars-list');
   list.innerHTML = S.cars.map(garageRow).join('');
-  list.querySelectorAll('.carrow').forEach(b => (b.onclick = () => openCarForm(b.dataset.id)));
+  list.querySelectorAll('.pick').forEach(b => (b.onclick = () => chooseCar(b.dataset.id)));
+  list.querySelectorAll('.edit').forEach(b => (b.onclick = () => openCarForm(b.dataset.id)));
 }
 // Usual fuel of the car form: a field button that opens the wheel (value kept in its value
 // attribute, like the purchase category).
@@ -2383,13 +2395,16 @@ function carsChanged() {
   render();
   applyCarDefaults();
 }
-// Selecting another car in the top bar.
-$('car').onchange = () => {
-  S.cur = $('car').value;
+// Make car id the one followed by every tab (fill-ups, purchases, stats…): from the selector of the
+// top bar, or from a line of the garage.
+function chooseCar(id) {
+  if (!S.cars.some(c => c.id === id)) return;
+  S.cur = id;
   persist();
   render();
   applyCarDefaults();
-};
+}
+$('car').onchange = () => chooseCar($('car').value);
 $('carAdd').onclick = () => openCarForm(null);
 $('carCancel').onclick = closeCarForm;
 // Save the form: the name is required and must be unique, the advanced options are optional.
@@ -2433,7 +2448,7 @@ $('carDel').onclick = () => {
 };
 
 // ================================================================================================
-// Buying a new car (My garage)
+// Buying a new car (Stats)
 // Compares, over the same distance per year, the yearly cost of the current car (the one selected in
 // the top bar) with the one of the car the user wants to buy, and says when the change pays for
 // itself. Worked out while the user types (no button); the fields are saved in S.plan.
@@ -3257,28 +3272,31 @@ document.addEventListener('visibilitychange', () => {
 // install, TOUR_VERSION for an older install meeting the tour for the first time), and the steps
 // seen. A step shows when step.since > base and it was not seen. To present something new in a
 // major update: add its steps with since = TOUR_VERSION + 1, then raise TOUR_VERSION.
-const TOUR_VERSION = 1;
+const TOUR_VERSION = 2;
 const TOUR_KEY = KP + 'tour';
 // The steps of each tour: id (texts tour_<id>_t and tour_<id>_x in i18n.js), the tab to show
 // (if any), what to prepare, the element pointed at, when it applies, and since.
 const TOURS = {
   start: [
-    { id: 'car', tab: 'garage', prep: () => showGarage('cars'), sel: '#cars-list .carrow', since: 1 },
-    { id: 'carsel', tab: 'garage', sel: '.carsel', since: 1 },
-    { id: 'buys', tab: 'garage', sel: '.seg [data-g="buys"]', since: 1 },
+    { id: 'car', tab: 'garage', sel: '#cars-list .carrow', since: 1 },
+    { id: 'pick', tab: 'garage', sel: '#cars-list', since: 2 },
     { id: 'navfuel', tab: 'garage', sel: '.nav [data-t="fuel"]', since: 1 },
     { id: 'navst', tab: 'garage', sel: '.nav [data-t="stations"]', since: 1 },
   ],
   fuel: [
-    { id: 'scan', sel: '#scan .btn', when: () => !$('scan').classList.contains('hide'), since: 1 },
-    { id: 'form', sel: '#fuel .grid', since: 1 },
+    { id: 'scan', sel: '#scanBtn', when: () => !$('scanBtn').classList.contains('hide'), since: 1 },
+    { id: 'form', sel: '#fill .grid', since: 1 },
+    { id: 'buys', sel: '#fuel .seg [data-p="buys"]', since: 2 },
   ],
   stations: [{ id: 'switch', sel: '#stSwitchCard .switch', since: 1 }],
   map: [
     { id: 'map', sel: '#stMap', when: () => ONLINE && !!map, since: 1 },
     { id: 'locate', sel: '#stLocate', when: () => ONLINE && !!map, since: 1 },
   ],
-  stats: [{ id: 'stats', sel: '#stats .card', since: 1 }],
+  stats: [
+    { id: 'stats', sel: '#stats .card', since: 1 },
+    { id: 'plan', sel: '#planFold', since: 2 },
+  ],
 };
 // The tours of each tab, offered the first time it is opened.
 const TAB_TOURS = { fuel: ['fuel'], stations: ['stations', 'map'], stats: ['stats'] };
@@ -3456,12 +3474,15 @@ addEventListener('resize', () => {
 
 // Show tab t (fuel, stations, stats, garage, or save = the settings) with a short animation.
 // The settings are not in the bottom bar: they open with the gear of the top bar, which is then
-// highlighted. Leaving the garage closes its car form; opening Stations refreshes the prices
+// highlighted. Opening Fill-ups shows the fill-ups (not the purchases); leaving the garage closes
+// its car form; opening Stations refreshes the prices
 // (at most every 30 minutes, only when the connection is allowed).
 function showTab(t) {
   document.querySelectorAll('.nav button').forEach(x => x.classList.toggle('on', x.dataset.t === t));
   $('setBtn').classList.toggle('on', t === 'save');
   ['fuel', 'stations', 'stats', 'garage', 'save'].forEach(id => $(id).classList.toggle('hide', id !== t));
+  document.body.dataset.tab = t; // the top bar shows the tab's name in My garage (app.css)
+  if (t === 'fuel') showFuelPart('fill');
   if (t !== 'garage') closeCarForm();
   if (t === 'stations') {
     refreshStations(false);
@@ -3476,19 +3497,22 @@ function showTab(t) {
 }
 document.querySelectorAll('.nav button').forEach(b => (b.onclick = () => showTab(b.dataset.t)));
 $('setBtn').onclick = () => showTab('save');
-// My garage has two parts, chosen with the buttons at the top: the cars ('cars') and the
-// purchases ('buys').
-function showGarage(part) {
-  document.querySelectorAll('.seg button').forEach(b => b.classList.toggle('on', b.dataset.g === part));
-  $('garCars').classList.toggle('hide', part !== 'cars');
+// The Fill-ups tab has two parts, chosen with the buttons at the top: the fill-ups ('fill'), shown
+// each time the tab opens because they are entered the most often, and the purchases ('buys').
+function showFuelPart(part) {
+  document.querySelectorAll('#fuel .seg button').forEach(b => {
+    b.classList.toggle('on', b.dataset.p === part);
+    b.setAttribute('aria-selected', b.dataset.p === part);
+  });
+  $('fuel').querySelector('.seg').classList.toggle('right', part === 'buys'); // the line slides under Purchases
+  $('fill').classList.toggle('hide', part !== 'fill');
   $('buys').classList.toggle('hide', part !== 'buys');
-  closeCarForm();
 }
-document.querySelectorAll('.seg button').forEach(b => (b.onclick = () => showGarage(b.dataset.g)));
-// Stats > Spending: the link under the reminder opens My garage -> Purchases.
+document.querySelectorAll('#fuel .seg button').forEach(b => (b.onclick = () => showFuelPart(b.dataset.p)));
+// Stats > Spending: the link under the reminder opens Fill-ups -> Purchases.
 $('sxGo').onclick = () => {
-  showTab('garage');
-  showGarage('buys');
+  showTab('fuel');
+  showFuelPart('buys');
 };
 // Keyboard open (body.kb hides the bottom bar): while a field that is typed into has the focus.
 // Date fields, switches (checkboxes) and file inputs open no keyboard.

@@ -1,0 +1,1 @@
+As compras anotam-se agora no separador Abastecimentos, ao lado dos abastecimentos, com separadores mais claros. A minha garagem só gere os carros: toca num carro para o seguir em toda a app, no seu lápis para o editar. O cálculo «Compra de carro e amortização» passa para o Resumo. O botão Digitalizar é mais discreto, ao lado do título «Novo abastecimento».

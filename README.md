@@ -53,17 +53,17 @@ Written by an AI does not mean unchecked: all the source code is open, so anyone
 
 - ⛽ **Fill-ups**: distance, litres, amount → L/100 km, cost per 100 km, price per litre. The fuel of your last fill-up is preselected; the distance field is outlined in green, and any missing field turns red when you save.
 - 📷 **Receipt scanning**: take a photo of a fuel receipt and the form fills itself (tuned for French receipts; always check the values). If the fuel type can't be read, the app asks you to pick it instead of guessing.
-- 🔧 **Purchases** (in *My garage*): oil, parts, tyres, servicing… sorted by category.
+- 🔧 **Purchases** (in the *Fill-ups* tab, next to the fill-ups): oil, parts, tyres, servicing… sorted by category.
 - 🗺️ **Stations map** (France, optional connection): the stations in view with the price of your car's fuel, from green (cheapest) to red, tap one for all its prices, to follow it or for directions; *Locate me* centres the map on you.
 - 📍 **Station prices** (France, optional connection): follow as many stations as you like, found by postcode, with the last official price and its date, and a chart of the fuel price of the selected car (your own fill-ups and the followed stations). Prices come from the government's live feed; the chart builds up as new prices are recorded.
 - 🛠️ **Service reminders**: every year or every 10,000 km, whichever comes first (adjustable from 100 to 100,000 km, per car). A message appears once, then an amber banner stays at the top of the screen; tap it once the service is done and tracking starts again from zero.
 - 📊 **Overview**: averages, consumption chart, monthly spending.
 - 📏 **Units and currency**: kilometres or miles (L/100 km, UK mpg, or US mpg with US gallons) and €, £, $, CHF, zł, lei or ₺. Chosen with four wheels at first launch (language, units, currency, theme — Light proposed) and changeable in Settings. Data is always stored in km and litres, so switching units loses nothing.
-- 🚗 **Several cars**, each with its own history and reminders, managed in the *My garage* tab (optional advanced options: purchase price, mileage at purchase, insurance per year or per month).
-- 💶 **Buying a new car?** *My garage* compares the yearly cost of your current car (from your fill-ups) with the one you want to buy, and tells you when the change pays for itself. Updated as you type.
+- 🚗 **Several cars**, each with its own history and reminders, managed in the *My garage* tab: tap a car to follow it across the app, or its pencil to edit it (optional advanced options: purchase price, mileage at purchase, insurance per year or per month).
+- 💶 **Buying a new car?** *Stats* compares the yearly cost of your current car (from your fill-ups) with the one you want to buy, and tells you when the change pays for itself. Updated as you type.
 - 💾 **Automatic backup** to `konso.json`, updated after every change.
 - 🎡 **Wheel pickers** for language, units, currency, categories and service distance.
-- 👋 **Guided tour**: at the first launch, a few bubbles over a dimmed screen show the car, the purchases, the fill-ups and the stations, then each tab explains itself the first time it is opened. Nothing is mandatory (one OK button), and it can be shown again from Settings → How it works.
+- 👋 **Guided tour**: at the first launch, a few bubbles over a dimmed screen show the cars, the fill-ups and the stations, then each tab explains itself the first time it is opened. Nothing is mandatory (one OK button), and it can be shown again from Settings → How it works.
 - 🌍 **10 languages**: English, French, Spanish, German, Italian, Portuguese, Dutch, Polish, Turkish, Romanian.
 - ❓ **Built-in help** ("How it works" in Settings) and a Material Design 3 interface with light and dark themes: automatic (like the device), or chosen in Settings.
 - 🖥️ **Adaptive layout**: bottom bar on phones; on tablets, computers and phones in landscape, a navigation rail on the left and two columns.
@@ -182,17 +182,17 @@ Comment elle est faite :
 
 - ⛽ **Pleins** : distance, litres, montant → L/100 km, coût aux 100 km, prix au litre. Le carburant du dernier plein est présélectionné ; le champ distance est entouré en vert, et un champ oublié passe en rouge à l'enregistrement.
 - 📷 **Lecture de ticket** : une photo du ticket remplit le formulaire (prévue pour les tickets français ; valeurs toujours à vérifier). Si le carburant n'est pas lisible, l'appli demande de le choisir au lieu de deviner.
-- 🔧 **Achats** (dans *Mon garage*) : huile, pièces, pneus, entretien… classés par catégorie.
+- 🔧 **Achats** (dans l'onglet *Pleins*, à côté des pleins) : huile, pièces, pneus, entretien… classés par catégorie.
 - 🗺️ **Carte des stations** (France, connexion facultative) : les stations de la zone affichée avec le prix du carburant de votre voiture, du vert (la moins chère) au rouge ; touchez-en une pour voir tous ses prix, la suivre ou lancer l'itinéraire ; *Me localiser* centre la carte sur vous.
 - 📍 **Prix des stations** (France, connexion facultative) : suivez autant de stations que vous voulez, trouvées par code postal, avec le dernier prix officiel et sa date, et un graphique du prix du carburant de la voiture choisie (vos pleins et les stations suivies). Les prix viennent du flux en direct du gouvernement ; la courbe se construit au fil des prix relevés.
 - 🛠️ **Rappels d'entretien** : tous les ans ou tous les 10 000 km, au premier des deux (réglable de 100 à 100 000 km, par voiture). Un message s'affiche une fois, puis un bandeau ambre reste en haut de l'écran ; un appui valide l'entretien et le suivi repart de zéro.
 - 📊 **Bilan** : moyennes, courbe de consommation, dépenses par mois.
 - 📏 **Unités et monnaie** : kilomètres ou miles (L/100 km, mpg britannique, ou mpg américain avec gallons US) et €, £, $, CHF, zł, lei ou ₺. Choisis avec quatre roues au premier lancement (langue, unités, monnaie, thème — Clair proposé), modifiables dans les Réglages. Les données sont toujours enregistrées en km et en litres : changer d'unité ne perd rien.
-- 🚗 **Plusieurs voitures**, chacune avec son historique et ses rappels, gérées dans l'onglet *Mon garage* (options avancées facultatives : prix d'achat, kilométrage à l'achat, assurance par an ou par mois).
-- 💶 **Envie d'une nouvelle voiture ?** *Mon garage* compare le coût annuel de ta voiture actuelle (d'après tes pleins) avec celle que tu veux acheter, et te dit quand le changement est rentabilisé. Calculé pendant que tu tapes.
+- 🚗 **Plusieurs voitures**, chacune avec son historique et ses rappels, gérées dans l'onglet *Mon garage* : touchez une voiture pour la suivre dans toute l'appli, ou son crayon pour la modifier (options avancées facultatives : prix d'achat, kilométrage à l'achat, assurance par an ou par mois).
+- 💶 **Envie d'une nouvelle voiture ?** Le *Bilan* compare le coût annuel de votre voiture actuelle (d'après vos pleins) avec celle que vous voulez acheter, et vous dit quand le changement est rentabilisé. Calculé pendant que vous tapez.
 - 💾 **Sauvegarde automatique** dans `konso.json`, mise à jour à chaque modification.
 - 🎡 **Choix par roue** pour la langue, les unités, la monnaie, les catégories et le kilométrage d'entretien.
-- 👋 **Visite guidée** : au premier lancement, quelques bulles sur un écran assombri présentent la voiture, les achats, les pleins et les stations, puis chaque onglet s'explique la première fois qu'on l'ouvre. Rien d'obligatoire (un bouton OK), et on peut la revoir depuis Réglages → Comment ça marche ?
+- 👋 **Visite guidée** : au premier lancement, quelques bulles sur un écran assombri présentent les voitures, les pleins et les stations, puis chaque onglet s'explique la première fois qu'on l'ouvre. Rien d'obligatoire (un bouton OK), et on peut la revoir depuis Réglages → Comment ça marche ?
 - 🌍 **10 langues** : français, anglais, espagnol, allemand, italien, portugais, néerlandais, polonais, turc, roumain.
 - ❓ **Aide intégrée** (« Comment ça marche ? » dans les Réglages) et interface Material Design 3, en thème clair ou sombre : automatique (comme l'appareil) ou choisi dans les Réglages.
 - 🖥️ **Mise en page adaptative** : barre en bas sur téléphone ; sur tablette, ordinateur et téléphone à l'horizontale, un rail de navigation à gauche et deux colonnes.

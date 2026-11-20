@@ -1,0 +1,1 @@
+Las compras se anotan ahora en la pestaña Repostajes, junto a los repostajes, con pestañas Repostajes / Compras más claras. Mi garaje solo gestiona los coches: toca un coche para seguirlo en toda la app, su lápiz para editarlo. El cálculo «Compra de coche y amortización» pasa al Resumen. El botón Escanear es más discreto, junto al título «Nuevo repostaje».
