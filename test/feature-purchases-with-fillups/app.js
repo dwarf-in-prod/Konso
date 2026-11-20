@@ -3494,7 +3494,11 @@ $('setBtn').onclick = () => showTab('save');
 // The Fill-ups tab has two parts, chosen with the buttons at the top: the fill-ups ('fill'), shown
 // each time the tab opens because they are entered the most often, and the purchases ('buys').
 function showFuelPart(part) {
-  document.querySelectorAll('#fuel .seg button').forEach(b => b.classList.toggle('on', b.dataset.p === part));
+  document.querySelectorAll('#fuel .seg button').forEach(b => {
+    b.classList.toggle('on', b.dataset.p === part);
+    b.setAttribute('aria-selected', b.dataset.p === part);
+  });
+  $('fuel').querySelector('.seg').classList.toggle('right', part === 'buys'); // the line slides under Purchases
   $('fill').classList.toggle('hide', part !== 'fill');
   $('buys').classList.toggle('hide', part !== 'buys');
 }
