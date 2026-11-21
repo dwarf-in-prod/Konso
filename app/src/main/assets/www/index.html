@@ -113,6 +113,14 @@
                   data-i18n="litres"
                 ></label>
               </div>
+              <!-- price per litre / gallon: with two of litres, price and amount, the third is worked
+                   out (fillThird() in app.js), so a receipt can be typed as it reads -->
+              <div class="f">
+                <input type="number" id="fp" inputmode="decimal" step="0.001" placeholder=" " /><label
+                  for="fp"
+                  data-i18n="unit_price"
+                ></label>
+              </div>
               <div class="f">
                 <input type="number" id="fe" inputmode="decimal" step="0.01" placeholder=" " /><label
                   for="fe"
@@ -123,7 +131,7 @@
                 <button type="button" class="fieldbtn" id="fc"></button
                 ><label data-i18n="fuel"></label>
               </div>
-              <div class="f">
+              <div class="f full">
                 <input type="text" id="fs" placeholder=" " /><label for="fs" data-i18n="station"></label>
               </div>
             </div>
