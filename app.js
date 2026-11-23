@@ -1083,6 +1083,7 @@ $('sv-import').onclick = () => {
 // (news_<version>_<n> in i18n.js). Before each release, add its version at the top of NEWS with
 // its texts in the 10 languages, and its date.
 const NEWS = [
+  { v: '2.20', d: '2026-11-23', items: [['new', 'news_220_1'], ['fix', 'news_220_2']] },
   {
     v: '2.19',
     d: '2026-11-20',
@@ -1492,7 +1493,9 @@ function initScan() {
       const { best: r, bestText } = await Promise.race([work(), stalled]);
       if (r.date) $('fd').value = r.date;
       if (r.litres) $('fl').value = Math.round(vol(r.litres) * 100) / 100; // receipts are in litres
+      if (r.prix) $('fp').value = Math.round((r.prix / vol(1)) * 1000) / 1000; // per litre -> per gallon
       if (r.montant) $('fe').value = r.montant;
+      fillScanned();
       if (r.station) $('fs').value = r.station.slice(0, 80);
       const fuelOk = !!r.carburant && FUELV.includes(r.carburant);
       tried = false;
@@ -1592,6 +1595,52 @@ $('fc').onclick = () =>
     },
   });
 ['fk', 'fl', 'fe'].forEach(i => $(i).addEventListener('input', live));
+// Litres, price per litre and amount: two of them give the third, so a receipt can be typed in the
+// order it reads (e.g. litres and price, or amount and price). fillOrder: the fields of the three
+// typed by the user, the last typed last; fillAuto: the field worked out by the app ('' = none).
+const FILL3 = ['fl', 'fp', 'fe'];
+let fillOrder = [],
+  fillAuto = '';
+// Value of the field id (fl, fp or fe) worked out from the two others, rounded like a receipt:
+// 2 decimals for litres and amount, 3 for the price.
+function fillValue(id) {
+  const l = +$('fl').value,
+    p = +$('fp').value,
+    e = +$('fe').value;
+  if (id === 'fe') return Math.round(l * p * 100) / 100;
+  if (id === 'fl') return Math.round((e / p) * 100) / 100;
+  return Math.round((e / l) * 1000) / 1000;
+}
+// After the user typed in field id: the two fields typed last (with a value) give the third. When
+// fewer than two are typed, a value worked out earlier no longer holds and is emptied.
+function fillThird(id) {
+  fillOrder = fillOrder.filter(x => x !== id).concat(id);
+  if (fillAuto === id) fillAuto = '';
+  const typed = fillOrder.filter(x => +$(x).value > 0).slice(-2);
+  if (typed.length < 2) {
+    if (fillAuto) $(fillAuto).value = '';
+    fillAuto = '';
+  } else {
+    fillAuto = FILL3.find(x => !typed.includes(x));
+    fillOrder = fillOrder.filter(x => x !== fillAuto); // no longer the user's value
+    $(fillAuto).value = fillValue(fillAuto);
+  }
+  live();
+  marks();
+}
+FILL3.forEach(i => $(i).addEventListener('input', () => fillThird(i)));
+// After a receipt scan: the values read count as typed by the user, litres and amount last, so
+// correcting one of them later works out the price again (and correcting the price, the litres).
+function fillScanned() {
+  fillOrder = ['fp', 'fl', 'fe'].filter(x => +$(x).value > 0);
+  fillAuto = '';
+}
+// Empty the three fields and forget who typed what (after a fill-up is saved).
+function fillReset() {
+  FILL3.forEach(i => ($(i).value = ''));
+  fillOrder = [];
+  fillAuto = '';
+}
 // Preselected fuel: the one of the car's last fill-up, otherwise its usual fuel.
 // After a receipt whose fuel type could not be read, nothing is preselected: the user must choose
 // (fuelPending = true, the field shows "Choose…").
@@ -1649,7 +1698,8 @@ $('addF').onclick = () => {
     s: $('fs').value.trim(),
   });
   S.fuel.sort((a, b) => b.d.localeCompare(a.d) || b.id - a.id);
-  ['fk', 'fl', 'fe', 'fs'].forEach(i => ($(i).value = ''));
+  ['fk', 'fs'].forEach(i => ($(i).value = ''));
+  fillReset();
   tried = false;
   setFuelPending(false);
   live();
