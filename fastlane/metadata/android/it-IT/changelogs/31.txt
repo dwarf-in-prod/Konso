@@ -1,0 +1,1 @@
+Nuovo campo Prezzo al litro nel modulo di rifornimento: con due dei tre valori (litri, prezzo, importo), il terzo si calcola, per scrivere lo scontrino nell'ordine in cui si legge. Anche la scansione dello scontrino compila il prezzo. Al primo avvio, la visita guidata arriva subito dopo le impostazioni, prima della scelta della cartella di backup.

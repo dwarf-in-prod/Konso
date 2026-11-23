@@ -1,0 +1,1 @@
+New price per litre field in the fill-up form: with two of the three values (litres, price, amount), the third is worked out, so a receipt can be typed in the order it reads. Receipt scanning fills the price too. At first launch, the guided tour comes right after the settings, before choosing the backup folder.

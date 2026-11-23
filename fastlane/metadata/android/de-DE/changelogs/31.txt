@@ -1,0 +1,1 @@
+Neues Feld Literpreis im Tankformular: Aus zwei der drei Werte (Liter, Preis, Betrag) wird der dritte berechnet, sodass der Beleg in seiner Reihenfolge eingetippt werden kann. Der Belegscan füllt auch den Preis aus. Beim ersten Start kommt die Tour direkt nach den Einstellungen, noch vor der Wahl des Sicherungsordners.

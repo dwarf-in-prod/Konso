@@ -1,0 +1,1 @@
+Nieuw veld Literprijs in het tankformulier: met twee van de drie waarden (liters, prijs, bedrag) wordt de derde berekend, zodat je het bonnetje in de volgorde kunt intikken waarin je het leest. Het scannen van het bonnetje vult ook de prijs in. Bij de eerste start komt de rondleiding direct na de instellingen, vóór het kiezen van de back-upmap.

@@ -1,0 +1,1 @@
+Nouveau champ Prix au litre dans le formulaire de plein : avec deux des trois valeurs (litres, prix, montant), la troisième se calcule, pour taper le ticket dans l'ordre où il se lit. Le scan du ticket remplit aussi le prix. Au premier lancement, la visite guidée arrive tout de suite après les réglages, avant le choix du dossier de sauvegarde.

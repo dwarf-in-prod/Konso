@@ -1,0 +1,1 @@
+Yakıt formunda yeni Litre fiyatı alanı: üç değerden ikisiyle (litre, fiyat, tutar) üçüncüsü hesaplanır, böylece fiş okunduğu sırayla yazılabilir. Fiş taraması fiyatı da doldurur. İlk açılışta rehberli tur, ayarlardan hemen sonra, yedek klasörü seçilmeden önce gelir.
