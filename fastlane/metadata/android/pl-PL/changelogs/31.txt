@@ -1,0 +1,1 @@
+Nowe pole Cena za litr w formularzu tankowania: z dwóch z trzech wartości (litry, cena, kwota) trzecia liczy się sama, więc paragon można wpisać w kolejności, w jakiej się go czyta. Skanowanie paragonu też wypełnia cenę. Przy pierwszym uruchomieniu przewodnik pojawia się zaraz po ustawieniach, przed wyborem folderu kopii.

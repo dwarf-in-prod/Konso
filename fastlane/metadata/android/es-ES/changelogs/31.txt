@@ -1,0 +1,1 @@
+Nuevo campo Precio por litro en el formulario de repostaje: con dos de los tres valores (litros, precio, importe), el tercero se calcula, para escribir el ticket en el orden en que se lee. El escaneo del ticket también rellena el precio. En el primer inicio, la visita guiada llega justo después de los ajustes, antes de elegir la carpeta de copia.

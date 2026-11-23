@@ -1,0 +1,1 @@
+Novo campo Preço por litro no formulário de abastecimento: com dois dos três valores (litros, preço, montante), o terceiro é calculado, para escrever o talão pela ordem em que se lê. A digitalização do talão também preenche o preço. No primeiro arranque, a visita guiada aparece logo após as definições, antes de escolher a pasta de cópia.

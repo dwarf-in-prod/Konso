@@ -1,0 +1,1 @@
+Câmp nou Preț pe litru în formularul de alimentare: din două dintre cele trei valori (litri, preț, sumă), a treia se calculează, ca să scrii bonul în ordinea în care se citește. Scanarea bonului completează și prețul. La prima pornire, turul ghidat apare imediat după setări, înainte de alegerea dosarului de salvare.
