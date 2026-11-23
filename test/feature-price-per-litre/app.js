@@ -1083,6 +1083,7 @@ $('sv-import').onclick = () => {
 // (news_<version>_<n> in i18n.js). Before each release, add its version at the top of NEWS with
 // its texts in the 10 languages, and its date.
 const NEWS = [
+  { v: '2.20', d: '2026-11-23', items: [['new', 'news_220_1'], ['fix', 'news_220_2']] },
   {
     v: '2.19',
     d: '2026-11-20',
